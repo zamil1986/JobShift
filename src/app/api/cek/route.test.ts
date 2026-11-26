@@ -1,6 +1,18 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { POST } from "./route";
 
+// Hanya untuk tes jalur 500: membuat cek() gagal tak terduga dengan error yang
+// pesannya memuat isi Teks. Selain itu cek() asli yang dipakai.
+const gagalkanCek = vi.hoisted(() => ({ aktif: false }));
+vi.mock("@/cek", async (importOriginal) => {
+  const asli = await importOriginal<typeof import("@/cek")>();
+  return {
+    ...asli,
+    cek: (teks: string) =>
+      gagalkanCek.aktif ? Promise.reject(new Error(`gagal menilai: ${teks}`)) : asli.cek(teks),
+  };
+});
+
 const TEKS_LOWONGAN =
   "Dibutuhkan staf administrasi untuk kantor cabang di Bandung. Kirim lamaran dan CV ke bagian HRD.";
 
@@ -16,6 +28,7 @@ function kirim(body: string, contentType = "application/json") {
 
 afterEach(() => {
   vi.restoreAllMocks();
+  gagalkanCek.aktif = false;
 });
 
 describe("POST /api/cek", () => {
@@ -89,6 +102,26 @@ describe("POST /api/cek", () => {
     await kirim(JSON.stringify({ teks: penanda }));
     await kirim(`{"teks": "${penanda}"`);
 
+    expect(JSON.stringify(tulisan)).not.toContain("PENANDA-RAHASIA");
+  });
+
+  it("menjawab 500 tanpa menulis isi Teks ke log saat Cek gagal tak terduga", async () => {
+    const tulisan: unknown[] = [];
+    vi.spyOn(console, "error").mockImplementation((...args: unknown[]) => {
+      tulisan.push(...args);
+    });
+    gagalkanCek.aktif = true;
+
+    const res = await kirim(
+      JSON.stringify({ teks: `${TEKS_LOWONGAN} PENANDA-RAHASIA-081234567890` }),
+    );
+
+    expect(res.status).toBe(500);
+    expect((await res.json()).error).toEqual({
+      kode: "kesalahan_server",
+      pesan: "Cek sedang bermasalah. Coba lagi sebentar lagi.",
+    });
+    expect(tulisan.length).toBeGreaterThan(0);
     expect(JSON.stringify(tulisan)).not.toContain("PENANDA-RAHASIA");
   });
 });
