@@ -1,5 +1,12 @@
 import { z } from "zod";
-import { cek, PESAN_ERROR, TeksTidakValid, type ErrorCek, type KodeError } from "@/cek";
+import {
+  cek,
+  PESAN_ERROR,
+  PESAN_GAGAL_SERVER,
+  TeksTidakValid,
+  type ErrorCek,
+  type KodeError,
+} from "@/cek";
 
 // Route tipis: parse JSON → cek() → JSON. Tidak ada logika penilaian di sini,
 // dan isi Teks tidak pernah ditulis ke log (NFR-01).
@@ -30,7 +37,7 @@ export async function POST(request: Request): Promise<Response> {
     // Hanya nama error yang dicatat: pesan error bisa saja memuat isi Teks.
     console.error("Cek gagal:", galat instanceof Error ? galat.name : typeof galat);
     return Response.json(
-      { error: { kode: "kesalahan_server", pesan: "Cek sedang bermasalah. Coba lagi sebentar lagi." } },
+      { error: { kode: "kesalahan_server", pesan: PESAN_GAGAL_SERVER } },
       { status: 500 },
     );
   }

@@ -44,8 +44,8 @@ TampilanHasil ◄── JSON ─────  parse JSON → cek() → JSON
 - **Inti Cek** (`src/cek`): `cek(teks, { ai })` adalah satu-satunya pintu masuk penilaian dan mengembalikan `HasilCek` (`src/cek/tipe.ts`, disalin persis dari spec). Teks di luar batas melempar `TeksTidakValid` yang membawa `kode` dan `pesan`.
 - **Adapter AI** (`PenilaiAI`): `aiNonaktif` selalu mengembalikan `null`. Adapter Groq, Statis, dan Palsu menyusul di tiket 10.
 - **Route API** (`src/app/api/cek/route.ts`): tipis, tanpa logika penilaian. Isi Teks tidak pernah ditulis ke log.
-- **UI** (`src/ui`): hanya me-render `HasilCek`. Teks pengguna selalu di-render sebagai teks biasa, bukan HTML. Kode browser hanya mengimpor `@/cek/panjang` dan `@/cek/tipe`, bukan `@/cek`, supaya kode server (misalnya SDK AI) tidak ikut terkirim ke browser.
-- **Panjang Teks** (`src/cek/panjang.ts`): batas 50–3.000 karakter setelah trim beserta pesannya dipakai bersama oleh UI dan API, jadi pesannya selalu sama.
+- **UI** (`src/ui`): hanya me-render `HasilCek`. Teks pengguna selalu di-render sebagai teks biasa, bukan HTML. Kode browser hanya mengimpor `@/cek/panjang`, `@/cek/pesan`, dan `@/cek/tipe`, bukan `@/cek`, supaya kode server (misalnya SDK AI) tidak ikut terkirim ke browser.
+- **Panjang Teks dan pesan** (`src/cek/panjang.ts`, `src/cek/pesan.ts`): batas 50–3.000 karakter setelah trim dan pesan error dipakai bersama oleh UI dan API, jadi pesannya selalu sama.
 
 ## API
 
@@ -53,6 +53,7 @@ TampilanHasil ◄── JSON ─────  parse JSON → cek() → JSON
 
 - `200`: `HasilCek`.
 - `400`: `{ "error": { "kode", "pesan" } }` dengan `kode` salah satu dari `teks_kosong`, `teks_terlalu_pendek`, `teks_terlalu_panjang`, atau `format_tidak_valid`.
+- `500`: `{ "error": { "kode": "kesalahan_server", "pesan" } }` kalau Cek gagal karena kesalahan tak terduga. Kode ini di luar kontrak 400 di spec.
 
 ```bash
 curl -s -X POST http://localhost:3000/api/cek -H 'content-type: application/json' -d '{"teks":"Dibutuhkan staf administrasi untuk kantor cabang di Bandung. Kirim lamaran dan CV ke bagian HRD."}'
@@ -69,4 +70,4 @@ Fungsi internal (regex, normalisasi, penggabung) tidak dites langsung.
 
 ## Deploy
 
-Di-deploy ke Vercel dari branch `main`. API key (mulai tiket 10) hanya disimpan sebagai environment variable di Vercel, tidak pernah di repo.
+Target deploy: Vercel, dari branch `main` (milestone M1). API key (mulai tiket 10) hanya disimpan sebagai environment variable di Vercel, tidak pernah di repo.

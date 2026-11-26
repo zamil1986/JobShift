@@ -78,7 +78,7 @@ describe("cek: Teks valid tanpa Aturan", () => {
     });
   });
 
-  it("memberi Penjelasan singkat yang tidak kosong", async () => {
+  it("memberi Penjelasan templat Risiko rendah", async () => {
     const hasil = await cek(TEKS_LOWONGAN);
 
     expect(hasil.penjelasan).toBe("Tidak ditemukan tanda bahaya di teks ini.");

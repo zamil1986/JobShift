@@ -1,11 +1,9 @@
+// Antarmuka server untuk Inti Cek. Kode browser tidak mengimpor dari sini,
+// tetapi langsung dari `@/cek/panjang`, `@/cek/pesan`, dan `@/cek/tipe`,
+// supaya kode server (misalnya SDK AI) tidak ikut terkirim ke browser.
+
 export { cek, type OpsiCek } from "./cek";
 export { aiNonaktif } from "./ai";
-export {
-  PANJANG_MAKS,
-  PANJANG_MIN,
-  PESAN_ERROR,
-  panjangTeks,
-  periksaPanjang,
-  TeksTidakValid,
-} from "./panjang";
+export { TeksTidakValid } from "./panjang";
+export { PESAN_ERROR, PESAN_GAGAL_SERVER } from "./pesan";
 export type * from "./tipe";

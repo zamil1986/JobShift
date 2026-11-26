@@ -64,7 +64,7 @@ export function TampilanHasil({ hasil, teks }: Props) {
 
       {hasil.tandaBahayaTersirat.length > 0 && (
         <section aria-labelledby="judul-tersirat">
-          <h3 id="judul-tersirat">Informasi yang tidak ada</h3>
+          <h3 id="judul-tersirat">Yang tidak disebutkan di teks</h3>
           <ul className="daftar">
             {hasil.tandaBahayaTersirat.map((t) => (
               <li key={t.alasan}>{t.alasan}</li>

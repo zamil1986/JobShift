@@ -1,19 +1,19 @@
 "use client";
 
 import { useId, useState, type FormEvent } from "react";
-import { PANJANG_MAKS, PESAN_ERROR, panjangTeks, periksaPanjang } from "@/cek/panjang";
+import { PANJANG_MAKS, panjangTeks, periksaPanjang } from "@/cek/panjang";
+import { PESAN_ERROR, PESAN_GAGAL_SERVER } from "@/cek/pesan";
 import type { ErrorCek, HasilCek } from "@/cek/tipe";
 import { DISCLAIMER_PRIVASI, PESAN_GAGAL_KONEKSI } from "./salinan";
 import { TampilanHasil } from "./TampilanHasil";
 
-const PESAN_GAGAL_SERVER = "Cek sedang bermasalah. Coba lagi sebentar lagi.";
 const angka = new Intl.NumberFormat("id-ID");
 
 export function FormCek() {
   const [teks, setTeks] = useState("");
   const [galat, setGalat] = useState<string | null>(null);
   const [memuat, setMemuat] = useState(false);
-  const [hasil, setHasil] = useState<{ hasil: HasilCek; teks: string } | null>(null);
+  const [cekTerakhir, setCekTerakhir] = useState<{ hasil: HasilCek; teks: string } | null>(null);
 
   const idKotak = useId();
   const idPenghitung = useId();
@@ -30,7 +30,7 @@ export function FormCek() {
     const kode = periksaPanjang(teks);
     if (kode) {
       setGalat(PESAN_ERROR[kode]);
-      setHasil(null);
+      setCekTerakhir(null);
       return;
     }
 
@@ -45,13 +45,13 @@ export function FormCek() {
       });
       const body: unknown = await res.json().catch(() => null);
       if (res.ok) {
-        setHasil({ hasil: body as HasilCek, teks: teksDicek });
+        setCekTerakhir({ hasil: body as HasilCek, teks: teksDicek });
       } else {
-        setHasil(null);
+        setCekTerakhir(null);
         setGalat((body as Partial<ErrorCek> | null)?.error?.pesan ?? PESAN_GAGAL_SERVER);
       }
     } catch {
-      setHasil(null);
+      setCekTerakhir(null);
       setGalat(PESAN_GAGAL_KONEKSI);
     } finally {
       setMemuat(false);
@@ -95,7 +95,7 @@ export function FormCek() {
       </form>
 
       <div aria-live="polite" className="wadah-hasil">
-        {hasil && <TampilanHasil hasil={hasil.hasil} teks={hasil.teks} />}
+        {cekTerakhir && <TampilanHasil hasil={cekTerakhir.hasil} teks={cekTerakhir.teks} />}
       </div>
     </>
   );
