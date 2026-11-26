@@ -2,13 +2,15 @@
 
 import { useEffect, useRef } from "react";
 import type { HasilCek } from "@/cek/tipe";
-import { PERINGATAN_RISIKO_RENDAH, TAGLINE, TAMPILAN_LABEL } from "./salinan";
+import { PERINGATAN_RISIKO_RENDAH, TAGLINE, TAMPILAN_LABEL, TAMPILAN_MODUS } from "./salinan";
+import { TeksBerhighlight } from "./TeksBerhighlight";
 
 type Props = { hasil: HasilCek; teks: string };
 
 /**
  * Me-render HasilCek apa adanya. Tidak menghitung apa pun. Teks pengguna dan
  * kutipan selalu di-render sebagai node teks, tidak pernah sebagai HTML.
+ * ID aturan (`aturanId`) tidak pernah ditampilkan (NFR-08).
  */
 export function TampilanHasil({ hasil, teks }: Props) {
   const judul = useRef<HTMLHeadingElement>(null);
@@ -48,6 +50,14 @@ export function TampilanHasil({ hasil, teks }: Props) {
 
       <p>{hasil.penjelasan}</p>
 
+      {hasil.modus.length > 0 && (
+        <p className="modus">
+          <span className="modus-judul">Modus yang cocok: </span>
+          {/* `modus` sudah urut jumlah bobot; elemen pertama adalah Modus terkuat. */}
+          {hasil.modus.map((m) => TAMPILAN_MODUS[m]).join(", ")}
+        </p>
+      )}
+
       {hasil.tandaBahaya.length > 0 && (
         <section aria-labelledby="judul-tanda-bahaya">
           <h3 id="judul-tanda-bahaya">Tanda bahaya</h3>
@@ -75,7 +85,10 @@ export function TampilanHasil({ hasil, teks }: Props) {
 
       <section aria-labelledby="judul-teks">
         <h3 id="judul-teks">Teks yang dicek</h3>
-        <p className="teks-asli">{teks}</p>
+        {hasil.tandaBahaya.length > 0 && (
+          <p className="petunjuk-sorotan">Kalimat yang menjadi tanda bahaya diberi tanda di bawah ini.</p>
+        )}
+        <TeksBerhighlight teks={teks} tandaBahaya={hasil.tandaBahaya} />
       </section>
 
       <p className="tagline-hasil">{TAGLINE}</p>

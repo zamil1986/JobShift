@@ -2,7 +2,7 @@
 // alasan, Langkah aman) tidak boleh memakai "aman", "asli", "legit", atau
 // "terpercaya" (spec, "Penjelasan dan kata terlarang"). Tagline dikecualikan.
 
-import type { Label } from "@/cek/tipe";
+import type { Label, Modus } from "@/cek/tipe";
 
 export const TAGLINE = "JobShift — cek dulu sebelum transfer.";
 
@@ -20,4 +20,11 @@ export const TAMPILAN_LABEL: Record<Label, { kata: string; ikon: string }> = {
   risiko_rendah: { kata: "Risiko rendah", ikon: "ℹ" },
   waspada: { kata: "Waspada", ikon: "⚠" },
   bahaya: { kata: "Bahaya", ikon: "⛔" },
+};
+
+/** Nama Modus seperti di glosarium, tanpa kata "Modus" (sudah ada di judulnya). */
+export const TAMPILAN_MODUS: Record<Modus, string> = {
+  tugas: "Tugas",
+  lokal: "Lokal",
+  luar_negeri: "Luar negeri",
 };

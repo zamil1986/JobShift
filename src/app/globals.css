@@ -228,6 +228,21 @@ textarea[aria-invalid="true"] {
   color: var(--teks-redup);
 }
 
+.modus-judul {
+  font-weight: 600;
+}
+
+/* Kutipan pemicu di Teks asli. Garis bawah ikut menandai, supaya tidak hanya
+   bergantung pada warna. Kontras teks #1a1a1a di atas #ffe08a ≥ 4,5:1. */
+.sorotan {
+  color: var(--teks);
+  background: #ffe08a;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+  border-radius: 0.125rem;
+}
+
 .teks-asli {
   max-height: 16rem;
   overflow-y: auto;
