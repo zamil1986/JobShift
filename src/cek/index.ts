@@ -3,7 +3,6 @@
 // supaya kode server (misalnya SDK AI) tidak ikut terkirim ke browser.
 
 export { cek, type OpsiCek } from "./cek";
-export type { Aturan, Pola } from "./aturan/mesin";
 export { aiNonaktif } from "./ai";
 export { TeksTidakValid } from "./panjang";
 export { PESAN_ERROR, PESAN_GAGAL_SERVER } from "./pesan";

@@ -251,6 +251,7 @@ Error 400: `{ error: { kode: "teks_kosong" | "teks_terlalu_pendek" | "teks_terla
 ## Testing Decisions
 
 - **Satu seam: `cek(teks, { ai })`.** Semua tes perilaku masuk lewat fungsi ini dan memeriksa `HasilCek`. Tes tidak memeriksa fungsi internal (regex, normalisasi, penggabung), supaya katalog dan implementasi bisa disetel tanpa memecahkan tes.
+- **Pengecualian: `buatCek(katalog)`.** `cek` dibuat sebagai `buatCek(KATALOG)`. Tes yang butuh bobot di luar katalog asli (batas Label 24/25/59/60, batas Skor 100, seri Modus terkuat) memakai `buatCek` dengan katalog sintetis, jadi tetap melewati jalur `cek()` yang lengkap. `buatCek` tidak diekspor dari `@/cek` dan tidak pernah dipakai route, UI, atau eval. Alasannya, semua bobot katalog kelipatan 5 dan AI paling banyak +25, jadi Skor 24 dan 59 tidak pernah bisa dihasilkan katalog asli.
 - Tes yang baik menyatakan perilaku yang terlihat pengguna: "Teks ini memberi Label Bahaya dengan Tanda bahaya R01 berkutipan 'biaya seragam'". Bukan "fungsi X dipanggil".
 - Setiap Aturan punya minimal satu tes positif dan satu tes negatif. R01 dan R02 juga punya tes negatif berisi penyangkalan dan tes "penyangkal lalu kecocokan kedua tetap tertangkap" (ADR-0002).
 - Yang dites lewat seam:

@@ -64,7 +64,7 @@ curl -s -X POST http://localhost:3000/api/cek -H 'content-type: application/json
 
 Tes perilaku masuk lewat dua seam saja (spec, "Testing Decisions"):
 
-- `cek(teks, { ai })`, di `src/cek/*.test.ts`. Opsi `{ aturan }` mengganti katalog dengan Aturan sintetis, khusus untuk tes yang butuh bobot di luar katalog (batas Label 24/25/59/60 dan seri Modus terkuat). Route API tidak pernah mengisinya.
+- `cek(teks, { ai })`, di `src/cek/*.test.ts`. Tes yang butuh bobot di luar katalog (batas Label 24/25/59/60 dan seri Modus terkuat) memakai `buatCek(katalog)` dengan Aturan sintetis, di `src/cek/skor.test.ts`. `cek` sendiri adalah `buatCek(KATALOG)`; `buatCek` tidak diekspor dari `@/cek`.
 - Handler `POST` yang dipanggil langsung, di `src/app/api/cek/route.test.ts`.
 
 Fungsi internal (regex, normalisasi, penggabung) tidak dites langsung.
