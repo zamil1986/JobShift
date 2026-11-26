@@ -324,3 +324,29 @@ export async function explainWithAI(text: string): Promise<unknown | null> {
 - [J1] OJK (Satgas PASTI), "Waspada Penipuan Website Mengatasnamakan Indonesia Anti-Scam Centre (IASC)", 28 March 2025: https://ojk.go.id/id/berita-dan-kegiatan/info-terkini/Pages/Waspada-Penipuan-Website-Mengatasnamakan-Indonesia-Anti-Scam-Centre-IASC.aspx
 - [J2] OJK, "Tingkatkan Pelindungan Konsumen Satgas PASTI Lakukan Soft Launching IASC", posted 25 Nov 2024: https://ojk.go.id/id/berita-dan-kegiatan/info-terkini/Pages/Tingkatkan-Pelindungan-Konsumen-Satgas-PASTI-Lakukan-Soft-Launching-IASC.aspx
 - [J3] IASC official site (OJK subdomain): https://iasc.ojk.go.id/ (form: https://iasc.ojk.go.id/Guest/LaporanV2)
+
+---
+
+## Addendum: official KP2MI channels for Modus Luar negeri (checked 2026-11-26)
+
+Primary source: the KP2MI site itself. Every URL below returned HTTP 200 from here, with no off-domain redirect.
+
+| Purpose | URL / contact | Source |
+|---|---|---|
+| KP2MI official site | https://www.kp2mi.go.id/ | [K1] |
+| Check a recruiter's (P3MI) licence before applying | https://migran-aman.kp2mi.go.id/cek-legalitas | [K2] |
+| List of licensed P3MI (SISKOP2MI) | https://siskop2mi.bp2mi.go.id/profil/lembaga/list_lembaga/p3mi | [K3] |
+| Complaints: call centre | 0800-1000 (from inside Indonesia) | [K4] |
+| Complaints: WhatsApp | 0811-8080-141 | [K4] |
+| Complaints: email | halopelindungan@bp2mi.go.id | [K4] |
+
+**Notes**
+- **Two government domains are used.** KP2MI is the successor of BP2MI, and both `kp2mi.go.id` and `bp2mi.go.id` are government domains.
+- **Recommended link for Legitly.** Use the Migran Aman "Cek Legalitas" page as the "check the official route" link in Langkah aman for Modus Luar negeri.
+- **Old PDF list.** The P3MI list PDF on kp2mi.go.id is dated 30 April 2023, so link SISKOP2MI or Migran Aman instead.
+
+**Sources**
+- [K1] https://www.kp2mi.go.id/
+- [K2] https://migran-aman.kp2mi.go.id/cek-legalitas
+- [K3] https://siskop2mi.bp2mi.go.id/profil/lembaga/list_lembaga/p3mi
+- [K4] KP2MI contact page: https://kp2mi.go.id/profil-kontak
