@@ -1,10 +1,10 @@
-# PRD — Legitly
+# PRD — JobShift
 
 Nov 26, 2026 · @Jamal
 
-**Tagline:** *Legitly — cek dulu sebelum transfer.* Nama "Legitly" menyiratkan "legit", jadi tagline ini wajib tampil bersama nama di halaman cek dan hasil. Tujuannya menegaskan bahwa Legitly memeriksa risiko, bukan menjamin sebuah lowongan legit.
+**Tagline:** *JobShift — cek dulu sebelum transfer.* Nama "JobShift" tidak menjelaskan fungsi produk, jadi tagline ini wajib tampil bersama nama di halaman cek dan hasil. Tagline inilah yang memberi tahu pengguna bahwa JobShift memeriksa risiko sebelum mereka membayar.
 
-Dokumen ini menjelaskan apa yang harus dibangun dan kapan MVP Legitly dianggap berhasil. Detail teknisnya (daftar aturan, prompt AI, arsitektur, jadwal per orang) ada di tab Spesifikasi MVP.
+Dokumen ini menjelaskan apa yang harus dibangun dan kapan MVP JobShift dianggap berhasil. Detail teknisnya (daftar aturan, kontrak API, arsitektur) ada di [spec MVP](.scratch/jobshift-mvp/spec.md).
 
 ## Latar belakang dan masalah
 
@@ -14,7 +14,7 @@ Pencari kerja muda tidak punya cara cepat untuk mengecek lowongan yang mereka te
 - 80% korban scam baru melapor 12 jam setelah kejadian, padahal dana sudah berpindah dalam hitungan jam ([Kontan, 17 Nov 2026](https://keuangan.kontan.co.id/news/iasc-terima-741545-laporan-scam-80-korban-lapor-setelah-12-jam)).
 - Komdigi dan BP2MI memblokir 7.908 konten iklan lowongan luar negeri fiktif pada Januari–Agustus 2026 ([Katadata](https://katadata.co.id/digital/teknologi/6a9ec5336a97b/komdigi-blokir-7908-loker-luar-negeri-palsu-waspada-modus-perdagangan-orang)).
 
-Job portal seperti Jobstreet dan Glints hanya memverifikasi lowongan di dalam platform mereka. Kanal pelaporan seperti IASC dan aduankonten.id bekerja **setelah** kejadian. Celah yang diisi Legitly ada **sebelum** korban mentransfer uang atau mengirim data.
+Job portal seperti Jobstreet dan Glints hanya memverifikasi lowongan di dalam platform mereka. Kanal pelaporan seperti IASC dan aduankonten.id bekerja **setelah** kejadian. Celah yang diisi JobShift ada **sebelum** korban mentransfer uang atau mengirim data.
 
 **Pernyataan masalah:** Pencari kerja usia 17–30 tahun yang menerima tawaran lewat pesan pribadi dan media sosial perlu cara menilai risiko penipuan dalam hitungan detik, dengan alasan yang mereka pahami, sebelum mereka membayar atau menyerahkan data.
 
@@ -52,9 +52,9 @@ Target recall dan false positive masih tebakan awal dan ditinjau Jumat setelah u
 
 ## Persona
 
-Ketiga persona utama mewakili tiga pola penipuan yang ditangani Legitly. Persona ini fiktif dan disusun dari pola modus yang terdokumentasi. Sebelum proposal ditulis, tim sebaiknya mengonfirmasinya lewat wawancara singkat dengan 3–5 orang sungguhan.
+Ketiga persona utama mewakili tiga pola penipuan yang ditangani JobShift. Persona ini fiktif dan disusun dari pola modus yang terdokumentasi. Sebelum proposal ditulis, tim sebaiknya mengonfirmasinya lewat wawancara singkat dengan 3–5 orang sungguhan.
 
-| Persona | Situasi | Pola yang mengancam | Yang dibutuhkan dari Legitly |
+| Persona | Situasi | Pola yang mengancam | Yang dibutuhkan dari JobShift |
 | --- | --- | --- | --- |
 | **Rina**, 19, lulusan SMK | melamar kerja pabrik dan admin lewat grup WhatsApp loker | loker lokal palsu: biaya seragam/medical, mengatasnamakan PT besar | jawaban cepat "asli atau tidak" sebelum transfer biaya |
 | **Bu Sari**, 38, ibu rumah tangga | mencari penghasilan tambahan dari HP | kerja "tugas" like/rating dengan deposit naik level | penjelasan sederhana, huruf besar, bisa dibacakan |
@@ -86,10 +86,10 @@ Sebuah kebutuhan baru dianggap selesai kalau semua kriteria penerimaannya bisa d
 | --- | --- | --- | --- | --- |
 | FR-01 | Input teks | Kotak teks 50–3.000 karakter dengan penghitung; tombol Cek nonaktif saat kosong; di bawah 50 karakter Cek tidak dijalankan dan muncul pesan "Teksnya terlalu pendek untuk dinilai, tempel seluruh pesan lowongannya."; lebih dari 3.000 karakter memunculkan pesan yang jelas; disclaimer singkat privasi tampil di bawah tombol Cek | US-01 | P0 wajib |
 | FR-02 | Input screenshot | Menerima PNG/JPG/WebP maksimal 5 MB; OCR berjalan di browser dengan indikator progres; teks hasil bacaan tampil dan bisa diedit sebelum dicek; kalau gagal, pengguna diarahkan untuk menempel teks | US-02 | P0 wajib |
-| FR-03 | Mesin aturan | Minimal 15 aturan (daftar di tab Spesifikasi MVP); setiap aturan yang cocok mengembalikan ID, alasan, dan kutipan pemicu, kecuali Tanda bahaya tersirat (R13) yang tanpa kutipan, berbobot 10, dan tidak pernah kritis; Penyangkal dalam 3 kata sebelum pemicu membatalkan kecocokan R01/R02 ([ADR-0002](docs/adr/0002-penyangkal-membatalkan-aturan-kritis.md)); kata kunci bahasa Inggris inti ada di R01, R02, R04, R06a/b, dan R10; R04 (gaji tidak wajar) hanya untuk kerja dalam negeri; kutipan dicocokkan tanpa membedakan huruf besar/kecil dan spasi berlebih; input yang sama selalu menghasilkan output yang sama; setiap aturan punya minimal 1 tes positif dan 1 tes negatif, dan R01/R02 punya tes negatif berisi penyangkalan | US-01, US-03 | P0 wajib |
+| FR-03 | Mesin aturan | Minimal 15 aturan (daftar di [spec MVP](.scratch/jobshift-mvp/spec.md)); setiap aturan yang cocok mengembalikan ID, alasan, dan kutipan pemicu, kecuali Tanda bahaya tersirat (R13) yang tanpa kutipan, berbobot 10, dan tidak pernah kritis; Penyangkal dalam 3 kata sebelum pemicu membatalkan kecocokan R01/R02 ([ADR-0002](docs/adr/0002-penyangkal-membatalkan-aturan-kritis.md)); kata kunci bahasa Inggris inti ada di R01, R02, R04, R06a/b, dan R10; R04 (gaji tidak wajar) hanya untuk kerja dalam negeri; kutipan dicocokkan tanpa membedakan huruf besar/kecil dan spasi berlebih; input yang sama selalu menghasilkan output yang sama; setiap aturan punya minimal 1 tes positif dan 1 tes negatif, dan R01/R02 punya tes negatif berisi penyangkalan | US-01, US-03 | P0 wajib |
 | FR-04 | Skor dan label | Skor 0–100 (jumlah bobot, maks 100); label Risiko rendah (0–24), Waspada (25–59), Bahaya (≥60); satu aturan kritis (perilaku yang praktis tidak pernah dilakukan lowongan asli) yang cocok langsung membuat label Bahaya dan skor minimal 60; aturan kritis berbobot 60 untuk urutan dan perhitungan Modus terkuat; setiap aturan ditandai 0 atau 1 modus; Modus terkuat = modus dengan jumlah bobot terbesar, seri diurutkan Luar negeri, Lokal, Tugas | US-01 | P0 wajib |
-| FR-05 | Lapisan AI | Groq `openai/gpt-oss-120b`; berjalan paralel dengan aturan; batas waktu 6 detik; Teks melalui Penyamaran (nomor HP, rekening, NIK, email diganti penanda) sebelum dikirim; keluaran divalidasi skema `{label, tanda_bahaya:[{kutipan, alasan}], penjelasan}` tanpa skor dan tanpa modus; kalau gagal, hasil aturan tetap tampil dengan catatan; AI hanya menambah tanda bahaya (bobot tetap 10, total maks +25) dan tidak pernah menurunkan skor; tanda bahaya AI tanpa kutipan yang ada di teks tersamar, yang kutipannya memuat penanda, atau yang tumpang-tindih dengan tanda bahaya aturan, dibuang; lihat [ADR-0001](docs/adr/0001-ai-hanya-menambah.md) | US-03 | P0 wajib |
-| FR-06 | Halaman hasil | Label tampil sebagai warna + ikon + kata; skor; daftar tanda bahaya diurutkan dari bobot terbesar; kutipan pemicu di-highlight di teks asli; Tanda bahaya tersirat tampil di daftar terpisah tanpa highlight; semua modus yang cocok disebut, urut bobot; penjelasan maksimal 3 kalimat (templat per label ditambah satu kalimat untuk Modus terkuat; boleh diganti Penjelasan AI hanya kalau label versi AI sama dengan Label akhir dan tidak memakai kata terlarang); hasil tidak pernah memakai kata "aman", "asli", "legit", atau "terpercaya"; label Risiko rendah selalu disertai peringatan tetap yang terlihat tanpa scroll: "Tidak ditemukan tanda bahaya, tapi ini bukan jaminan. Jangan transfer uang apa pun sebelum resmi diterima kerja." | US-01, US-03 | P0 wajib |
+| FR-05 | Lapisan AI | Groq `openai/gpt-oss-120b`; berjalan paralel dengan aturan; batas waktu 3,5 detik agar p95 total tetap < 5 detik; Teks melalui Penyamaran (nomor HP, rekening, NIK, email diganti penanda) sebelum dikirim; keluaran divalidasi skema `{label, tanda_bahaya:[{kutipan, alasan}], penjelasan}` tanpa skor dan tanpa modus; kalau gagal, hasil aturan tetap tampil dengan catatan; AI hanya menambah tanda bahaya (bobot tetap 10, total maks +25) dan tidak pernah menurunkan skor; tanda bahaya AI tanpa kutipan yang ada di teks tersamar, yang kutipannya memuat penanda, atau yang tumpang-tindih dengan tanda bahaya aturan, dibuang; lihat [ADR-0001](docs/adr/0001-ai-hanya-menambah.md) | US-03 | P0 wajib |
+| FR-06 | Halaman hasil | Label tampil sebagai warna + ikon + kata; skor; daftar tanda bahaya diurutkan dari bobot terbesar; kutipan pemicu di-highlight di teks asli; Tanda bahaya tersirat tampil di daftar terpisah tanpa highlight; semua modus yang cocok disebut, urut bobot; penjelasan maksimal 3 kalimat (templat per label ditambah satu kalimat untuk Modus terkuat; boleh diganti Penjelasan AI hanya kalau label versi AI sama dengan Label akhir dan tidak memakai kata terlarang); teks hasil yang dihasilkan (Label, Penjelasan, alasan tanda bahaya, copy Langkah aman) tidak pernah memakai kata "aman", "asli", "legit", atau "terpercaya", kecuali nama merek, tagline, dan domain resmi; label Risiko rendah selalu disertai peringatan tetap yang terlihat tanpa scroll: "Tidak ditemukan tanda bahaya, tapi ini bukan jaminan. Jangan transfer uang apa pun sebelum resmi diterima kerja." | US-01, US-03 | P0 wajib |
 | FR-07 | Langkah aman | Langkah umum per label ditambah langkah spesifik untuk Modus terkuat saja; berisi tautan ke Karirhub Kemnaker dan aduankonten.id; Modus Luar negeri selalu menautkan pengecekan legalitas P3MI di KP2MI (https://migran-aman.kp2mi.go.id/cek-legalitas) dan pengaduan KP2MI (0800-1000, WA 0811-8080-141); hasil Waspada dan Bahaya selalu memuat Langkah darurat dua bagian: "Sudah telanjur transfer?" (IASC https://iasc.ojk.go.id/, hubungi bank atau e-wallet, Kontak OJK 157) dan "Sudah telanjur kirim data?" (hubungi bank atau e-wallet, Kontak OJK 157, laporkan akun pelaku di platformnya); semua tautan membuka situs resmi dan menampilkan domainnya | US-04 | P0 wajib |
 | FR-08 | Contoh siap pakai | Minimal 4 tombol contoh: 3 loker palsu (tugas, lokal, luar negeri) dan 1 loker asli; satu klik mengisi kotak teks; hasil AI untuk contoh disimpan statis sehingga tidak memakai kuota AI | US-05 | P0 wajib |
 | FR-09 | Aksesibilitas | Seluruh alur bisa dijalankan dengan keyboard; hasil dibacakan screen reader lewat `aria-live`; Lighthouse Accessibility ≥ 95 | US-06 | P0 wajib |
@@ -108,7 +108,7 @@ Privasi dan ketersediaan paling diprioritaskan, karena URL wajib aktif selama pe
 
 | ID | Aspek | Kebutuhan |
 | --- | --- | --- |
-| NFR-01 | Privasi | Legitly tidak menyimpan Teks maupun gambar, dan isi teks tidak masuk log. Gambar diproses di browser dan tidak pernah diunggah ke server. Data pribadi disamarkan sebelum Teks dikirim ke AI. Yang tersimpan hanya angka agregat dan hash IP sementara (paling lama 60 detik) untuk batas pemakaian. Dataset di repo publik sudah disamarkan dari nomor, nama orang, dan rekening. |
+| NFR-01 | Privasi | JobShift tidak menyimpan Teks maupun gambar, dan isi teks tidak masuk log. Gambar diproses di browser dan tidak pernah diunggah ke server. Data pribadi disamarkan sebelum Teks dikirim ke AI. Yang tersimpan hanya angka agregat dan hash IP sementara (paling lama 60 detik) untuk batas pemakaian. Dataset di repo publik sudah disamarkan dari nomor, nama orang, dan rekening. |
 | NFR-02 | Ketersediaan | URL publik aktif terus sampai final 10 Desember 2026, di hosting gratis yang tidak "tidur". |
 | NFR-03 | Kinerja | Cek teks: persentil ke-95 di bawah 5 detik. OCR: target di bawah 15 detik untuk screenshot di HP kelas menengah (ukur sendiri hari Jumat). |
 | NFR-04 | Keamanan | API key hanya ada di environment variable server, tidak pernah di repo atau browser. Teks pengguna ditampilkan sebagai teks biasa, tidak di-render sebagai HTML. |
@@ -141,11 +141,11 @@ Risiko terbesar ada di ketergantungan pada layanan pihak ketiga yang gratis. Kar
 - Waktu: submit paling lambat 30 November 2026 (target internal 29 November 21.00 WIB).
 - Lomba hanya mengizinkan satu karya per tim, karya harus orisinal, dan repo wajib publik.
 - Tidak ada akses ke data atau API pemerintah, sehingga tidak bisa memverifikasi legalitas perusahaan.
-- Hasil Legitly adalah indikasi risiko, bukan vonis hukum.
+- Hasil JobShift adalah indikasi risiko, bukan vonis hukum.
 
 ## Milestone
 
-Fitur dikunci Sabtu malam, dan karya dikumpulkan Minggu, sehari sebelum batas resmi. Rincian per orang ada di diagram jadwal di tab Spesifikasi MVP.
+Fitur dikunci Sabtu malam, dan karya dikumpulkan Minggu, sehari sebelum batas resmi. Rincian per orang mengikuti tiket di `.scratch/jobshift-mvp/issues/`.
 
 1. Nov 26, 2026 — **M1:** tim terdaftar dan sudah bayar; versi kosong ter-deploy di Vercel.
 2. Nov 27, 2026 — **M2:** semua FR P0 jalan end-to-end di lokal; dataset `dev` dan `test` lengkap.
@@ -161,5 +161,5 @@ Dua pertanyaan pertama harus dijawab hari ini, karena menentukan siapa mengerjak
 - [ ] Siapa saja anggota tim, dan siapa memegang peran A–E? Rencana saat ini 3 orang (A+E, B+D, C). Set test harus dipegang C atau A+E, bukan B+D.
 - [x] API AI mana yang dipakai? Cek kuota gratisnya di dokumentasi resmi. **Jawaban:** Groq Free plan, `openai/gpt-oss-120b`, tanpa cadangan di MVP (lihat `docs/research/ai-api-and-iasc.md`).
 - [x] Apa URL resmi kanal pelaporan IASC yang akan ditautkan? Ambil dari situs OJK, jangan dari artikel berita. **Jawaban:** https://iasc.ojk.go.id/ (lihat `docs/research/ai-api-and-iasc.md`).
-- [ ] Apakah nama "Legitly" sudah dipakai produk lain? Cek di Google, Play Store, dan GitHub.
+- [x] Apakah nama "JobShift" sudah dipakai produk lain? Cek di Google, Play Store, dan GitHub. **Temuan (26 Nov 2026):** sudah dipakai Jobshift Ltd (tryjobshift.com, berdiri 2023), aplikasi web pencarian kerja berbasis AI yang menyusun CV dan melamar otomatis, jadi kategorinya sama dengan JobShift. Ada juga JOBSHIFT di Calgary, organisasi pendukung pekerja terdampak COVID-19. Tidak ditemukan aplikasi bernama JobShift di Play Store maupun repo GitHub. **Keputusan:** nama JobShift tetap dipakai.
 - [ ] Apakah persona sesuai kenyataan? Wawancara singkat 3–5 pencari kerja di sekitar kampus untuk mengonfirmasinya.

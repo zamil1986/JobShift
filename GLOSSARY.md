@@ -1,6 +1,6 @@
-# Legitly
+# JobShift
 
-Legitly menilai risiko penipuan sebuah lowongan kerja yang diterima di luar job portal, sebelum pencari kerja membayar atau menyerahkan data pribadi. Nama Legitly tidak berarti hasilnya menyatakan sebuah lowongan legit.
+JobShift menilai risiko penipuan sebuah lowongan kerja yang diterima di luar job portal, sebelum pencari kerja membayar atau menyerahkan data pribadi.
 
 ## Pengecekan
 
@@ -82,11 +82,11 @@ Aturan untuk perilaku yang praktis tidak pernah dilakukan lowongan asli, misalny
 _Hindari_: aturan berat, aturan utama
 
 **Penyangkal**:
-Kata seperti "tidak", "tanpa", "bebas", "jangan", atau "gratis" yang muncul tepat sebelum kata pemicu dan membatalkan kecocokan sebuah Aturan, misalnya "tidak dipungut biaya". Penyangkal hanya membatalkan, tidak pernah mengurangi Skor.
+Kata seperti "tidak", "tanpa", "bebas", "jangan", atau "gratis" yang muncul paling jauh tiga kata sebelum kata pemicu dan membatalkan kecocokan Aturan kritis "Minta uang di awal" atau "Minta OTP/PIN/password", misalnya "tidak dipungut biaya". Penyangkal hanya membatalkan, tidak pernah mengurangi Skor.
 _Hindari_: negasi (di teks antarmuka)
 
 **Modus**:
-Pola penipuan lowongan yang dikenali Legitly: Tugas, Lokal, atau Luar negeri. Sebuah Aturan terkait dengan paling banyak satu Modus. Tanda bahaya dari AI tidak terkait Modus.
+Pola penipuan lowongan yang dikenali JobShift: Tugas, Lokal, atau Luar negeri. Sebuah Aturan terkait dengan paling banyak satu Modus. Tanda bahaya dari AI tidak terkait Modus.
 _Hindari_: kategori, jenis scam, pola
 
 **Modus terkuat**:
