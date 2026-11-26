@@ -25,7 +25,7 @@ All sources were checked on **2026-11-26**. Only primary sources were used: prov
 
 ---
 
-## Question 1: Which AI API should CekLoker use?
+## Question 1: Which AI API should Legitly use?
 
 ### Comparison table (free tiers only, checked 2026-11-26)
 
@@ -204,7 +204,7 @@ export async function explainWithAI(text: string): Promise<unknown | null> {
       ],
       response_format: {
         type: "json_schema",
-        json_schema: { name: "cekloker_ai_result", strict: true, schema: aiResultSchema },
+        json_schema: { name: "legitly_ai_result", strict: true, schema: aiResultSchema },
       },
       reasoning_effort: "low",
       max_completion_tokens: 800,
@@ -242,12 +242,12 @@ export async function explainWithAI(text: string): Promise<unknown | null> {
   - `https://iasc.ojk.go.id/Guest/LaporanV2` returned HTTP 200.
   - The plain `http://` URL quoted in the 2024 OJK article returned HTTP 504 from here. **Link to the `https://` URL.**
 
-### Caveats for CekLoker's copy
+### Caveats for Legitly's copy
 
 - **IASC's scope.** IASC handles *financial-transaction* fraud. Its form needs data on one victim account and one reported account, and uploading **proof of a transaction is mandatory** [J3].
   - For a job-scam message where the user has *not yet paid*, IASC may not be the right channel.
   - In that case, suggest Kontak OJK 157 or the platform's own report feature instead.
-- **Impersonation warning.** OJK warns about fake websites that impersonate IASC [J1]. CekLoker should show the exact domain `iasc.ojk.go.id`.
+- **Impersonation warning.** OJK warns about fake websites that impersonate IASC [J1]. Legitly should show the exact domain `iasc.ojk.go.id`.
 
 ---
 

@@ -1,8 +1,10 @@
-# PRD — CekLoker
+# PRD — Legitly
 
 Nov 26, 2026 · @Jamal
 
-Dokumen ini menjelaskan apa yang harus dibangun dan kapan MVP CekLoker dianggap berhasil. Detail teknisnya (daftar aturan, prompt AI, arsitektur, jadwal per orang) ada di tab Spesifikasi MVP.
+**Tagline:** *Legitly — cek dulu sebelum transfer.* Nama "Legitly" menyiratkan "legit", jadi tagline ini wajib tampil bersama nama di halaman cek dan hasil. Tujuannya menegaskan bahwa Legitly memeriksa risiko, bukan menjamin sebuah lowongan legit.
+
+Dokumen ini menjelaskan apa yang harus dibangun dan kapan MVP Legitly dianggap berhasil. Detail teknisnya (daftar aturan, prompt AI, arsitektur, jadwal per orang) ada di tab Spesifikasi MVP.
 
 ## Latar belakang dan masalah
 
@@ -12,7 +14,7 @@ Pencari kerja muda tidak punya cara cepat untuk mengecek lowongan yang mereka te
 - 80% korban scam baru melapor 12 jam setelah kejadian, padahal dana sudah berpindah dalam hitungan jam ([Kontan, 17 Nov 2026](https://keuangan.kontan.co.id/news/iasc-terima-741545-laporan-scam-80-korban-lapor-setelah-12-jam)).
 - Komdigi dan BP2MI memblokir 7.908 konten iklan lowongan luar negeri fiktif pada Januari–Agustus 2026 ([Katadata](https://katadata.co.id/digital/teknologi/6a9ec5336a97b/komdigi-blokir-7908-loker-luar-negeri-palsu-waspada-modus-perdagangan-orang)).
 
-Job portal seperti Jobstreet dan Glints hanya memverifikasi lowongan di dalam platform mereka. Kanal pelaporan seperti IASC dan aduankonten.id bekerja **setelah** kejadian. Celah yang diisi CekLoker ada **sebelum** korban mentransfer uang atau mengirim data.
+Job portal seperti Jobstreet dan Glints hanya memverifikasi lowongan di dalam platform mereka. Kanal pelaporan seperti IASC dan aduankonten.id bekerja **setelah** kejadian. Celah yang diisi Legitly ada **sebelum** korban mentransfer uang atau mengirim data.
 
 **Pernyataan masalah:** Pencari kerja usia 17–30 tahun yang menerima tawaran lewat pesan pribadi dan media sosial perlu cara menilai risiko penipuan dalam hitungan detik, dengan alasan yang mereka pahami, sebelum mereka membayar atau menyerahkan data.
 
@@ -50,9 +52,9 @@ Target recall dan false positive masih tebakan awal dan ditinjau Jumat setelah u
 
 ## Persona
 
-Ketiga persona utama mewakili tiga pola penipuan yang ditangani CekLoker. Persona ini fiktif dan disusun dari pola modus yang terdokumentasi. Sebelum proposal ditulis, tim sebaiknya mengonfirmasinya lewat wawancara singkat dengan 3–5 orang sungguhan.
+Ketiga persona utama mewakili tiga pola penipuan yang ditangani Legitly. Persona ini fiktif dan disusun dari pola modus yang terdokumentasi. Sebelum proposal ditulis, tim sebaiknya mengonfirmasinya lewat wawancara singkat dengan 3–5 orang sungguhan.
 
-| Persona | Situasi | Pola yang mengancam | Yang dibutuhkan dari CekLoker |
+| Persona | Situasi | Pola yang mengancam | Yang dibutuhkan dari Legitly |
 | --- | --- | --- | --- |
 | **Rina**, 19, lulusan SMK | melamar kerja pabrik dan admin lewat grup WhatsApp loker | loker lokal palsu: biaya seragam/medical, mengatasnamakan PT besar | jawaban cepat "asli atau tidak" sebelum transfer biaya |
 | **Bu Sari**, 38, ibu rumah tangga | mencari penghasilan tambahan dari HP | kerja "tugas" like/rating dengan deposit naik level | penjelasan sederhana, huruf besar, bisa dibacakan |
@@ -85,15 +87,15 @@ Sebuah kebutuhan baru dianggap selesai kalau semua kriteria penerimaannya bisa d
 | FR-01 | Input teks | Kotak teks maksimal 3.000 karakter dengan penghitung; tombol Cek nonaktif saat kosong; lebih dari 3.000 karakter memunculkan pesan yang jelas | US-01 | P0 wajib |
 | FR-02 | Input screenshot | Menerima PNG/JPG/WebP maksimal 5 MB; OCR berjalan di browser dengan indikator progres; teks hasil bacaan tampil dan bisa diedit sebelum dicek; kalau gagal, pengguna diarahkan untuk menempel teks | US-02 | P0 wajib |
 | FR-03 | Mesin aturan | Minimal 15 aturan; setiap aturan yang cocok mengembalikan ID, alasan, dan kutipan pemicu; input yang sama selalu menghasilkan output yang sama; setiap aturan punya minimal 1 tes positif dan 1 tes negatif | US-01, US-03 | P0 wajib |
-| FR-04 | Skor dan label | Skor 0–100; label Risiko rendah (0–24), Waspada (25–59), Bahaya (≥60); satu aturan kritis yang cocok langsung membuat label Bahaya | US-01 | P0 wajib |
-| FR-05 | Lapisan AI | Berjalan paralel dengan aturan; batas waktu 6 detik; keluaran divalidasi skema; kalau gagal, hasil aturan tetap tampil dengan catatan; AI tidak bisa menurunkan label dari aturan kritis | US-03 | P0 wajib |
-| FR-06 | Halaman hasil | Label tampil sebagai warna + ikon + kata; skor; daftar tanda bahaya diurutkan dari bobot terbesar; kutipan pemicu di-highlight di teks asli; penjelasan maksimal 3 kalimat | US-01, US-03 | P0 wajib |
-| FR-07 | Langkah aman | Langkah berbeda per label; berisi tautan ke Karirhub Kemnaker, aduankonten.id, dan kanal pelaporan IASC; semua tautan membuka situs resmi | US-04 | P0 wajib |
+| FR-04 | Skor dan label | Skor 0–100; label Risiko rendah (0–24), Waspada (25–59), Bahaya (≥60); satu aturan kritis (perilaku yang praktis tidak pernah dilakukan lowongan asli) yang cocok langsung membuat label Bahaya dan skor minimal 60; setiap aturan ditandai 0 atau 1 modus | US-01 | P0 wajib |
+| FR-05 | Lapisan AI | Berjalan paralel dengan aturan; batas waktu 6 detik; keluaran divalidasi skema; kalau gagal, hasil aturan tetap tampil dengan catatan; AI hanya menambah tanda bahaya (bobot tetap 10, total maks +25) dan tidak pernah menurunkan skor; tanda bahaya AI tanpa kutipan yang persis ada di teks, atau yang tumpang-tindih dengan tanda bahaya aturan, dibuang; lihat [ADR-0001](docs/adr/0001-ai-hanya-menambah.md) | US-03 | P0 wajib |
+| FR-06 | Halaman hasil | Label tampil sebagai warna + ikon + kata; skor; daftar tanda bahaya diurutkan dari bobot terbesar; kutipan pemicu di-highlight di teks asli; semua modus yang cocok disebut, urut bobot; penjelasan maksimal 3 kalimat (templat, boleh diganti AI kalau tidak memakai kata terlarang dan tidak bertentangan dengan label); hasil tidak pernah memakai kata "aman", "asli", "legit", atau "terpercaya"; label Risiko rendah selalu disertai peringatan tetap yang terlihat tanpa scroll: "Tidak ditemukan tanda bahaya, tapi ini bukan jaminan. Jangan transfer uang apa pun sebelum resmi diterima kerja." | US-01, US-03 | P0 wajib |
+| FR-07 | Langkah aman | Langkah berbeda per label dan modus; berisi tautan ke Karirhub Kemnaker, aduankonten.id, dan kanal pelaporan IASC (https://iasc.ojk.go.id/); hasil Waspada dan Bahaya selalu memuat bagian "Sudah telanjur transfer atau kirim data?" dengan IASC dan Kontak OJK 157; semua tautan membuka situs resmi | US-04 | P0 wajib |
 | FR-08 | Contoh siap pakai | Minimal 4 tombol contoh: 3 loker palsu (tugas, lokal, luar negeri) dan 1 loker asli; satu klik mengisi kotak teks | US-05 | P0 wajib |
 | FR-09 | Aksesibilitas | Seluruh alur bisa dijalankan dengan keyboard; hasil dibacakan screen reader lewat `aria-live`; Lighthouse Accessibility ≥ 95 | US-06 | P0 wajib |
 | FR-10 | Halaman Cara kerja | Menampilkan ringkasan aturan, angka evaluasi dari set `test`, batasan, dan kebijakan privasi | US-07 | P0 wajib |
 | FR-11 | API cek | `POST /api/cek` dengan isi `{teks}` mengembalikan label, skor, tanda bahaya, penjelasan, dan sumber penilaian ("aturan" atau "aturan+AI"); input tidak valid dijawab 400 dengan pesan yang jelas | US-01 | P0 wajib |
-| FR-12 | Skrip evaluasi | `npm run eval` mencetak recall, presisi, false positive, dan tabel confusion untuk versi aturan saja, AI saja, dan gabungan | US-07 | P0 wajib |
+| FR-12 | Skrip evaluasi | `npm run eval` mencetak recall, presisi, false positive, angka asli → Waspada (dilaporkan, bukan target), dan tabel confusion untuk versi aturan saja, AI saja, dan gabungan | US-07 | P0 wajib |
 | FR-13 | Bacakan hasil | Tombol memakai text-to-speech bawaan browser berbahasa Indonesia; tombol disembunyikan kalau browser tidak mendukung | US-08 | P1 kalau sempat |
 | FR-14 | Bagikan ke WhatsApp | Menyiapkan ringkasan peringatan tanpa menyertakan teks lowongan asli maupun data pribadi | US-09 | P1 kalau sempat |
 | FR-15 | Halaman Kenali modus | Tiga pola penipuan, masing-masing dengan ciri dan contoh | US-10 | P1 kalau sempat |
@@ -135,7 +137,7 @@ Risiko terbesar ada di ketergantungan pada layanan pihak ketiga yang gratis. Kar
 - Waktu: submit paling lambat 30 November 2026 (target internal 29 November 21.00 WIB).
 - Lomba hanya mengizinkan satu karya per tim, karya harus orisinal, dan repo wajib publik.
 - Tidak ada akses ke data atau API pemerintah, sehingga tidak bisa memverifikasi legalitas perusahaan.
-- Hasil CekLoker adalah indikasi risiko, bukan vonis hukum.
+- Hasil Legitly adalah indikasi risiko, bukan vonis hukum.
 
 ## Milestone
 
@@ -154,6 +156,6 @@ Dua pertanyaan pertama harus dijawab hari ini, karena menentukan siapa mengerjak
 
 - [ ] Siapa saja anggota tim, dan siapa memegang peran A–E?
 - [ ] API AI mana yang dipakai? Cek kuota gratisnya di dokumentasi resmi.
-- [ ] Apa URL resmi kanal pelaporan IASC yang akan ditautkan? Ambil dari situs OJK, jangan dari artikel berita.
-- [ ] Apakah nama "CekLoker" sudah dipakai produk lain? Cek di Google, Play Store, dan GitHub.
+- [x] Apa URL resmi kanal pelaporan IASC yang akan ditautkan? Ambil dari situs OJK, jangan dari artikel berita. **Jawaban:** https://iasc.ojk.go.id/ (lihat `docs/research/ai-api-and-iasc.md`).
+- [ ] Apakah nama "Legitly" sudah dipakai produk lain? Cek di Google, Play Store, dan GitHub.
 - [ ] Apakah persona sesuai kenyataan? Wawancara singkat 3–5 pencari kerja di sekitar kampus untuk mengonfirmasinya.
