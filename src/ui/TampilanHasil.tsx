@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { HasilCek } from "@/cek/tipe";
 import { PERINGATAN_RISIKO_RENDAH, TAGLINE, TAMPILAN_LABEL, TAMPILAN_MODUS } from "./salinan";
-import { TeksBerhighlight } from "./TeksBerhighlight";
+import { TeksBersorotan } from "./TeksBersorotan";
 
 type Props = { hasil: HasilCek; teks: string };
 
@@ -51,7 +51,7 @@ export function TampilanHasil({ hasil, teks }: Props) {
       <p>{hasil.penjelasan}</p>
 
       {hasil.modus.length > 0 && (
-        <p className="modus">
+        <p>
           <span className="modus-judul">Modus yang cocok: </span>
           {/* `modus` sudah urut jumlah bobot; elemen pertama adalah Modus terkuat. */}
           {hasil.modus.map((m) => TAMPILAN_MODUS[m]).join(", ")}
@@ -88,7 +88,7 @@ export function TampilanHasil({ hasil, teks }: Props) {
         {hasil.tandaBahaya.length > 0 && (
           <p className="petunjuk-sorotan">Kalimat yang menjadi tanda bahaya diberi tanda di bawah ini.</p>
         )}
-        <TeksBerhighlight teks={teks} tandaBahaya={hasil.tandaBahaya} />
+        <TeksBersorotan teks={teks} tandaBahaya={hasil.tandaBahaya} />
       </section>
 
       <p className="tagline-hasil">{TAGLINE}</p>

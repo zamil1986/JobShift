@@ -57,6 +57,14 @@ describe("cek: R01 Minta uang di awal", () => {
     expect(hasil.label).toBe("bahaya");
   });
 
+  it("Penyangkal tepat 3 kata sebelum pemicu masih membatalkan", async () => {
+    const hasil = await cek(
+      "Lowongan kasir minimarket di Depok. Tidak dipungut sepeser biaya seragam, semua perlengkapan disediakan toko.",
+    );
+
+    expect(tanda(hasil, "R01")).toBeUndefined();
+  });
+
   it("Penyangkal lebih dari 3 kata sebelum pemicu tidak membatalkan", async () => {
     const hasil = await cek(
       "Tidak perlu pengalaman kerja sebelumnya, cukup biaya seragam Rp150.000 lalu langsung mulai kerja besok pagi.",
@@ -109,6 +117,14 @@ describe("cek: R02 Minta OTP/PIN/password", () => {
 
     expect(tanda(hasil, "R02")).toBeUndefined();
     expect(hasil.label).toBe("risiko_rendah");
+  });
+
+  it("tidak menganggap 'pin lokasi' sebagai PIN rahasia", async () => {
+    const hasil = await cek(
+      "Lowongan kurir paket area Bekasi. Setelah diterima, kirim pin lokasi rumah kamu ke koordinator untuk pembagian rute.",
+    );
+
+    expect(tanda(hasil, "R02")).toBeUndefined();
   });
 
   it("dibatalkan Penyangkal untuk seluruh daftar: 'jangan berikan kode OTP, PIN, atau password'", async () => {

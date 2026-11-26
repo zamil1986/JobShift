@@ -21,20 +21,20 @@ export type Aturan = {
   /** Alasan dalam bahasa awam; tampil di UI sebagai alasan Tanda bahaya. */
   alasan: string;
   bobot: number;
-  /** Aturan kritis selalu berbobot 60. */
+  /** Aturan kritis (spec: selalu berbobot 60); satu saja sudah cukup untuk Label Bahaya. */
   kritis: boolean;
   modus?: Modus;
   /** Penyangkal ≤ 3 kata sebelum pemicu membatalkan kecocokan (ADR-0002: hanya R01/R02). */
   pakaiPenyangkal: boolean;
   pola: Pola[];
-  /** Syarat tambahan atas seluruh Teks normal; kalau false, Aturan tidak berlaku sama sekali. */
-  berlaku?: (teksNormal: string) => boolean;
 };
 
 /** ADR-0002. Daftar dan jaraknya dibekukan; mengubahnya berarti menyetel ulang bobot. */
+const PENYANGKAL_ID = ["tidak", "tanpa", "bebas", "jangan", "gratis"];
 const PENYANGKAL: Record<Bahasa, ReadonlySet<string>> = {
-  id: new Set(["tidak", "tanpa", "bebas", "jangan", "gratis"]),
-  en: new Set(["tidak", "tanpa", "bebas", "jangan", "gratis", "no", "free"]),
+  id: new Set(PENYANGKAL_ID),
+  // Spec: "no"/"free" hanya untuk pola Inggris.
+  en: new Set([...PENYANGKAL_ID, "no", "free"]),
 };
 const JARAK_PENYANGKAL = 3;
 
@@ -82,13 +82,16 @@ function kecocokanPertama(aturan: Aturan, normal: TeksNormal): [number, number] 
   return terbaik;
 }
 
-/** Satu Aturan menghasilkan paling banyak satu Tanda bahaya. */
+/**
+ * Menjalankan katalog atas Teks persis seperti diterima. Satu Aturan
+ * menghasilkan paling banyak satu Tanda bahaya, dengan `kutipan` yang selalu
+ * diambil dari Teks asli lewat `rentang`.
+ */
 export function jalankanAturan(teks: string, katalog: readonly Aturan[]): TandaBahaya[] {
   const normal = normalisasi(teks);
   const hasil: TandaBahaya[] = [];
 
   for (const aturan of katalog) {
-    if (aturan.berlaku && !aturan.berlaku(normal.teks)) continue;
     const cocok = kecocokanPertama(aturan, normal);
     if (!cocok) continue;
 

@@ -18,6 +18,7 @@
   --waspada-teks: #7a3e00;
   --bahaya-latar: #fdecea;
   --bahaya-teks: #8c0b0b;
+  --sorotan-latar: #ffe08a;
 }
 
 *,
@@ -232,11 +233,15 @@ textarea[aria-invalid="true"] {
   font-weight: 600;
 }
 
+.petunjuk-sorotan {
+  color: var(--teks-redup);
+}
+
 /* Kutipan pemicu di Teks asli. Garis bawah ikut menandai, supaya tidak hanya
    bergantung pada warna. Kontras teks #1a1a1a di atas #ffe08a ≥ 4,5:1. */
 .sorotan {
   color: var(--teks);
-  background: #ffe08a;
+  background: var(--sorotan-latar);
   text-decoration: underline;
   text-decoration-thickness: 2px;
   text-underline-offset: 2px;

@@ -13,6 +13,7 @@ export type TeksNormal = {
 
 const WHITESPACE = /\s/u;
 
+/** Teks normal beserta peta offset-nya ke Teks asli. */
 export function normalisasi(asli: string): TeksNormal {
   let teks = "";
   const awal: number[] = [];

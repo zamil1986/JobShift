@@ -33,7 +33,7 @@ export async function cek(teks: string, opsi: Partial<OpsiCek> = {}): Promise<Ha
   if (kode) throw new TeksTidakValid(kode);
 
   // Aturan menilai Teks persis seperti diterima (tanpa trim), supaya `rentang`
-  // cocok dengan Teks yang di-highlight UI.
+  // cocok dengan Teks yang disorot UI.
   const tandaBahaya = urutkanTandaBahaya(jalankanAturan(teks, aturan));
   const tandaBahayaTersirat: HasilCek["tandaBahayaTersirat"] = [];
   const skor = hitungSkor(tandaBahaya, tandaBahayaTersirat);

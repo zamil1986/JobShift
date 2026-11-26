@@ -9,11 +9,13 @@ const AMBANG_BAHAYA = 60;
 /** Urutan pemecah seri Modus terkuat. */
 const URUTAN_SERI_MODUS: readonly Modus[] = ["luar_negeri", "lokal", "tugas"];
 
+/** Skor = min(100, Σ bobot). Bobot AI ditambahkan di tiket 10. */
 export function hitungSkor(tandaBahaya: TandaBahaya[], tersirat: TandaBahayaTersirat[]): number {
   const total = [...tandaBahaya, ...tersirat].reduce((jumlah, t) => jumlah + t.bobot, 0);
   return Math.min(SKOR_MAKS, total);
 }
 
+/** 0–24 Risiko rendah, 25–59 Waspada, ≥ 60 Bahaya. */
 export function labelDariSkor(skor: number): Label {
   if (skor >= AMBANG_BAHAYA) return "bahaya";
   if (skor >= AMBANG_WASPADA) return "waspada";

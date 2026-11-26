@@ -28,7 +28,8 @@ const JENIS_BIAYA = [
   "tes kesehatan",
 ].join("|");
 
-const DATA_RAHASIA = ["kode otp", "otp", "pin", "kata sandi", "password", "kode verifikasi"].join("|");
+// "pin lokasi" atau "pin point" bukan PIN rahasia.
+const DATA_RAHASIA = ["kode otp", "otp", "pin(?! lokasi| point| map)", "kata sandi", "password", "kode verifikasi"].join("|");
 // Kata serapan (otp, pin, password) cukup di daftar Indonesia: "no" bukan Penyangkal di
 // pola Indonesia, supaya "kirim no HP dan PIN" tetap tertangkap.
 const DATA_RAHASIA_EN = ["otp code", "verification code", "security code"].join("|");

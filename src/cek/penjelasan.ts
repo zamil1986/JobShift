@@ -10,6 +10,7 @@ const PENJELASAN_LABEL: Record<Label, string> = {
   bahaya: "Teks ini memuat tanda bahaya kuat yang sering dipakai penipu lowongan kerja.",
 };
 
+/** Penjelasan templat untuk Label akhir. */
 export function penjelasanTemplat(label: Label): string {
   return PENJELASAN_LABEL[label];
 }
