@@ -5,7 +5,7 @@
 // Alasan tampil di UI: bahasa awam, tanpa ID aturan, dan tanpa kata "aman",
 // "asli", "legit", atau "terpercaya".
 
-import type { Aturan } from "./mesin";
+import type { Aturan, Pola } from "./mesin";
 
 /** Pemisah dalam daftar: "seragam, medical, atau pelatihan". */
 const PEMISAH = String.raw`(?: ?[,/&] ?| (?:atau|dan|serta|or|and) | ?, (?:atau|dan|or|and) )`;
@@ -192,4 +192,302 @@ export const R08: Aturan = {
   ],
 };
 
-export const KATALOG: readonly Aturan[] = [R01, R02, R06b, R07, R08];
+/** Negara dan kota tujuan rawan TPPO untuk kerja online (R16). Thailand hanya di perbatasan. */
+const NEGARA_RAWAN = [
+  "kamboja",
+  "cambodia",
+  "phnom penh",
+  "sihanoukville",
+  "bavet",
+  "poipet",
+  "myanmar",
+  "burma",
+  "myawaddy",
+  "shwe kokko",
+  "laos",
+  "bokeo",
+  "segitiga emas",
+  "golden triangle",
+  "mae sot",
+  "perbatasan (?:thailand|thai|myanmar|kamboja|laos)",
+  "thailand perbatasan",
+  "thai border",
+].join("|");
+
+/** Kata benda yang membuat nama negara menjadi kata sifat: "restoran Jepang", "skincare Korea". */
+const NEGARA_SEBAGAI_SIFAT = [
+  "bahasa",
+  "wisatawan",
+  "turis",
+  "tamu",
+  "restoran",
+  "resto",
+  "masakan",
+  "makanan",
+  "kuliner",
+  "produk",
+  "toko",
+  "skincare",
+  "kosmetik",
+  "drama",
+  "budaya",
+  "gaya",
+  "mobil",
+  "motor",
+  "merek",
+  "brand",
+].join("|");
+
+/**
+ * Penanda luar negeri (spec, "Mesin Aturan"): nama negara atau kota tujuan
+ * umum, atau kata "luar negeri"/"overseas". Sumber regex untuk Teks normal,
+ * tanpa batas kata; bungkus dengan `diTeks()` atau batas kata sendiri. Nama
+ * negara yang menjadi kata sifat ("restoran Jepang", "wisatawan mancanegara")
+ * tidak dihitung. Dipakai R05 dan R12, dan oleh R04 untuk menolak gaji luar
+ * negeri.
+ *
+ * "Inggris" sengaja tidak ada karena juga berarti bahasa Inggris.
+ */
+export const PENANDA_LUAR_NEGERI = `(?<!(?:${NEGARA_SEBAGAI_SIFAT}) )(?:${[
+  "luar negeri",
+  "mancanegara",
+  "overseas",
+  "abroad",
+  // Asia Tenggara
+  "malaysia",
+  "kuala lumpur",
+  "johor",
+  "penang",
+  "sabah",
+  "sarawak",
+  "singapura",
+  "singapore",
+  "brunei",
+  "thailand",
+  "bangkok",
+  NEGARA_RAWAN,
+  "vietnam",
+  "filipina",
+  "philippines",
+  // Asia Timur
+  "makau",
+  "macau",
+  "hong ?kong",
+  "taiwan",
+  "taipei",
+  "jepang",
+  "japan",
+  "tokyo",
+  "osaka",
+  "korea(?: selatan)?",
+  "south korea",
+  "seoul",
+  "busan",
+  "china",
+  "tiongkok",
+  // Timur Tengah
+  "arab saudi",
+  "saudi(?: arabia)?",
+  "riyadh",
+  "jeddah",
+  "uni emirat arab",
+  "uae",
+  "dubai",
+  "abu dhabi",
+  "qatar",
+  "doha",
+  "kuwait",
+  "oman",
+  "bahrain",
+  "turki",
+  // Lainnya
+  "australia",
+  "selandia baru",
+  "new zealand",
+  "polandia",
+  "poland",
+  "jerman",
+  "germany",
+  "belanda",
+  "rusia",
+  "amerika(?: serikat)?",
+  "kanada",
+  "canada",
+].join("|")})`;
+
+/** Kata utuh dari `sumber` muncul di mana pun dalam Teks, sebelum atau sesudah posisi ini. */
+const diTeks = (sumber: string) => {
+  const kata = String.raw`(?<![\p{L}\p{N}])(?:${sumber})(?![\p{L}\p{N}])`;
+  // Teks normal tidak memuat baris baru, jadi "." menjangkau seluruh Teks.
+  return `(?:(?<=${kata}.*)|(?=.*${kata}))`;
+};
+
+/** Pola hanya cocok kalau Teks memuat penanda luar negeri. */
+const diLuarNegeri = (pola: Pola[]): Pola[] =>
+  pola.map((p) => ({ ...p, cari: `(?:${p.cari})${diTeks(PENANDA_LUAR_NEGERI)}` }));
+
+// R03 kritis, jadi "visa turis" saja tidak cukup: staf biro perjalanan memang
+// mengurus visa turis. Visa harus menjadi cara berangkat atau bekerja.
+// Penyangkal berlaku (ADR-0002) supaya peringatan "jangan berangkat pakai visa
+// turis" batal.
+const VISA_KUNJUNGAN = ["turis", "wisata", "kunjungan", "pelancong", "on arrival", "voa", "free"].join("|");
+// "masuk" tidak dipakai: petugas bandara membantu turis yang masuk dengan visa on arrival.
+const BERANGKAT_KERJA = ["berangkat", "diberangkatkan", "kerja", "bekerja", "dipekerjakan"].join("|");
+/** Yang berangkat adalah pelanggan, bukan pekerja: "membantu pelanggan berangkat dengan visa turis". */
+const BUKAN_PEKERJA = ["pelanggan", "klien", "turis", "wisatawan", "tamu", "jamaah", "jemaah", "penumpang", "customer"].join("|");
+const CARA_VISA = ["pakai", "memakai", "menggunakan", "dengan", "lewat", "via"].join("|");
+// "Holiday" tidak dipakai: Working Holiday Visa memang mengizinkan bekerja.
+const VISA_KUNJUNGAN_EN = ["tourist", "visit", "visitor", "visiting"].join("|");
+
+export const R03: Aturan = {
+  id: "R03",
+  alasan: "Mengajakmu bekerja di luar negeri dengan visa turis atau kunjungan, padahal visa itu tidak mengizinkan bekerja.",
+  bobot: 60,
+  kritis: true,
+  modus: "luar_negeri",
+  pakaiPenyangkal: true,
+  pola: [
+    // "berangkat pakai visa wisata", "bekerja di Kamboja dengan visa turis"
+    { cari: `(?<!(?:${BUKAN_PEKERJA}) )(?:${BERANGKAT_KERJA})${celah(4)} (?:${CARA_VISA}) visa (?:${VISA_KUNJUNGAN})`, bahasa: "id" },
+    // "cukup visa turis", "modal visa on arrival"
+    { cari: `(?:cukup|hanya|modal)(?: (?:${CARA_VISA}))? visa (?:${VISA_KUNJUNGAN})`, bahasa: "id" },
+    // "visa kunjungan untuk kerja", "bebas visa untuk kerja". Kata "bebas" di
+    // awal kecocokan bukan Penyangkal, karena Penyangkal dicari sebelum kecocokan.
+    { cari: `(?:visa (?:${VISA_KUNJUNGAN})|bebas visa)${celah(3)} (?:untuk|buat|sambil) (?:kerja|bekerja)`, bahasa: "id" },
+    { cari: `(?:on|with|using|via|under) (?:a |the )?(?:${VISA_KUNJUNGAN_EN}) visa`, bahasa: "en" },
+    { cari: `(?:(?:${VISA_KUNJUNGAN_EN}) visas?|visa-free|visa free)${celah(3)} (?:to|for) work`, bahasa: "en" },
+  ],
+};
+
+// R05: tiga syarat sering berada di baris berbeda, jadi Kutipan pemicu adalah
+// nominal gaji, dan tanpa-keahlian serta penanda luar negeri cukup ada di Teks.
+const TANPA_KEAHLIAN = [
+  "tanpa (?:pengalaman|skill|keahlian|keterampilan|ijazah)",
+  "tidak (?:perlu|butuh|harus|wajib) (?:pengalaman|berpengalaman|skill|keahlian)",
+  "no (?:experience|skills?)(?: (?:needed|required))?",
+  "without (?:experience|skills?)",
+].join("|");
+const KETERANGAN_GAJI = [
+  "mulai",
+  "dari",
+  "hingga",
+  "sampai",
+  "sebesar",
+  "pokok",
+  "bersih",
+  "bulanan",
+  "per bulan",
+  "sekitar",
+  "capai",
+  "mencapai",
+  "s/d",
+  "up to",
+  "from",
+  "around",
+].join("|");
+/** Dua digit juta: "Rp 25 juta", "20-30 juta", "35 million", atau "Rp18.000.000". */
+const JUTA_DUA_DIGIT = [
+  String.raw`(?:rp\.? ?)?\d{2}(?:[.,]\d+)?(?: ?(?:-|–|s/d|sampai|hingga|to) ?(?:rp\.? ?)?\d{2,3}(?:[.,]\d+)?)? ?(?:juta|jt|million)`,
+  String.raw`rp\.? ?\d{2}\.\d{3}\.\d{3}`,
+].join("|");
+
+export const R05: Aturan = {
+  id: "R05",
+  alasan: "Menjanjikan gaji puluhan juta di luar negeri tanpa meminta pengalaman atau keahlian apa pun.",
+  bobot: 25,
+  kritis: false,
+  modus: "luar_negeri",
+  pakaiPenyangkal: false,
+  pola: diLuarNegeri([
+    { cari: `(?:gaji|penghasilan|pendapatan)(?: (?:${KETERANGAN_GAJI}))*:? (?:${JUTA_DUA_DIGIT})${diTeks(TANPA_KEAHLIAN)}`, bahasa: "id" },
+    { cari: `(?:salary|income)(?: (?:${KETERANGAN_GAJI}))*:? (?:${JUTA_DUA_DIGIT})${diTeks(TANPA_KEAHLIAN)}`, bahasa: "en" },
+  ]),
+};
+
+// R12: "berangkat cepat" atau "tiket ditanggung" juga muncul di lowongan dalam
+// negeri, jadi Teks harus memuat penanda luar negeri.
+const JALUR_RESMI = daftar("pt|p3mi|pjtki|pptkis|agen|agensi|lpk|sponsor|kp2mi|bp2mi");
+const WAKTU_CEPAT = [
+  "cepat",
+  "secepatnya",
+  "kilat",
+  "segera",
+  "dalam \\d+ (?:hari|minggu)",
+  "\\d+ (?:hari|minggu) lagi",
+  "minggu (?:ini|depan)",
+  "bulan ini",
+  "besok",
+  "hari ini",
+].join("|");
+/** "Tiket pesawat dibayar sendiri" justru jalur biasa. */
+const BUKAN_SENDIRI = "(?! sendiri| oleh (?:pekerja|peserta|calon pekerja|kamu|anda))";
+const DITANGGUNG = ["ditanggung", "dibayar", "dibayarin", "dibayari", "dibiayai", "dibelikan", "disediakan", "gratis"].join("|");
+const DIURUS_EN = ["arranged", "processed", "handled", "provided", "covered", "paid", "free"].join("|");
+
+export const R12: Aturan = {
+  id: "R12",
+  alasan: "Menjanjikan proses berangkat ke luar negeri yang cepat atau serba diurus, di luar jalur penempatan resmi.",
+  bobot: 25,
+  kritis: false,
+  modus: "luar_negeri",
+  pakaiPenyangkal: false,
+  pola: diLuarNegeri([
+    // "berangkat cepat", "keberangkatan dalam 2 minggu", "langsung berangkat"
+    { cari: `(?:berangkat|keberangkatan|terbang|diberangkatkan)(?: (?:bisa|lebih))? (?:${WAKTU_CEPAT})`, bahasa: "id" },
+    { cari: "(?:proses (?:cepat|kilat|singkat),? )?langsung (?:berangkat|terbang|diberangkatkan)", bahasa: "id" },
+    // "tanpa lewat PT atau P3MI"
+    { cari: `tanpa (?:lewat |melalui |perlu |harus )?${JALUR_RESMI}`, bahasa: "id" },
+    // "paspor diurus", "gratis pembuatan paspor"
+    { cari: `paspor (?:diurus|diuruskan|dibuatkan|dibantu|disiapkan|ditanggung|dibiayai|gratis)${BUKAN_SENDIRI}`, bahasa: "id" },
+    { cari: "gratis (?:pembuatan |pengurusan )?paspor", bahasa: "id" },
+    // "tiket pesawat ditanggung", "gratis tiket keberangkatan"
+    { cari: `tiket(?: (?:pesawat|keberangkatan|berangkat))?(?: (?:pp|pulang pergi|sekali jalan))? (?:${DITANGGUNG})${BUKAN_SENDIRI}`, bahasa: "id" },
+    { cari: "gratis tiket (?:pesawat|keberangkatan|berangkat)", bahasa: "id" },
+    { cari: `(?:fly|depart|leave)(?: out)? (?:immediately|asap|within \\d+ (?:days?|weeks?)|next week|this week)`, bahasa: "en" },
+    { cari: `passports? (?:(?:will be|is|are) )?(?:${DIURUS_EN})`, bahasa: "en" },
+    { cari: `(?:free (?:air ?|flight |plane )?tickets?|(?:air|flight|plane) tickets? (?:(?:is|are|will be) )?(?:${DIURUS_EN}))`, bahasa: "en" },
+    { cari: "no (?:agency|agent|recruitment agency) (?:needed|required)", bahasa: "en" },
+  ]),
+};
+
+// R16: pekerjaan online saja wajar, negara rawan saja juga (guru di Kamboja).
+// Kalau keduanya sekalimat, Kutipan pemicu memuat keduanya; kalau tidak,
+// Kutipan pemicu adalah pekerjaannya dan negara rawan cukup ada di Teks.
+// Spec: admin, operator, atau customer service online. "Operator mesin" dan
+// "staf marketing" di Kamboja atau Laos tidak cocok.
+const PEKERJAAN_ONLINE = [
+  `(?:admin|operator|customer service|cs|telemarketing|marketing)(?: (?:${[
+    "online",
+    "chat",
+    "sosmed",
+    "media sosial",
+    "game",
+    "judi",
+    "kasino",
+    "casino",
+    "slot",
+    "crypto",
+    "kripto",
+    "trading",
+    "investasi",
+  ].join("|")}))(?: (?:staff|staf))?`,
+  "(?:kerja|bekerja) online",
+].join("|");
+
+export const R16: Aturan = {
+  id: "R16",
+  alasan: "Menawarkan kerja online di negara yang sering menjadi tujuan perdagangan orang untuk penipuan daring.",
+  bobot: 25,
+  kritis: false,
+  modus: "luar_negeri",
+  pakaiPenyangkal: false,
+  pola: [
+    // "admin online untuk perusahaan di Kamboja"
+    { cari: `(?:${PEKERJAAN_ONLINE})${celah(8)} (?:${NEGARA_RAWAN})`, bahasa: "id" },
+    // "di Myanmar sebagai operator chat"
+    { cari: `(?:${NEGARA_RAWAN})${celah(8)} (?:${PEKERJAAN_ONLINE})`, bahasa: "id" },
+    { cari: `(?:${PEKERJAAN_ONLINE})${diTeks(NEGARA_RAWAN)}`, bahasa: "id" },
+  ],
+};
+
+export const KATALOG: readonly Aturan[] = [R01, R02, R03, R05, R06b, R07, R08, R12, R16];

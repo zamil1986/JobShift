@@ -73,6 +73,15 @@ describe("cek: R01 Minta uang di awal", () => {
     expect(tanda(hasil, "R01")?.kutipan).toBe("biaya seragam");
   });
 
+  it("Penyangkal di kalimat sebelumnya tidak membatalkan", async () => {
+    const teks =
+      "Lowongan staf gudang, langsung kerja tanpa tes. Biaya seragam Rp250.000 dibayar di awal ke admin, ya!";
+    const hasil = await cek(teks);
+
+    expect(tanda(hasil, "R01")?.kutipan).toBe("Biaya seragam");
+    expect(hasil.label).toBe("bahaya");
+  });
+
   it("'No.' sebelum pola Indonesia bukan Penyangkal", async () => {
     const hasil = await cek(
       "Hubungi No. HP 0812-0000-0000 untuk biaya seragam dan pelatihan sebelum mulai kerja di gudang kami.",
