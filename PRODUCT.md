@@ -64,6 +64,7 @@ The scene is a phone, a chat app, and a forwarded posting. The user copies the m
 - Tagline, always shown with the name on the check and result pages: "JobShift — cek dulu sebelum transfer."
 - Language: plain Indonesian for lay readers, with no technical terms such as "skor model" or rule IDs (NFR-08).
 - Tone: a calm, clear checking aid, not an app that frightens people.
+- Visual reference pinned by the user on 2026-11-27: the look of the Cruip Open React Template ("seperti ini lohh", with a screenshot). That means a dark navy ground, indigo accents and glow, a gradient headline, a floating rounded header, card sections, and a glowing CTA panel. It sets the look and the craft bar. The template's content (testimonials, brand logos, product video) is not product truth and must not be copied or invented.
 
 ## Evidence on Hand
 

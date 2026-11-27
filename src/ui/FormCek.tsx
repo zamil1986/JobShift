@@ -5,7 +5,6 @@ import { PANJANG_MAKS, panjangTeks, periksaPanjang } from "@/cek/panjang";
 import { PESAN_ERROR, PESAN_GAGAL_SERVER } from "@/cek/pesan";
 import type { ErrorCek, HasilCek } from "@/cek/tipe";
 import { DISCLAIMER_PRIVASI, PESAN_GAGAL_KONEKSI } from "./salinan";
-import { KEPALA_STRUK } from "./salinan-beranda";
 import { TampilanHasil } from "./TampilanHasil";
 import { UnggahScreenshot } from "./UnggahScreenshot";
 
@@ -62,15 +61,11 @@ export function FormCek() {
     }
   }
 
-  // Form dan hasil dicetak di satu struk yang sama: hasil menyambung di
-  // kertas tempat teks ditempel.
+  // Form dan hasil berada di satu panel: hasil muncul di bawah kotak tempel,
+  // di tempat yang sama dengan yang baru saja diisi.
   return (
-    <div className="struk" id="kotak-cek">
-      <div className="struk-celah" aria-hidden="true" />
-      <div className="struk-kertas">
-        <p className="struk-kepala" aria-hidden="true">
-          {KEPALA_STRUK}
-        </p>
+    <div className="alat" id="kotak-cek">
+      <div className="alat-isi">
         <form className="form-cek" onSubmit={jalankanCek} noValidate>
           <label htmlFor={idKotak} className="label-kotak">
             Tempel teks lowongan di sini
@@ -121,7 +116,6 @@ export function FormCek() {
           {cekTerakhir && <TampilanHasil hasil={cekTerakhir.hasil} teks={cekTerakhir.teks} />}
         </div>
       </div>
-      <div className="struk-sobekan" aria-hidden="true" />
     </div>
   );
 }

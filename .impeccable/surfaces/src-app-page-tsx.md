@@ -7,20 +7,24 @@ related_targets: ["src/ui/FormCek.tsx","src/ui/TampilanHasil.tsx","src/app/globa
 
 # Beranda JobShift (landing + alat cek)
 
-Scope: route `/`, mode Persuade. Audience: pencari kerja 17–30 di HP 360 px dan data seluler; aksi = tempel lowongan lalu Cek, di layar pertama. Bukti: statistik bersumber di PRD (IASC 26.910, 80% lapor setelah 12 jam, 7.908 iklan diblokir) dan kanal resmi. Tidak ada testimoni, angka pengguna, logo mitra, atau angka akurasi sebelum M3. Dunia ini menggantikan gaya tiket 15 untuk seluruh situs (halaman cek dan kartu hasil ikut).
+Scope: route `/`, mode Persuade. Audience: pencari kerja 17–30 di HP 360 px dan data seluler; aksi = tempel lowongan lalu Cek, di layar pertama. Bukti: statistik bersumber di PRD (IASC 26.910, 80% lapor setelah 12 jam, 7.908 iklan diblokir) dan kanal resmi. Tidak ada testimoni, angka pengguna, logo mitra, video produk, atau angka akurasi sebelum M3. Gaya ini berlaku untuk seluruh situs (halaman cek dan kartu hasil ikut). Arah "Struk Cek" yang sempat dibangun (commit a8e9b51) digantikan atas permintaan pengguna.
 
 Unresolved: halaman Cara kerja (tiket 13), tombol contoh (12), unggah screenshot (09) belum ada; beranda menautkan ke bagian #cara-kerja di halaman yang sama.
 
 ## Direction contract
 
-THESIS: Setiap cek adalah struk yang dicetak sebelum transfer. Menolak landing SaaS gelap bergradien dan grid kartu fitur; alat cek sendiri adalah hero.
+THESIS: Standar kategori, dikerjakan setara Open React Template: landing SaaS gelap. Satu perbedaan yang tidak bisa ditawar: produk di hero bukan video atau foto, melainkan alat cek yang benar-benar berfungsi.
 
-OWN-WORLD: Bidang ultramarine datar sebagai meja kasir, kertas thermal putih bertepi sobekan bergerigi, satu tinta hitam, huruf dot-matrix untuk judul dan cap, mono untuk baris struk, sans sistem untuk paragraf. Warna lain hanya tinta cap Label (biru, cokelat-amber, merah). Bagian bergantian bidang ultramarine dan tinta hitam.
+OWN-WORLD: Latar hampir hitam kebiruan dengan cahaya indigo kabur di atas dan di bawah. Judul bergradien abu-indigo yang berkilau pelan. Kartu gelap berbingkai gradien halus dengan sorotan yang mengikuti kursor. Tombol indigo bergradien dengan kilap dalam, tombol kedua abu gelap berbingkai. Huruf sans sistem rapat. Warna Label: biru, kuning, dan merah pastel di atas tint gelap.
 
-STORY: Pengunjung paham dalam satu layar bahwa JobShift memeriksa pesan lowongan sebelum mereka membayar, percaya karena alasan ditunjuk di kalimat mereka sendiri dan kanal resmi disebut, lalu menempel dan menekan CEK.
+STORY: Pengunjung paham dalam satu layar bahwa JobShift memeriksa pesan lowongan sebelum mereka membayar. Mereka percaya karena alasan ditunjuk di kalimat mereka sendiri, statistik diberi sumber, dan kanal resmi disebut. Lalu mereka menempel teks dan menekan Cek.
 
-FIRST VIEWPORT: Di 360 px: baris merek kecil, tagline dot-matrix besar di bidang ultramarine, lalu struk keluar dari celah printer hitam berisi kepala struk, kotak tempel, penghitung, dan tombol CEK selebar kertas yang sudah terlihat di atas lipatan. Di desktop: tagline kiri, struk kanan.
+FIRST VIEWPORT: Bilah navigasi melayang dan membulat: logo JobShift di kiri; "Cara kerja" dan "Cek sekarang" di kanan. Di tengah ada judul gradien "Cek dulu sebelum transfer." dan subjudul satu kalimat. Di bawahnya panel alat cek bercahaya indigo berisi kotak tempel, penghitung, dan tombol Cek, yang terlihat di atas lipatan di 360 × 640.
 
-FORM: Struk Cek, kandidat 5 dari daftar berurut, seed:6202fd8cde46b7e2. Tanda tangan interaksi: hasil dicetak menyambung di struk yang sama, baris demi baris, dengan meter Skor dari sel-sel karakter yang terisi; legenda tiga Label di kaki struk dengan Label aktif bertinta penuh.
+FORM: Standar kategori yang dipin pengguna. seed: none (pinned). Kata-kata pengguna: "seperti ini lohh", disertai screenshot Open React Template. Tanda tangan interaksi:
+- kartu Cara kerja dengan sorotan yang mengikuti kursor;
+- judul berkilau;
+- bagian muncul naik saat digulir (hanya kalau gerak diizinkan);
+- hasil cek muncul di panel yang sama.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance

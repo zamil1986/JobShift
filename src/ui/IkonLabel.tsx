@@ -35,7 +35,7 @@ const BENTUK: Record<Label, ReactNode> = {
         strokeWidth="1"
         strokeLinejoin="round"
       />
-      <path d="M7.5 12h9" stroke="var(--warna-kertas)" strokeWidth="2.75" strokeLinecap="round" />
+      <path d="M7.5 12h9" stroke="var(--warna-latar)" strokeWidth="2.75" strokeLinecap="round" />
     </>
   ),
 };
