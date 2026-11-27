@@ -261,6 +261,11 @@ describe("cek: batas aturan umum (tidak cocok untuk Teks wajar)", () => {
     ["PT resmi", "Kerja ke luar negeri lewat PT resmi, proses mudah. Gaji dibayar setiap bulan langsung ke pekerja."],
     ["penempatan", "Dibutuhkan operator pabrik, penempatan Kamboja. Gaji dibayar setiap bulan langsung ke pekerja."],
     ["domisili pelamar", "Dibutuhkan admin input data, domisili Bandung diutamakan. Kerja dari rumah, gaji mingguan."],
+    ["CV pelamar", "Dibutuhkan admin input data kerja dari rumah. Kirim CV terbaru ke WA 0812-3456-7890 sekarang."],
+    ["CV di akhir kalimat", "Dibutuhkan admin input data kerja dari rumah, gaji mingguan. Kirim CV. Hubungi admin untuk info."],
+    ["alamat email", "Dibutuhkan admin input data kerja dari rumah. Kirim lamaran ke alamat email hrd.loker@gmail.com."],
+    ["alamat pelamar", "Dibutuhkan admin input data kerja dari rumah. Sertakan alamat lengkap kamu dan nomor HP aktif."],
+    ["lokasi kerja fleksibel", "Dibutuhkan admin input data, lokasi kerja fleksibel dari rumah. Gaji dibayar setiap minggu."],
   ])("R13 tetap muncul walau Teks menyebut %s", async (_kasus, teks) => {
     expect((await cek(teks)).tandaBahayaTersirat).toHaveLength(1);
   });

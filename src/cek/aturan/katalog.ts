@@ -705,11 +705,28 @@ const BUKAN_NAMA = [
   "resmi", "besar", "ternama", "terkenal", "bonafit", "bonafide", "swasta", "asing", "luar",
   "online", "baju", "pakaian", "kue", "roti", "bangunan", "sembako", "kelontong", "elektronik", "hp", "ponsel", "kosmetik", "emas", "buku", "ritel", "retail",
 ].join("|");
-const NAMA = String.raw`(?!(?:${BUKAN_NAMA})(?![\p{L}\p{N}]))[\p{L}\p{N}]{2,}`;
+/** Satu kata yang bisa menjadi nama, selain `BUKAN_NAMA` dan `ekstra`. */
+const nama = (ekstra: string[] = []) =>
+  String.raw`(?!(?:${[BUKAN_NAMA, ...ekstra].join("|")})(?![\p{L}\p{N}]))[\p{L}\p{N}]{2,}`;
+const NAMA = nama();
+
+/** "Kirim CV terbaru" adalah berkas lamaran, bukan nama CV. */
+const SEBELUM_CV_PELAMAR = ["kirim", "kirimkan", "lampirkan", "sertakan", "upload", "unggah", "bawa", "siapkan", "berupa"].join("|");
+const SESUDAH_CV_PELAMAR = [
+  "terbaru", "lengkap", "kamu", "anda", "kalian", "beserta", "lamaran", "ats", "terlampir", "sekarang", "segera",
+  "hubungi", "foto", "ijazah", "ktp", "portofolio", "pdf", "ya", "kak",
+];
+
+/** "Alamat email", "alamat lengkap kamu", "lokasi kerja fleksibel" bukan alamat kantor. */
+const BUKAN_NAMA_ALAMAT = [
+  "email", "surel", "rumah", "domisili", "tinggal", "kamu", "anda", "pelamar", "lengkap", "kantor", "toko", "pabrik",
+  "kerja", "fleksibel", "bebas", "remote", "wfh", "sesuai", "menyesuaikan", "lamaran",
+];
 
 /** Nama badan usaha atau tempat usaha (spec: PT/CV/Tbk/nama toko). */
 const PENANDA_BADAN_USAHA = [
-  String.raw`(?:pt|cv|ud|pd|yayasan|koperasi|perum|perumda|firma)\.? ${NAMA}`,
+  String.raw`(?:pt|ud|pd|yayasan|koperasi|perum|perumda|firma)\.? ${NAMA}`,
+  String.raw`(?<!(?:${SEBELUM_CV_PELAMAR}) )cv\.? ${nama(SESUDAH_CV_PELAMAR)}`,
   String.raw`[\p{L}\p{N}]{2,} tbk`,
   `(?:toko|warung|kedai|restoran|resto|rumah makan|rm|cafe|kafe|klinik|apotek|bengkel|salon|laundry|hotel) ${NAMA}`,
   String.raw`[\p{L}\p{N}]{2,} (?:corp(?:oration)?|inc|ltd|llc|gmbh|co\.? ltd)`,
@@ -727,7 +744,7 @@ const KOTA = [
  */
 const PENANDA_ALAMAT = [
   String.raw`(?:jl|jln|jalan)\.? ${NAMA}`,
-  `(?:alamat(?: kantor| lengkap| toko| pabrik)?|beralamat|berkantor|lokasi(?: kerja| kantor)?):?(?: di)? ${NAMA}`,
+  `(?:alamat(?: kantor| lengkap| toko| pabrik)?|beralamat|berkantor|lokasi(?: kerja| kantor)?):?(?: di)? ${nama(BUKAN_NAMA_ALAMAT)}`,
   String.raw`(?:gedung|ruko|kawasan industri|kompleks|komplek|blok|lantai|lt|kecamatan|kec|kelurahan|kel|kabupaten|kab)\.? ${NAMA}`,
   String.raw`(?:rt|rw)\.? ?\d+`,
   `(?:kantor|cabang|gudang|pabrik|toko|outlet)(?: (?:pusat|cabang))?(?: (?:di|kota))? (?:${KOTA})`,
