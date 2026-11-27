@@ -5,6 +5,7 @@ import { PANJANG_MAKS, panjangTeks, periksaPanjang } from "@/cek/panjang";
 import { PESAN_ERROR, PESAN_GAGAL_SERVER } from "@/cek/pesan";
 import type { ErrorCek, HasilCek } from "@/cek/tipe";
 import { DISCLAIMER_PRIVASI, PESAN_GAGAL_KONEKSI } from "./salinan";
+import { KEPALA_STRUK } from "./salinan-beranda";
 import { TampilanHasil } from "./TampilanHasil";
 import { UnggahScreenshot } from "./UnggahScreenshot";
 
@@ -61,57 +62,66 @@ export function FormCek() {
     }
   }
 
+  // Form dan hasil dicetak di satu struk yang sama: hasil menyambung di
+  // kertas tempat teks ditempel.
   return (
-    <>
-      <form className="form-cek" onSubmit={jalankanCek} noValidate>
-        <label htmlFor={idKotak} className="label-kotak">
-          Tempel teks lowongan di sini
-        </label>
-        <textarea
-          ref={kotak}
-          id={idKotak}
-          name="teks"
-          value={teks}
-          onChange={(e) => {
-            setTeks(e.target.value);
-            setGalat(null);
-          }}
-          rows={8}
-          spellCheck={false}
-          aria-describedby={galat ? `${idPenghitung} ${idGalat}` : idPenghitung}
-          aria-invalid={galat ? true : undefined}
-          placeholder="Contoh: Dibutuhkan admin online, kerja dari rumah, gaji harian…"
-        />
-        <p id={idPenghitung} className={kelebihan ? "penghitung penghitung-lebih" : "penghitung"}>
-          {angka.format(panjang)} / {angka.format(PANJANG_MAKS)} karakter
+    <div className="struk" id="kotak-cek">
+      <div className="struk-celah" aria-hidden="true" />
+      <div className="struk-kertas">
+        <p className="struk-kepala" aria-hidden="true">
+          {KEPALA_STRUK}
         </p>
-
-        <UnggahScreenshot
-          teks={teks}
-          onSibuk={setOcrSibuk}
-          onTeks={(hasilOcr) => {
-            // Hasil OCR menggantikan isi kotak dan tidak dipotong; pengguna memeriksanya dulu.
-            setTeks(hasilOcr);
-            setGalat(null);
-            kotak.current?.focus();
-          }}
-        />
-
-        {galat && (
-          <p id={idGalat} className="galat" role="alert">
-            {galat}
+        <form className="form-cek" onSubmit={jalankanCek} noValidate>
+          <label htmlFor={idKotak} className="label-kotak">
+            Tempel teks lowongan di sini
+          </label>
+          <textarea
+            ref={kotak}
+            id={idKotak}
+            name="teks"
+            value={teks}
+            onChange={(e) => {
+              setTeks(e.target.value);
+              setGalat(null);
+            }}
+            rows={8}
+            spellCheck={false}
+            aria-describedby={galat ? `${idPenghitung} ${idGalat}` : idPenghitung}
+            aria-invalid={galat ? true : undefined}
+            placeholder="Contoh: Dibutuhkan admin online, kerja dari rumah, gaji harian…"
+          />
+          <p id={idPenghitung} className={kelebihan ? "penghitung penghitung-lebih" : "penghitung"}>
+            {angka.format(panjang)} / {angka.format(PANJANG_MAKS)} karakter
           </p>
-        )}
 
-        <button type="submit" className="tombol-cek" disabled={panjang === 0 || memuat || ocrSibuk}>
-          {memuat ? "Mengecek…" : "Cek"}
-        </button>
-        <p className="disclaimer">{DISCLAIMER_PRIVASI}</p>
-      </form>
+          <UnggahScreenshot
+            teks={teks}
+            onSibuk={setOcrSibuk}
+            onTeks={(hasilOcr) => {
+              // Hasil OCR menggantikan isi kotak dan tidak dipotong; pengguna memeriksanya dulu.
+              setTeks(hasilOcr);
+              setGalat(null);
+              kotak.current?.focus();
+            }}
+          />
 
-      <div aria-live="polite" className="wadah-hasil">
-        {cekTerakhir && <TampilanHasil hasil={cekTerakhir.hasil} teks={cekTerakhir.teks} />}
+          {galat && (
+            <p id={idGalat} className="galat" role="alert">
+              {galat}
+            </p>
+          )}
+
+          <button type="submit" className="tombol-cek" disabled={panjang === 0 || memuat || ocrSibuk}>
+            {memuat ? "Mengecek…" : "Cek"}
+          </button>
+          <p className="disclaimer">{DISCLAIMER_PRIVASI}</p>
+        </form>
+
+        <div aria-live="polite" className="wadah-hasil">
+          {cekTerakhir && <TampilanHasil hasil={cekTerakhir.hasil} teks={cekTerakhir.teks} />}
+        </div>
       </div>
-    </>
+      <div className="struk-sobekan" aria-hidden="true" />
+    </div>
   );
 }

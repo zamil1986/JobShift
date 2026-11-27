@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import type { HasilCek, Langkah } from "@/cek/tipe";
+import { useEffect, useRef, type CSSProperties } from "react";
+import type { HasilCek, Label } from "@/cek/tipe";
+import { DaftarLangkah } from "./DaftarLangkah";
 import {
   CATATAN_AI_TIDAK_TERSEDIA,
   JUDUL_LANGKAH,
@@ -14,9 +15,14 @@ import {
   TAMPILAN_MODUS,
 } from "./salinan";
 import { IkonLabel } from "./IkonLabel";
+import { RENTANG_LABEL } from "./salinan-beranda";
 import { TeksBersorotan } from "./TeksBersorotan";
 
 type Props = { hasil: HasilCek; teks: string };
+
+/** Meter Skor: 20 sel karakter, satu sel = 5 poin, seperti blok cetak struk. */
+const JUMLAH_SEL = 20;
+const URUTAN_LABEL = Object.keys(RENTANG_LABEL) as Label[];
 
 /**
  * Me-render HasilCek apa adanya. Tidak menghitung apa pun. Teks pengguna dan
@@ -51,6 +57,15 @@ export function TampilanHasil({ hasil, teks }: Props) {
         </span>
         <span className="label-kata">{label.kata}</span>
         <span className="label-skor">Skor {hasil.skor} dari 100</span>
+        <span className="label-meter" aria-hidden="true">
+          {Array.from({ length: JUMLAH_SEL }, (_, i) => (
+            <span
+              key={i}
+              className={i < Math.round(hasil.skor / (100 / JUMLAH_SEL)) ? "sel sel-isi" : "sel"}
+              style={{ "--i": i } as CSSProperties}
+            />
+          ))}
+        </span>
       </p>
 
       {hasil.label === "risiko_rendah" && (
@@ -123,34 +138,16 @@ export function TampilanHasil({ hasil, teks }: Props) {
         <TeksBersorotan teks={teks} tandaBahaya={hasil.tandaBahaya} />
       </section>
 
+      {/* Legenda skala di kaki struk: Label aktif bertinta penuh, lainnya putus-putus. */}
+      <ul className="legenda" aria-label="Skala Label">
+        {URUTAN_LABEL.map((l) => (
+          <li key={l} className={`legenda-${l}`} aria-current={l === hasil.label ? "true" : undefined}>
+            {TAMPILAN_LABEL[l].kata} <span className="legenda-rentang">{RENTANG_LABEL[l]}</span>
+          </li>
+        ))}
+      </ul>
+
       <p className="tagline-hasil">{TAGLINE}</p>
     </article>
-  );
-}
-
-/**
- * Daftar Langkah. Teks Langkah bertautan menjadi teks tautannya, dan domain
- * resmi selalu tampil di sampingnya sebagai teks biasa, supaya pengguna bisa
- * mencocokkan alamat sebelum membuka (IASC sering ditiru situs palsu).
- */
-function DaftarLangkah({ langkah }: { langkah: Langkah[] }) {
-  return (
-    <ul className="daftar daftar-langkah">
-      {/* Daftar statis yang tidak pernah diurutkan ulang, jadi indeks cukup sebagai key. */}
-      {langkah.map((l, i) => (
-        <li key={i}>
-          {l.tautan ? (
-            <>
-              <a href={l.tautan.url} target="_blank" rel="noopener noreferrer">
-                {l.teks}
-              </a>{" "}
-              ({l.tautan.domain})
-            </>
-          ) : (
-            l.teks
-          )}
-        </li>
-      ))}
-    </ul>
   );
 }
