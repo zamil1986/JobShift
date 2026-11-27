@@ -12,20 +12,33 @@
  */
 const BUKAN_NOMINAL = String.raw`(?<!\d)(?<!(?<![\p{L}\p{N}])rp\.?[ \t]*)`;
 
-const LANGKAH: readonly [RegExp, string][] = [
-  [/[\p{L}\p{N}._%+-]+@[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)*\.\p{L}{2,}/giu, "[EMAIL]"],
-  [new RegExp(String.raw`${BUKAN_NOMINAL}\d{16}(?!\d)`, "giu"), "[NIK]"],
-  [
-    new RegExp(String.raw`${BUKAN_NOMINAL}(?<!\+)(?:\+62|62|0)[ -]?8(?:[ -]?\d){7,11}(?!\d)`, "giu"),
-    "[NOMOR]",
-  ],
-  [new RegExp(String.raw`${BUKAN_NOMINAL}\d{10,15}(?!\d)`, "giu"), "[REKENING]"],
-];
+/**
+ * Pola data pribadi, dalam urutan penerapannya. Dipakai juga oleh validator
+ * dataset untuk menemukan angka yang belum disamarkan.
+ */
+export const POLA_DATA_PRIBADI = [
+  {
+    jenis: "email",
+    pola: /[\p{L}\p{N}._%+-]+@[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)*\.\p{L}{2,}/giu,
+    penanda: "[EMAIL]",
+  },
+  { jenis: "NIK", pola: new RegExp(String.raw`${BUKAN_NOMINAL}\d{16}(?!\d)`, "giu"), penanda: "[NIK]" },
+  {
+    jenis: "nomor HP",
+    pola: new RegExp(String.raw`${BUKAN_NOMINAL}(?<!\+)(?:\+62|62|0)[ -]?8(?:[ -]?\d){7,11}(?!\d)`, "giu"),
+    penanda: "[NOMOR]",
+  },
+  {
+    jenis: "rekening",
+    pola: new RegExp(String.raw`${BUKAN_NOMINAL}\d{10,15}(?!\d)`, "giu"),
+    penanda: "[REKENING]",
+  },
+] as const;
 
 /** Semua penanda Penyamaran. Kutipan AI yang memuat salah satunya dibuang. */
 export const PENANDA = /\[(?:EMAIL|NIK|NOMOR|REKENING)\]/iu;
 
 /** Teks dengan email, NIK, nomor HP, dan rekening diganti penanda. */
 export function samarkan(teks: string): string {
-  return LANGKAH.reduce((hasil, [pola, penanda]) => hasil.replace(pola, penanda), teks);
+  return POLA_DATA_PRIBADI.reduce((hasil, { pola, penanda }) => hasil.replace(pola, penanda), teks);
 }
