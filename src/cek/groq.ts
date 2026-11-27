@@ -78,10 +78,25 @@ export function buatPenilaiGroq({ apiKey, fetch }: OpsiGroq): PenilaiAI {
 }
 
 /**
- * Adapter Groq dari `process.env.GROQ_API_KEY`, atau undefined kalau env itu
- * kosong (Cek lalu dinilai Aturan saja).
+ * Adapter tanpa API key: tidak memanggil jaringan dan selalu dianggap gagal,
+ * jadi hasilnya Aturan saja dengan `catatanAI`. Dengan begitu key yang hilang
+ * di produksi terlihat di UI, tidak diam-diam jadi penilaian Aturan saja.
  */
-export function penilaiGroqDariEnv(): PenilaiAI | undefined {
+const penilaiTanpaKunci: PenilaiAI = async () => null;
+
+let sudahMemperingatkan = false;
+
+/**
+ * Adapter Groq dari `process.env.GROQ_API_KEY`. Kalau env itu kosong, adapter
+ * yang selalu gagal, dan satu peringatan di log server (tanpa isi Teks).
+ */
+export function penilaiGroqDariEnv(): PenilaiAI {
   const apiKey = process.env.GROQ_API_KEY;
-  return apiKey ? buatPenilaiGroq({ apiKey }) : undefined;
+  if (apiKey) return buatPenilaiGroq({ apiKey });
+
+  if (!sudahMemperingatkan) {
+    sudahMemperingatkan = true;
+    console.warn("GROQ_API_KEY tidak diset: Cek dinilai Aturan saja dengan catatanAI.");
+  }
+  return penilaiTanpaKunci;
 }

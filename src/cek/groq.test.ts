@@ -144,13 +144,19 @@ describe("adapter Groq", () => {
 });
 
 describe("penilaiGroqDariEnv", () => {
-  it("tidak membuat adapter kalau GROQ_API_KEY kosong", () => {
+  it("tanpa GROQ_API_KEY memberi catatanAI tanpa memanggil jaringan, dan memperingatkan tanpa isi Teks", async () => {
     vi.stubEnv("GROQ_API_KEY", "");
-    expect(penilaiGroqDariEnv()).toBeUndefined();
-  });
+    const fetch = vi.fn();
+    vi.stubGlobal("fetch", fetch);
+    const peringatan = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-  it("membuat adapter dari GROQ_API_KEY", () => {
-    vi.stubEnv("GROQ_API_KEY", "kunci-uji");
-    expect(penilaiGroqDariEnv()).toEqual(expect.any(Function));
+    const hasil = await cek(`${TEKS} PENANDA-RAHASIA`, { ai: penilaiGroqDariEnv() });
+
+    expect(hasil.sumberPenilaian).toBe("aturan");
+    expect(hasil.catatanAI).toBe("ai_tidak_tersedia");
+    expect(fetch).not.toHaveBeenCalled();
+    expect(peringatan).toHaveBeenCalledWith(expect.stringContaining("GROQ_API_KEY"));
+    expect(JSON.stringify(peringatan.mock.calls)).not.toContain("PENANDA-RAHASIA");
+    vi.unstubAllGlobals();
   });
 });

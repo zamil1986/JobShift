@@ -11,7 +11,8 @@ import { penilaiGroqDariEnv } from "@/cek/groq";
 
 // Route tipis: parse JSON → cek() → JSON. Tidak ada logika penilaian di sini,
 // dan isi Teks tidak pernah ditulis ke log (NFR-01). Adapter Groq dibuat dari
-// GROQ_API_KEY di env server; tanpa key, Cek dinilai Aturan saja.
+// GROQ_API_KEY di env server; tanpa key, Cek dinilai Aturan saja dengan
+// catatanAI.
 
 const BodyCek = z.object({ teks: z.string() });
 

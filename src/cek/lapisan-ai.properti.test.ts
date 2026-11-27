@@ -135,7 +135,13 @@ describe("cek: properti lapisan AI (ADR-0001)", () => {
   it("AI sendirian tidak pernah membuat Bahaya dengan katalog asli, walaupun AI menjawab bahaya", async () => {
     const teks =
       "Dibutuhkan staf administrasi untuk kantor cabang di Bandung. Gaji dibayar mingguan lewat kantor pusat, kirim CV ke HRD.";
-    const kutipan = ["staf", "administrasi", "kantor cabang", "Bandung", "Gaji dibayar mingguan"];
+    const kutipan = [
+      "Dibutuhkan staf",
+      "administrasi untuk",
+      "kantor cabang",
+      "di Bandung",
+      "Gaji dibayar mingguan",
+    ];
     const hasil = await cek(teks, {
       ai: penilaiPalsu({
         label: "bahaya",

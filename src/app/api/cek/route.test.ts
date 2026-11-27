@@ -78,6 +78,8 @@ describe("POST /api/cek", () => {
       },
       langkahDarurat: null,
       sumberPenilaian: "aturan",
+      // Tes ini berjalan tanpa GROQ_API_KEY (lihat beforeEach).
+      catatanAI: "ai_tidak_tersedia",
     });
   });
 
@@ -184,13 +186,14 @@ describe("POST /api/cek dengan Groq", () => {
     expect(await res.json()).toMatchObject({ sumberPenilaian: "aturan", catatanAI: "ai_tidak_tersedia" });
   });
 
-  it("tanpa GROQ_API_KEY tidak memanggil jaringan dan dinilai Aturan saja", async () => {
+  it("tanpa GROQ_API_KEY tidak memanggil jaringan, dinilai Aturan saja, dan memberi catatanAI", async () => {
     const fetch = vi.fn();
     vi.stubGlobal("fetch", fetch);
+    vi.spyOn(console, "warn").mockImplementation(() => {});
 
     const hasil = await (await kirim(JSON.stringify({ teks: TEKS_LOWONGAN }))).json();
 
     expect(fetch).not.toHaveBeenCalled();
-    expect(hasil.sumberPenilaian).toBe("aturan");
+    expect(hasil).toMatchObject({ sumberPenilaian: "aturan", catatanAI: "ai_tidak_tersedia" });
   });
 });

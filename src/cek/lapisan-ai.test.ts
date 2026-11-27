@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cek } from "@/cek";
 import { penilaiPalsu, penilaiPerekam } from "@/cek/ai";
 import type { PenilaiAI } from "@/cek";
+import { buatCek } from "@/cek/cek";
 
 const DATA_PRIBADI = [
   "hrd.rekrutmen@gmail.com",
@@ -258,12 +259,19 @@ describe("cek: Tanda bahaya AI yang sah", () => {
   });
 
   it("hanya membaca 5 butir pertama", async () => {
-    const kutipan = ["staf", "administrasi", "kantor", "cabang", "Bandung", "mingguan"];
+    const kutipan = [
+      "Dibutuhkan staf",
+      "administrasi untuk",
+      "kantor cabang",
+      "di Bandung",
+      "Gaji dibayar",
+      "kirim CV",
+    ];
     const hasil = await cek(TEKS_NETRAL, {
       ai: penilaiPalsu(jawabanAI(kutipan.map((k) => butir(k)))),
     });
 
-    expect(hasil.tandaBahaya.map((t) => t.kutipan)).not.toContain("mingguan");
+    expect(hasil.tandaBahaya.map((t) => t.kutipan)).not.toContain("kirim CV");
     expect(hasil.tandaBahaya).toHaveLength(5);
   });
 
@@ -306,6 +314,10 @@ describe("cek: butir AI yang dibuang", () => {
     ["kutipannya tidak ada di Teks", butir("transfer deposit dulu")],
     ["kutipannya kosong", butir("")],
     ["kutipannya hanya spasi", butir("   ")],
+    ["kutipannya satu huruf", butir("a")],
+    ["kutipannya hanya tanda baca", butir(".")],
+    ["kutipannya hanya satu kata", butir("kantor")],
+    ["kutipannya satu kata dengan tanda baca", butir("Bandung.")],
     ["alasannya kosong", butir("kantor cabang", "  ")],
     ["alasannya memuat kata terlarang", butir("kantor cabang", "Lowongan ini tampak aman.")],
   ])("membuang butir yang %s", async (_nama, b) => {
@@ -328,7 +340,7 @@ describe("cek: butir AI yang dibuang", () => {
   });
 
   it("membuang butir yang kutipannya hanya cocok di dalam penanda", async () => {
-    const hasil = await cek(TEKS_BERNOMOR, { ai: penilaiPalsu(jawabanAI([butir("NOMOR")])) });
+    const hasil = await cek(TEKS_BERNOMOR, { ai: penilaiPalsu(jawabanAI([butir("NOMOR sekarang")])) });
 
     expect(hasil.tandaBahaya).toEqual([]);
   });
@@ -377,7 +389,7 @@ describe("cek: butir AI yang dibuang", () => {
 
   it("membuang butir yang beririsan dengan butir AI sebelumnya", async () => {
     const hasil = await cek(TEKS_NETRAL, {
-      ai: penilaiPalsu(jawabanAI([butir("kantor cabang di Bandung"), butir("cabang")])),
+      ai: penilaiPalsu(jawabanAI([butir("kantor cabang di Bandung"), butir("cabang di")])),
     });
 
     expect(hasil.tandaBahaya.map((t) => t.kutipan)).toEqual(["kantor cabang di Bandung"]);
@@ -404,7 +416,9 @@ describe("cek: butir AI yang dibuang", () => {
     const hasil = await cek(TEKS_NETRAL, {
       ai: penilaiPalsu(
         jawabanAI(
-          ["staf", "administrasi", "kantor", "cabang", "Bandung"].map((k) => butir(k)),
+          ["Dibutuhkan staf", "administrasi untuk", "kantor cabang", "di Bandung", "Gaji dibayar"].map(
+            (k) => butir(k),
+          ),
           "bahaya",
         ),
       ),
@@ -472,6 +486,42 @@ describe("cek: Penjelasan AI", () => {
     });
 
     expect(hasil.penjelasan).toBe(penjelasan);
+  });
+
+  describe("Risiko rendah yang tetap memuat Tanda bahaya memakai templat (tiket 08)", () => {
+    const TEMPLAT_ADA_TANDA =
+      "Ada tanda bahaya kecil di teks ini, tapi belum cukup kuat untuk dinilai Waspada.";
+    const penjelasanMenyangkal = "Tidak ditemukan tanda bahaya di teks ini.";
+
+    it("Tanda bahaya dari Aturan", async () => {
+      const cekUji = buatCek([
+        {
+          id: "U1",
+          alasan: "Alasan uji.",
+          bobot: 10,
+          kritis: false,
+          pakaiPenyangkal: false,
+          pola: [{ cari: "mingguan", bahasa: "id" }],
+        },
+      ]);
+
+      const hasil = await cekUji(TEKS_NETRAL, {
+        ai: penilaiPalsu(jawabanAI([], "risiko_rendah", penjelasanMenyangkal)),
+      });
+
+      expect(hasil.label).toBe("risiko_rendah");
+      expect(hasil.penjelasan).toBe(TEMPLAT_ADA_TANDA);
+    });
+
+    it("Tanda bahaya dari AI", async () => {
+      const hasil = await cek(TEKS_NETRAL, {
+        ai: penilaiPalsu(jawabanAI([butir("kantor cabang")], "risiko_rendah", penjelasanMenyangkal)),
+      });
+
+      expect(hasil.label).toBe("risiko_rendah");
+      expect(hasil.tandaBahaya).toHaveLength(1);
+      expect(hasil.penjelasan).toBe(TEMPLAT_ADA_TANDA);
+    });
   });
 
   it("tidak dipakai kalau AI gagal", async () => {

@@ -13,6 +13,13 @@ import type { TandaBahaya } from "./tipe";
 export const BOBOT_TANDA_AI = 10;
 /** Jumlah butir `tanda_bahaya` yang dibaca; sisanya diabaikan. */
 const BUTIR_DIBACA = 5;
+/**
+ * Kutipan paling sedikit 2 kata, supaya setiap poin Skor bisa ditunjuk ke
+ * potongan kalimat yang bermakna (ADR-0001), bukan satu huruf atau tanda baca.
+ */
+const KATA_KUTIPAN_MIN = 2;
+
+const jumlahKata = (teks: string) => teks.match(/[\p{L}\p{N}]+/gu)?.length ?? 0;
 
 type Rentang = [number, number];
 
@@ -46,7 +53,8 @@ export function tandaBahayaAI(
     if (!alasanBersih || memuatKataTerlarang(alasanBersih)) continue;
 
     const cari = kutipanNormal(kutipan);
-    if (!cari || PENANDA.test(cari) || !tersamar.includes(cari)) continue;
+    if (jumlahKata(cari) < KATA_KUTIPAN_MIN || PENANDA.test(cari)) continue;
+    if (!tersamar.includes(cari)) continue;
 
     const dari = asli.teks.indexOf(cari);
     if (dari === -1) continue;
