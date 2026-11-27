@@ -1,11 +1,12 @@
 "use client";
 
-import { useId, useState, type FormEvent } from "react";
+import { useId, useRef, useState, type FormEvent } from "react";
 import { PANJANG_MAKS, panjangTeks, periksaPanjang } from "@/cek/panjang";
 import { PESAN_ERROR, PESAN_GAGAL_SERVER } from "@/cek/pesan";
 import type { ErrorCek, HasilCek } from "@/cek/tipe";
 import { DISCLAIMER_PRIVASI, PESAN_GAGAL_KONEKSI } from "./salinan";
 import { TampilanHasil } from "./TampilanHasil";
+import { UnggahScreenshot } from "./UnggahScreenshot";
 
 const angka = new Intl.NumberFormat("id-ID");
 
@@ -14,6 +15,8 @@ export function FormCek() {
   const [galat, setGalat] = useState<string | null>(null);
   const [memuat, setMemuat] = useState(false);
   const [cekTerakhir, setCekTerakhir] = useState<{ hasil: HasilCek; teks: string } | null>(null);
+  const [ocrSibuk, setOcrSibuk] = useState(false);
+  const kotak = useRef<HTMLTextAreaElement>(null);
 
   const idKotak = useId();
   const idPenghitung = useId();
@@ -65,6 +68,7 @@ export function FormCek() {
           Tempel teks lowongan di sini
         </label>
         <textarea
+          ref={kotak}
           id={idKotak}
           name="teks"
           value={teks}
@@ -82,13 +86,24 @@ export function FormCek() {
           {angka.format(panjang)} / {angka.format(PANJANG_MAKS)} karakter
         </p>
 
+        <UnggahScreenshot
+          teks={teks}
+          onSibuk={setOcrSibuk}
+          onTeks={(hasilOcr) => {
+            // Hasil OCR menggantikan isi kotak dan tidak dipotong; pengguna memeriksanya dulu.
+            setTeks(hasilOcr);
+            setGalat(null);
+            kotak.current?.focus();
+          }}
+        />
+
         {galat && (
           <p id={idGalat} className="galat" role="alert">
             {galat}
           </p>
         )}
 
-        <button type="submit" className="tombol-cek" disabled={panjang === 0 || memuat}>
+        <button type="submit" className="tombol-cek" disabled={panjang === 0 || memuat || ocrSibuk}>
           {memuat ? "Mengecek…" : "Cek"}
         </button>
         <p className="disclaimer">{DISCLAIMER_PRIVASI}</p>

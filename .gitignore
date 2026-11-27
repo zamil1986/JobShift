@@ -20,6 +20,9 @@
 # production
 /build
 
+# aset OCR, disalin dari node_modules oleh scripts/salin-tesseract.mjs
+/public/tesseract/
+
 # misc
 .DS_Store
 *.pem

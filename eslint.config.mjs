@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Aset OCR yang disalin dari node_modules oleh scripts/salin-tesseract.mjs.
+    "public/tesseract/**",
   ]),
 ]);
 
