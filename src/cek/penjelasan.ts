@@ -11,6 +11,14 @@ export const PENJELASAN_LABEL: Record<Label, string> = {
   bahaya: "Teks ini memuat tanda bahaya kuat yang sering dipakai penipu lowongan kerja.",
 };
 
+/**
+ * Pengganti kalimat Risiko rendah kalau ada Tanda bahaya (Skor < 25), supaya
+ * Penjelasan tidak mengatakan "tidak ditemukan" padahal daftarnya berisi, dan
+ * tetap tidak menyiratkan risiko yang lebih tinggi dari Label.
+ */
+export const PENJELASAN_RISIKO_RENDAH_ADA_TANDA =
+  "Ada tanda bahaya kecil di teks ini, tapi belum cukup kuat untuk dinilai Waspada.";
+
 /** Ditulis netral supaya bisa berdiri di bawah Label apa pun. */
 export const PENJELASAN_MODUS: Record<Modus, string> = {
   tugas:
@@ -21,8 +29,20 @@ export const PENJELASAN_MODUS: Record<Modus, string> = {
     "Ada ciri yang mirip Modus Luar negeri, yaitu tawaran kerja ke luar negeri di luar jalur penempatan resmi.",
 };
 
-/** Penjelasan templat untuk Label akhir dan Modus terkuat. */
-export function penjelasanTemplat(label: Label, modusTerkuat: Modus | null): string {
-  const kalimatLabel = PENJELASAN_LABEL[label];
+/**
+ * Penjelasan templat untuk Label akhir dan Modus terkuat.
+ *
+ * @param adaTandaBahaya true kalau hasil memuat Tanda bahaya atau Tanda bahaya
+ *   tersirat; hanya mengubah kalimat Risiko rendah.
+ */
+export function penjelasanTemplat(
+  label: Label,
+  modusTerkuat: Modus | null,
+  adaTandaBahaya: boolean,
+): string {
+  const kalimatLabel =
+    label === "risiko_rendah" && adaTandaBahaya
+      ? PENJELASAN_RISIKO_RENDAH_ADA_TANDA
+      : PENJELASAN_LABEL[label];
   return modusTerkuat ? `${kalimatLabel} ${PENJELASAN_MODUS[modusTerkuat]}` : kalimatLabel;
 }

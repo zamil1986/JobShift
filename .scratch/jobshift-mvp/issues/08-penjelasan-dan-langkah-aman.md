@@ -23,4 +23,4 @@
 - Nomor 157, 0800-1000, dan 0811-8080-141 ditulis di teks, bukan tautan `tel:`/`wa.me`.
 - Judul bagian di UI "Langkah berikutnya", karena "Langkah aman" memuat kata terlarang.
 - Cek URL otomatis (curl, 2026-11-27): karirhub.kemnaker.go.id, iasc.ojk.go.id, dan migran-aman.kp2mi.go.id/cek-legalitas menjawab 200 tanpa redirect ke domain lain. aduankonten.id menjawab tantangan Cloudflare (403), jadi **belum terverifikasi**: perlu dibuka manual di browser.
-- Catatan: Risiko rendah dengan Modus (Skor < 25) menghasilkan "Tidak ditemukan tanda bahaya di teks ini. Ada ciri yang mirip Modus …", yang agak bertentangan. Kalimat Label Risiko rendah belum diubah.
+- Risiko rendah yang memuat Tanda bahaya (Skor < 25) memakai kalimat "Ada tanda bahaya kecil di teks ini, tapi belum cukup kuat untuk dinilai Waspada." alih-alih "Tidak ditemukan tanda bahaya di teks ini." Peringatan FR-06 ("Tidak ditemukan tanda bahaya, tapi ini bukan jaminan…") tetap teks persis PRD dan tidak diubah, jadi untuk kasus ini masih bertentangan; perlu keputusan PRD.

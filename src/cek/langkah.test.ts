@@ -221,6 +221,24 @@ describe("cek: Penjelasan templat", () => {
     );
   });
 
+  it("Risiko rendah dengan Tanda bahaya kecil tidak mengatakan bahwa tanda bahaya tidak ditemukan", async () => {
+    const hasil = await cekUji(teksDengan("pemiculuarkecil"));
+
+    expect(hasil.label).toBe("risiko_rendah");
+    expect(hasil.tandaBahaya).toHaveLength(1);
+    expect(hasil.penjelasan).not.toMatch(/tidak ditemukan tanda bahaya/i);
+    expect(hasil.penjelasan).toMatch(/tanda bahaya/i);
+    expect(hasil.penjelasan).toMatch(/Modus Luar negeri/);
+  });
+
+  it("Risiko rendah dengan Tanda bahaya tanpa Modus tetap satu kalimat", async () => {
+    const hasil = await cekUji(teksDengan("pemicukecil"));
+
+    expect(hasil.label).toBe("risiko_rendah");
+    expect(hasil.penjelasan).not.toMatch(/tidak ditemukan tanda bahaya/i);
+    expect(jumlahKalimat(hasil.penjelasan)).toBe(1);
+  });
+
   it("menambah satu kalimat untuk Modus terkuat setelah kalimat Label", async () => {
     const hasil = await cek(TEKS_BIAYA_SERAGAM);
 

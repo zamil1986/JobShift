@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 import { memuatKataTerlarang } from "@/cek";
 import { KATALOG } from "@/cek/aturan/katalog";
 import { SEMUA_LANGKAH } from "@/cek/langkah";
-import { PENJELASAN_LABEL, PENJELASAN_MODUS } from "@/cek/penjelasan";
+import {
+  PENJELASAN_LABEL,
+  PENJELASAN_MODUS,
+  PENJELASAN_RISIKO_RENDAH_ADA_TANDA,
+} from "@/cek/penjelasan";
 import { TAGLINE, TAMPILAN_LABEL } from "@/ui/salinan";
 
 describe("memuatKataTerlarang", () => {
@@ -37,6 +41,7 @@ describe("copy statis hasil tidak memuat kata terlarang", () => {
   const copy: [string, string][] = [
     ...Object.entries(TAMPILAN_LABEL).map(([k, v]) => [`Label ${k}`, v.kata] as [string, string]),
     ...Object.entries(PENJELASAN_LABEL).map(([k, v]) => [`Penjelasan Label ${k}`, v] as [string, string]),
+    ["Penjelasan Risiko rendah dengan Tanda bahaya", PENJELASAN_RISIKO_RENDAH_ADA_TANDA],
     ...Object.entries(PENJELASAN_MODUS).map(([k, v]) => [`Penjelasan Modus ${k}`, v] as [string, string]),
     ...KATALOG.map((a) => [`alasan ${a.id}`, a.alasan] as [string, string]),
     ...SEMUA_LANGKAH.flatMap((l) => [

@@ -55,7 +55,11 @@ function nilai(teks: string, katalog: readonly Aturan[]): HasilCek {
     tandaBahayaTersirat,
     modus,
     modusTerkuat,
-    penjelasan: penjelasanTemplat(label, modusTerkuat),
+    penjelasan: penjelasanTemplat(
+      label,
+      modusTerkuat,
+      tandaBahaya.length + tandaBahayaTersirat.length > 0,
+    ),
     langkahAman: langkahAman(label, modus),
     langkahDarurat: langkahDarurat(label),
     sumberPenilaian: "aturan",
