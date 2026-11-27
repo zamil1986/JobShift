@@ -64,8 +64,7 @@ export const LANGKAH_MODUS: Record<Modus, Langkah[]> = {
       teks: "Perusahaan sungguhan tidak meminta biaya seragam, medical, atau pelatihan sebelum kamu diterima kerja.",
     },
     {
-      teks: "Cek apakah lowongan yang sama juga diumumkan di Karirhub Kemnaker atau situs resmi perusahaannya.",
-      tautan: KARIRHUB,
+      teks: "Kalau lowongan memakai nama perusahaan besar, cek di situs resmi perusahaan itu apakah lowongannya benar ada.",
     },
   ],
   luar_negeri: [
@@ -99,13 +98,21 @@ const LANGKAH_DARURAT: NonNullable<HasilCek["langkahDarurat"]> = {
   ],
 };
 
-/** Langkah aman untuk Label akhir dan Modus terkuat. */
-export function langkahAman(label: Label, modusTerkuat: Modus | null): HasilCek["langkahAman"] {
-  return {
-    // Salinan, supaya pemakai hasil tidak bisa mengubah tabel statis.
-    umum: [...LANGKAH_UMUM[label]],
-    spesifik: modusTerkuat ? [...LANGKAH_MODUS[modusTerkuat]] : [],
-  };
+/**
+ * Langkah aman untuk Label akhir. Langkah spesifik mengikuti Modus terkuat,
+ * dan kanal KP2MI selalu ditambahkan setiap kali Modus Luar negeri terdeteksi
+ * walaupun bukan yang terkuat (spec, user story 25).
+ *
+ * @param modus Semua Modus yang cocok, urut jumlah bobot (elemen pertama = Modus terkuat).
+ */
+export function langkahAman(label: Label, modus: readonly Modus[]): HasilCek["langkahAman"] {
+  const modusTerkuat = modus[0];
+  const spesifik = modusTerkuat ? [...LANGKAH_MODUS[modusTerkuat]] : [];
+  if (modusTerkuat !== "luar_negeri" && modus.includes("luar_negeri")) {
+    spesifik.push(...LANGKAH_MODUS.luar_negeri);
+  }
+  // Array baru per hasil, supaya hasil yang berbeda tidak berbagi array.
+  return { umum: [...LANGKAH_UMUM[label]], spesifik };
 }
 
 /** Langkah darurat untuk Waspada dan Bahaya; null untuk Risiko rendah. */

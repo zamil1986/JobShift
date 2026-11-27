@@ -17,7 +17,9 @@
 
 **2026-11-27, implementasi:**
 - Data statis di `src/cek/langkah.ts`, Penjelasan di `src/cek/penjelasan.ts`, filter `memuatKataTerlarang` diekspor dari `@/cek` untuk tiket 10.
-- Langkah spesifik mengikuti Modus terkuat untuk semua Label, termasuk Risiko rendah. Kanal KP2MI muncul kalau Modus terkuatnya Luar negeri, bukan setiap kali Luar negeri ada di daftar Modus.
+- Langkah spesifik mengikuti Modus terkuat untuk semua Label, termasuk Risiko rendah. Kanal KP2MI (cek legalitas, 0800-1000, WA 0811-8080-141) ditambahkan setiap kali Modus Luar negeri terdeteksi, walaupun bukan yang terkuat (user story 25).
+- URL Karirhub dan aduankonten.id tidak ada di spec/docs/research; dipakai root domain dari nama kanal di spec dan mockup proposal. Perlu dicatat di docs/research bila disetujui.
+- Filter kata terlarang mengecualikan semua domain `*.go.id`, aduankonten.id, dan nama layanan "Migran Aman"; domain lain (misalnya domain penipu) tidak dikecualikan.
 - Nomor 157, 0800-1000, dan 0811-8080-141 ditulis di teks, bukan tautan `tel:`/`wa.me`.
 - Judul bagian di UI "Langkah berikutnya", karena "Langkah aman" memuat kata terlarang.
 - Cek URL otomatis (curl, 2026-11-27): karirhub.kemnaker.go.id, iasc.ojk.go.id, dan migran-aman.kp2mi.go.id/cek-legalitas menjawab 200 tanpa redirect ke domain lain. aduankonten.id menjawab tantangan Cloudflare (403), jadi **belum terverifikasi**: perlu dibuka manual di browser.

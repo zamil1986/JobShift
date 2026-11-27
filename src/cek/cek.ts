@@ -56,7 +56,7 @@ function nilai(teks: string, katalog: readonly Aturan[]): HasilCek {
     modus,
     modusTerkuat,
     penjelasan: penjelasanTemplat(label, modusTerkuat),
-    langkahAman: langkahAman(label, modusTerkuat),
+    langkahAman: langkahAman(label, modus),
     langkahDarurat: langkahDarurat(label),
     sumberPenilaian: "aturan",
   };

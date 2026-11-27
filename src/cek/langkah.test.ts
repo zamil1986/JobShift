@@ -108,6 +108,24 @@ describe("cek: Langkah aman spesifik sesuai Modus terkuat", () => {
     expect(urlDi(hasil.langkahAman.spesifik)).toContain("https://migran-aman.kp2mi.go.id/cek-legalitas");
   });
 
+  it("tetap memuat kanal KP2MI kalau Modus Luar negeri terdeteksi walaupun bukan Modus terkuat", async () => {
+    const hasil = await cekUji(teksDengan("pemiculokal", "pemiculuarkecil"));
+
+    expect(hasil.modusTerkuat).toBe("lokal");
+    expect(hasil.modus).toContain("luar_negeri");
+    expect(teksDi(hasil.langkahAman.spesifik)).toMatch(/seragam/i);
+    expect(urlDi(hasil.langkahAman.spesifik)).toContain("https://migran-aman.kp2mi.go.id/cek-legalitas");
+    expect(teksDi(hasil.langkahAman.spesifik)).toContain("0800-1000");
+    expect(teksDi(hasil.langkahAman.spesifik)).toContain("0811-8080-141");
+  });
+
+  it("tidak menampilkan tautan yang sama dua kali di Langkah aman", async () => {
+    const hasil = await cek(TEKS_BIAYA_SERAGAM);
+    const url = urlDi([...hasil.langkahAman.umum, ...hasil.langkahAman.spesifik]);
+
+    expect(url).toEqual([...new Set(url)]);
+  });
+
   it("Modus Tugas memperingatkan soal deposit, tanpa kanal KP2MI", async () => {
     const hasil = await cekUji(teksDengan("pemicutugas"));
 

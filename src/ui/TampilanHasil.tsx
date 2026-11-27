@@ -132,8 +132,9 @@ export function TampilanHasil({ hasil, teks }: Props) {
 function DaftarLangkah({ langkah }: { langkah: Langkah[] }) {
   return (
     <ul className="daftar">
-      {langkah.map((l) => (
-        <li key={l.teks}>
+      {/* Daftar statis yang tidak pernah diurutkan ulang, jadi indeks cukup sebagai key. */}
+      {langkah.map((l, i) => (
+        <li key={i}>
           {l.tautan ? (
             <>
               <a href={l.tautan.url} target="_blank" rel="noopener noreferrer">
