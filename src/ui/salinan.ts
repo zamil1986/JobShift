@@ -13,6 +13,10 @@ export const PERINGATAN_RISIKO_RENDAH =
 export const DISCLAIMER_PRIVASI =
   "JobShift tidak menyimpan teks yang kamu tempel. Teks hanya dipakai untuk satu kali cek ini.";
 
+/** Tampil kalau `catatanAI` ada: AI timeout, gagal, atau jawabannya tidak bisa dipakai. */
+export const CATATAN_AI_TIDAK_TERSEDIA =
+  "Penilaian AI sedang tidak tersedia, jadi hasil ini hanya dari pemeriksaan aturan JobShift.";
+
 export const PESAN_GAGAL_KONEKSI =
   "Cek gagal karena koneksi terputus. Periksa internet kamu, lalu coba lagi.";
 

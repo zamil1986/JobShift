@@ -3,7 +3,12 @@
 // "legit", atau "terpercaya" (spec, "Penjelasan dan kata terlarang"). Setiap
 // bagian tepat satu kalimat: jangan pakai titik di tengah (misalnya "Rp250.000").
 
+import { memuatKataTerlarang } from "./kata-terlarang";
+import { PENANDA } from "./penyamaran";
 import type { Label, Modus } from "./tipe";
+
+/** Penjelasan paling banyak 3 kalimat (spec, "Kontrak HasilCek"). */
+const KALIMAT_MAKS = 3;
 
 export const PENJELASAN_LABEL: Record<Label, string> = {
   risiko_rendah: "Tidak ditemukan tanda bahaya di teks ini.",
@@ -45,4 +50,24 @@ export function penjelasanTemplat(
       ? PENJELASAN_RISIKO_RENDAH_ADA_TANDA
       : PENJELASAN_LABEL[label];
   return modusTerkuat ? `${kalimatLabel} ${PENJELASAN_MODUS[modusTerkuat]}` : kalimatLabel;
+}
+
+/**
+ * Jumlah kalimat: dipisah titik, tanda tanya, atau tanda seru yang diikuti
+ * spasi atau akhir teks, jadi titik di dalam "Rp8.000.000" tidak dihitung.
+ */
+const jumlahKalimat = (teks: string) => teks.split(/(?<=[.!?])(?:\s+|$)/u).filter(Boolean).length;
+
+/**
+ * Penjelasan AI yang boleh menggantikan templat, atau null (spec, "Penjelasan
+ * dan kata terlarang"; ADR-0001). Syaratnya: label versi AI sama dengan Label
+ * akhir, tidak kosong, ≤ 3 kalimat, tanpa kata terlarang, dan tanpa penanda
+ * Penyamaran (yang tidak bermakna bagi pengguna).
+ */
+export function penjelasanAI(penjelasan: string, labelAI: Label, labelAkhir: Label): string | null {
+  const bersih = penjelasan.trim();
+  if (labelAI !== labelAkhir || !bersih) return null;
+  if (jumlahKalimat(bersih) > KALIMAT_MAKS) return null;
+  if (memuatKataTerlarang(bersih) || PENANDA.test(bersih)) return null;
+  return bersih;
 }

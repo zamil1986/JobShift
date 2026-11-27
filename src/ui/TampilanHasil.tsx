@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { HasilCek, Langkah } from "@/cek/tipe";
 import {
+  CATATAN_AI_TIDAK_TERSEDIA,
   JUDUL_LANGKAH,
   JUDUL_LANGKAH_DARURAT,
   JUDUL_SUDAH_KIRIM_DATA,
@@ -58,6 +59,8 @@ export function TampilanHasil({ hasil, teks }: Props) {
       )}
 
       <p>{hasil.penjelasan}</p>
+
+      {hasil.catatanAI && <p className="disclaimer">{CATATAN_AI_TIDAK_TERSEDIA}</p>}
 
       {hasil.modus.length > 0 && (
         <p>

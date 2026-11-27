@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "./route";
 
 // Hanya untuk tes jalur 500: membuat cek() gagal tak terduga dengan error yang
@@ -8,8 +8,8 @@ vi.mock("@/cek", async (importOriginal) => {
   const asli = await importOriginal<typeof import("@/cek")>();
   return {
     ...asli,
-    cek: (teks: string) =>
-      gagalkanCek.aktif ? Promise.reject(new Error(`gagal menilai: ${teks}`)) : asli.cek(teks),
+    cek: (teks: string, opsi?: Parameters<typeof asli.cek>[1]) =>
+      gagalkanCek.aktif ? Promise.reject(new Error(`gagal menilai: ${teks}`)) : asli.cek(teks, opsi),
   };
 });
 
@@ -26,10 +26,36 @@ function kirim(body: string, contentType = "application/json") {
   );
 }
 
+beforeEach(() => {
+  // Tes route tidak pernah memanggil Groq sungguhan, walaupun shell punya API key.
+  vi.stubEnv("GROQ_API_KEY", "");
+});
+
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
   gagalkanCek.aktif = false;
 });
+
+/** Mengganti fetch global dengan respons Groq buatan, dan mengaktifkan GROQ_API_KEY. */
+function groqPalsu(respons: () => Response) {
+  vi.stubEnv("GROQ_API_KEY", "kunci-uji");
+  const fetch = vi.fn(async () => respons());
+  vi.stubGlobal("fetch", fetch);
+  return fetch;
+}
+
+const responsGroq = (keluaran: unknown) =>
+  Response.json({
+    id: "chatcmpl-uji",
+    object: "chat.completion",
+    created: 0,
+    model: "openai/gpt-oss-120b",
+    choices: [
+      { index: 0, finish_reason: "stop", message: { role: "assistant", content: JSON.stringify(keluaran) } },
+    ],
+  });
 
 describe("POST /api/cek", () => {
   it("menjawab 200 dengan HasilCek untuk Teks valid", async () => {
@@ -128,5 +154,43 @@ describe("POST /api/cek", () => {
     });
     expect(tulisan.length).toBeGreaterThan(0);
     expect(JSON.stringify(tulisan)).not.toContain("PENANDA-RAHASIA");
+  });
+});
+
+describe("POST /api/cek dengan Groq", () => {
+  it("menilai dengan Groq kalau GROQ_API_KEY ada", async () => {
+    const fetch = groqPalsu(() =>
+      responsGroq({
+        label: "risiko_rendah",
+        tanda_bahaya: [{ kutipan: "kantor cabang", alasan: "Alasan uji." }],
+        penjelasan: "Penjelasan uji.",
+      }),
+    );
+
+    const res = await kirim(JSON.stringify({ teks: TEKS_LOWONGAN }));
+    const hasil = await res.json();
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(hasil.sumberPenilaian).toBe("aturan+AI");
+    expect(hasil.tandaBahaya).toEqual([expect.objectContaining({ sumber: "ai", kutipan: "kantor cabang" })]);
+  });
+
+  it("menjawab 200 dengan catatanAI kalau Groq menolak (429)", async () => {
+    groqPalsu(() => Response.json({ error: { message: "rate limit" } }, { status: 429 }));
+
+    const res = await kirim(JSON.stringify({ teks: TEKS_LOWONGAN }));
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ sumberPenilaian: "aturan", catatanAI: "ai_tidak_tersedia" });
+  });
+
+  it("tanpa GROQ_API_KEY tidak memanggil jaringan dan dinilai Aturan saja", async () => {
+    const fetch = vi.fn();
+    vi.stubGlobal("fetch", fetch);
+
+    const hasil = await (await kirim(JSON.stringify({ teks: TEKS_LOWONGAN }))).json();
+
+    expect(fetch).not.toHaveBeenCalled();
+    expect(hasil.sumberPenilaian).toBe("aturan");
   });
 });

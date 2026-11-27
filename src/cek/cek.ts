@@ -1,13 +1,20 @@
-import { aiNonaktif } from "./ai";
 import { KATALOG } from "./aturan/katalog";
 import { jalankanAturan, type Aturan } from "./aturan/mesin";
+import { tandaBahayaAI } from "./gabung-ai";
 import { langkahAman, langkahDarurat } from "./langkah";
+import { panggilAI } from "./panggil-ai";
 import { periksaPanjang, TeksTidakValid } from "./panjang";
-import { penjelasanTemplat } from "./penjelasan";
+import { penjelasanAI, penjelasanTemplat } from "./penjelasan";
+import { samarkan } from "./penyamaran";
+import type { KeluaranAI } from "./skema-ai";
 import { hitungSkor, labelDariSkor, urutkanModus, urutkanTandaBahaya } from "./skor";
 import type { HasilCek, PenilaiAI } from "./tipe";
 
-export type OpsiCek = { ai: PenilaiAI };
+/**
+ * `ai` kosong: Cek dinilai Aturan saja, tanpa `catatanAI` (misalnya mode
+ * "aturan" di eval, atau server tanpa API key).
+ */
+export type OpsiCek = { ai?: PenilaiAI };
 
 export type FungsiCek = (teks: string, opsi?: OpsiCek) => Promise<HasilCek>;
 
@@ -18,30 +25,42 @@ export type FungsiCek = (teks: string, opsi?: OpsiCek) => Promise<HasilCek>;
  * "Testing Decisions"). Tidak diekspor dari `@/cek`.
  */
 export function buatCek(katalog: readonly Aturan[]): FungsiCek {
-  return async function cekDenganKatalog(teks, opsi = { ai: aiNonaktif }) {
-    // Belum dipakai: lapisan AI (tiket 10) yang akan memanggil adapter ini.
-    void opsi;
-    return nilai(teks, katalog);
+  return async function cekDenganKatalog(teks, opsi = {}) {
+    const kode = periksaPanjang(teks);
+    if (kode) throw new TeksTidakValid(kode);
+
+    // AI dipanggil lebih dulu supaya berjalan bersamaan dengan Aturan.
+    const teksTersamar = samarkan(teks);
+    const jawabanAI = opsi.ai ? panggilAI(opsi.ai, teksTersamar) : null;
+    // Aturan menilai Teks persis seperti diterima (tanpa trim), supaya
+    // `rentang` cocok dengan Teks yang disorot UI.
+    const tandaBahayaAturan = jalankanAturan(teks, katalog);
+
+    if (!jawabanAI) return nilai(tandaBahayaAturan, null);
+    const keluaranAI = await jawabanAI;
+    if (!keluaranAI) return { ...nilai(tandaBahayaAturan, null), catatanAI: "ai_tidak_tersedia" };
+    return nilai(tandaBahayaAturan, {
+      keluaran: keluaranAI,
+      tandaBahaya: tandaBahayaAI(teks, teksTersamar, keluaranAI, tandaBahayaAturan),
+    });
   };
 }
 
 /**
  * Satu-satunya pintu masuk penilaian (spec, "Modul"). Urutan langkahnya:
  * validasi panjang → Aturan → Penyamaran + AI → penyaringan AI → Skor, Label,
- * Modus → Penjelasan → Langkah aman. Lapisan AI belum ada.
+ * Modus → Penjelasan → Langkah aman.
  *
  * @throws {TeksTidakValid} kalau Teks kosong, < 50, atau > 3.000 karakter
  *   setelah trim.
  */
 export const cek: FungsiCek = buatCek(KATALOG);
 
-function nilai(teks: string, katalog: readonly Aturan[]): HasilCek {
-  const kode = periksaPanjang(teks);
-  if (kode) throw new TeksTidakValid(kode);
+/** Jawaban AI yang valid secara skema, beserta Tanda bahaya AI yang lolos penyaringan. */
+type PenilaianAI = { keluaran: KeluaranAI; tandaBahaya: HasilCek["tandaBahaya"] };
 
-  // Aturan menilai Teks persis seperti diterima (tanpa trim), supaya `rentang`
-  // cocok dengan Teks yang disorot UI.
-  const tandaBahaya = urutkanTandaBahaya(jalankanAturan(teks, katalog));
+function nilai(tandaBahayaAturan: HasilCek["tandaBahaya"], ai: PenilaianAI | null): HasilCek {
+  const tandaBahaya = urutkanTandaBahaya([...tandaBahayaAturan, ...(ai?.tandaBahaya ?? [])]);
   const tandaBahayaTersirat: HasilCek["tandaBahayaTersirat"] = [];
   const skor = hitungSkor(tandaBahaya, tandaBahayaTersirat);
   const label = labelDariSkor(skor);
@@ -55,13 +74,11 @@ function nilai(teks: string, katalog: readonly Aturan[]): HasilCek {
     tandaBahayaTersirat,
     modus,
     modusTerkuat,
-    penjelasan: penjelasanTemplat(
-      label,
-      modusTerkuat,
-      tandaBahaya.length + tandaBahayaTersirat.length > 0,
-    ),
+    penjelasan:
+      (ai && penjelasanAI(ai.keluaran.penjelasan, ai.keluaran.label, label)) ??
+      penjelasanTemplat(label, modusTerkuat, tandaBahaya.length + tandaBahayaTersirat.length > 0),
     langkahAman: langkahAman(label, modus),
     langkahDarurat: langkahDarurat(label),
-    sumberPenilaian: "aturan",
+    sumberPenilaian: ai ? "aturan+AI" : "aturan",
   };
 }

@@ -9,10 +9,17 @@ const AMBANG_BAHAYA = 60;
 /** Urutan pemecah seri Modus terkuat. */
 const URUTAN_SERI_MODUS: readonly Modus[] = ["luar_negeri", "lokal", "tugas"];
 
-/** Skor = min(100, Σ bobot). Bobot AI ditambahkan di tiket 10. */
+/** Batas total sumbangan Tanda bahaya AI (ADR-0001): AI sendirian tidak pernah sampai Bahaya. */
+export const SUMBANGAN_AI_MAKS = 25;
+
+const jumlahBobot = (daftar: readonly { bobot: number }[]) =>
+  daftar.reduce((jumlah, t) => jumlah + t.bobot, 0);
+
+/** Skor = min(100, Σ bobot Aturan + Σ bobot tersirat + min(25, Σ bobot AI)). */
 export function hitungSkor(tandaBahaya: TandaBahaya[], tersirat: TandaBahayaTersirat[]): number {
-  const total = [...tandaBahaya, ...tersirat].reduce((jumlah, t) => jumlah + t.bobot, 0);
-  return Math.min(SKOR_MAKS, total);
+  const aturan = jumlahBobot(tandaBahaya.filter((t) => t.sumber === "aturan"));
+  const ai = Math.min(SUMBANGAN_AI_MAKS, jumlahBobot(tandaBahaya.filter((t) => t.sumber === "ai")));
+  return Math.min(SKOR_MAKS, aturan + jumlahBobot(tersirat) + ai);
 }
 
 /** 0–24 Risiko rendah, 25–59 Waspada, ≥ 60 Bahaya. */
