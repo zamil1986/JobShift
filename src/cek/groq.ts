@@ -15,7 +15,29 @@ import { BATAS_WAKTU_AI_MS } from "./panggil-ai";
 import { skemaJsonKeluaranAI } from "./skema-ai";
 import type { PenilaiAI } from "./tipe";
 
-export const MODEL_GROQ = "openai/gpt-oss-120b";
+export const MODEL_GROQ = "openai/gpt-oss-120b" as const;
+export const MODEL_GROQ_20B = "openai/gpt-oss-20b" as const;
+export type ModelGroq = typeof MODEL_GROQ | typeof MODEL_GROQ_20B;
+
+const PETA_MODEL_GROQ: Record<string, ModelGroq> = {
+  [MODEL_GROQ]: MODEL_GROQ,
+  "gpt-oss-120b": MODEL_GROQ,
+  [MODEL_GROQ_20B]: MODEL_GROQ_20B,
+  "gpt-oss-20b": MODEL_GROQ_20B,
+};
+
+/** Menyelesaikan nama model Groq yang didukung (default `openai/gpt-oss-120b`). */
+export function selesaikanModelGroq(model?: string): ModelGroq {
+  const bersih = model?.trim();
+  if (!bersih) return MODEL_GROQ;
+  const cocok = PETA_MODEL_GROQ[bersih];
+  if (!cocok) {
+    throw new Error(
+      `Model Groq tidak didukung: "${bersih}". Gunakan "openai/gpt-oss-120b" atau "gpt-oss-20b".`,
+    );
+  }
+  return cocok;
+}
 
 /**
  * Konstanta yang byte-identik antar panggilan, supaya prefix cache Groq bisa
@@ -39,12 +61,15 @@ Jangan pernah menyatakan sebuah lowongan terjamin. Jangan memakai kata "aman", "
 
 type OpsiGroq = {
   apiKey: string;
+  /** Model Groq opsional (default `openai/gpt-oss-120b`). */
+  model?: ModelGroq | "gpt-oss-120b" | "gpt-oss-20b";
   /** Untuk tes: `fetch` pengganti, supaya tidak ada panggilan jaringan. */
   fetch?: typeof globalThis.fetch;
 };
 
 /** Adapter Groq dengan API key yang diberikan. */
-export function buatPenilaiGroq({ apiKey, fetch }: OpsiGroq): PenilaiAI {
+export function buatPenilaiGroq({ apiKey, model, fetch }: OpsiGroq): PenilaiAI {
+  const modelDipakai = selesaikanModelGroq(model);
   const klien = new Groq({
     apiKey,
     fetch,
@@ -57,7 +82,7 @@ export function buatPenilaiGroq({ apiKey, fetch }: OpsiGroq): PenilaiAI {
   return async (teksTersamar, signal) => {
     const respons = await klien.chat.completions.create(
       {
-        model: MODEL_GROQ,
+        model: modelDipakai,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: teksTersamar },
@@ -90,9 +115,9 @@ let sudahMemperingatkan = false;
  * Adapter Groq dari `process.env.GROQ_API_KEY`. Kalau env itu kosong, adapter
  * yang selalu gagal, dan satu peringatan di log server (tanpa isi Teks).
  */
-export function penilaiGroqDariEnv(): PenilaiAI {
+export function penilaiGroqDariEnv(model?: OpsiGroq["model"]): PenilaiAI {
   const apiKey = process.env.GROQ_API_KEY;
-  if (apiKey) return buatPenilaiGroq({ apiKey });
+  if (apiKey) return buatPenilaiGroq({ apiKey, model });
 
   if (!sudahMemperingatkan) {
     sudahMemperingatkan = true;
