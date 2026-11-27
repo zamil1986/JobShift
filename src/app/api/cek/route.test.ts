@@ -44,7 +44,12 @@ describe("POST /api/cek", () => {
       modus: [],
       modusTerkuat: null,
       penjelasan: "Tidak ditemukan tanda bahaya di teks ini.",
-      langkahAman: { umum: [], spesifik: [] },
+      langkahAman: {
+        umum: expect.arrayContaining([
+          expect.objectContaining({ tautan: expect.objectContaining({ domain: "karirhub.kemnaker.go.id" }) }),
+        ]),
+        spesifik: [],
+      },
       langkahDarurat: null,
       sumberPenilaian: "aturan",
     });

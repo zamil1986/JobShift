@@ -28,3 +28,9 @@ export const TAMPILAN_MODUS: Record<Modus, string> = {
   lokal: "Lokal",
   luar_negeri: "Luar negeri",
 };
+
+/** Judul bagian Langkah. "Langkah aman" sengaja tidak dipakai di UI karena memuat kata "aman". */
+export const JUDUL_LANGKAH = "Langkah berikutnya";
+export const JUDUL_LANGKAH_DARURAT = "Kalau sudah telanjur";
+export const JUDUL_SUDAH_TRANSFER = "Sudah telanjur transfer?";
+export const JUDUL_SUDAH_KIRIM_DATA = "Sudah telanjur kirim data?";

@@ -4,6 +4,7 @@
 
 export { cek, type OpsiCek } from "./cek";
 export { aiNonaktif } from "./ai";
+export { memuatKataTerlarang } from "./kata-terlarang";
 export { TeksTidakValid } from "./panjang";
 export { PESAN_ERROR, PESAN_GAGAL_SERVER } from "./pesan";
 export type * from "./tipe";

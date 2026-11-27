@@ -1,8 +1,17 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { HasilCek } from "@/cek/tipe";
-import { PERINGATAN_RISIKO_RENDAH, TAGLINE, TAMPILAN_LABEL, TAMPILAN_MODUS } from "./salinan";
+import type { HasilCek, Langkah } from "@/cek/tipe";
+import {
+  JUDUL_LANGKAH,
+  JUDUL_LANGKAH_DARURAT,
+  JUDUL_SUDAH_KIRIM_DATA,
+  JUDUL_SUDAH_TRANSFER,
+  PERINGATAN_RISIKO_RENDAH,
+  TAGLINE,
+  TAMPILAN_LABEL,
+  TAMPILAN_MODUS,
+} from "./salinan";
 import { TeksBersorotan } from "./TeksBersorotan";
 
 type Props = { hasil: HasilCek; teks: string };
@@ -83,6 +92,25 @@ export function TampilanHasil({ hasil, teks }: Props) {
         </section>
       )}
 
+      <section aria-labelledby="judul-langkah">
+        <h3 id="judul-langkah">{JUDUL_LANGKAH}</h3>
+        <DaftarLangkah langkah={[...hasil.langkahAman.umum, ...hasil.langkahAman.spesifik]} />
+      </section>
+
+      {hasil.langkahDarurat && (
+        <section aria-labelledby="judul-darurat">
+          <h3 id="judul-darurat">{JUDUL_LANGKAH_DARURAT}</h3>
+          <section aria-labelledby="judul-sudah-transfer">
+            <h4 id="judul-sudah-transfer">{JUDUL_SUDAH_TRANSFER}</h4>
+            <DaftarLangkah langkah={hasil.langkahDarurat.sudahTransfer} />
+          </section>
+          <section aria-labelledby="judul-sudah-kirim-data">
+            <h4 id="judul-sudah-kirim-data">{JUDUL_SUDAH_KIRIM_DATA}</h4>
+            <DaftarLangkah langkah={hasil.langkahDarurat.sudahKirimData} />
+          </section>
+        </section>
+      )}
+
       <section aria-labelledby="judul-teks">
         <h3 id="judul-teks">Teks yang dicek</h3>
         {hasil.tandaBahaya.length > 0 && (
@@ -93,5 +121,31 @@ export function TampilanHasil({ hasil, teks }: Props) {
 
       <p className="tagline-hasil">{TAGLINE}</p>
     </article>
+  );
+}
+
+/**
+ * Daftar Langkah. Teks Langkah bertautan menjadi teks tautannya, dan domain
+ * resmi selalu tampil di sampingnya sebagai teks biasa, supaya pengguna bisa
+ * mencocokkan alamat sebelum membuka (IASC sering ditiru situs palsu).
+ */
+function DaftarLangkah({ langkah }: { langkah: Langkah[] }) {
+  return (
+    <ul className="daftar">
+      {langkah.map((l) => (
+        <li key={l.teks}>
+          {l.tautan ? (
+            <>
+              <a href={l.tautan.url} target="_blank" rel="noopener noreferrer">
+                {l.teks}
+              </a>{" "}
+              ({l.tautan.domain})
+            </>
+          ) : (
+            l.teks
+          )}
+        </li>
+      ))}
+    </ul>
   );
 }

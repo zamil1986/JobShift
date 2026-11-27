@@ -1,6 +1,7 @@
 import { aiNonaktif } from "./ai";
 import { KATALOG } from "./aturan/katalog";
 import { jalankanAturan, type Aturan } from "./aturan/mesin";
+import { langkahAman, langkahDarurat } from "./langkah";
 import { periksaPanjang, TeksTidakValid } from "./panjang";
 import { penjelasanTemplat } from "./penjelasan";
 import { hitungSkor, labelDariSkor, urutkanModus, urutkanTandaBahaya } from "./skor";
@@ -27,7 +28,7 @@ export function buatCek(katalog: readonly Aturan[]): FungsiCek {
 /**
  * Satu-satunya pintu masuk penilaian (spec, "Modul"). Urutan langkahnya:
  * validasi panjang → Aturan → Penyamaran + AI → penyaringan AI → Skor, Label,
- * Modus → Penjelasan → Langkah aman. Lapisan AI dan Langkah aman belum ada.
+ * Modus → Penjelasan → Langkah aman. Lapisan AI belum ada.
  *
  * @throws {TeksTidakValid} kalau Teks kosong, < 50, atau > 3.000 karakter
  *   setelah trim.
@@ -45,6 +46,7 @@ function nilai(teks: string, katalog: readonly Aturan[]): HasilCek {
   const skor = hitungSkor(tandaBahaya, tandaBahayaTersirat);
   const label = labelDariSkor(skor);
   const modus = urutkanModus(tandaBahaya);
+  const modusTerkuat = modus[0] ?? null;
 
   return {
     label,
@@ -52,11 +54,10 @@ function nilai(teks: string, katalog: readonly Aturan[]): HasilCek {
     tandaBahaya,
     tandaBahayaTersirat,
     modus,
-    modusTerkuat: modus[0] ?? null,
-    penjelasan: penjelasanTemplat(label),
-    // Diisi di tiket 08.
-    langkahAman: { umum: [], spesifik: [] },
-    langkahDarurat: label === "risiko_rendah" ? null : { sudahTransfer: [], sudahKirimData: [] },
+    modusTerkuat,
+    penjelasan: penjelasanTemplat(label, modusTerkuat),
+    langkahAman: langkahAman(label, modusTerkuat),
+    langkahDarurat: langkahDarurat(label),
     sumberPenilaian: "aturan",
   };
 }
