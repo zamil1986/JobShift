@@ -1,5 +1,6 @@
 /* Tampilan JobShift (tiket 15). Alat bantu cek yang tenang dan jelas.
-   NFR-06/07: kontras teks ≥ 4,5:1, garis dan cincin fokus ≥ 3:1, huruf isi
+   NFR-06/07: kontras teks ≥ 4,5:1, bingkai kontrol dan cincin fokus ≥ 3:1
+   (garis hias seperti pembatas bagian dikecualikan WCAG 1.4.11), huruf isi
    ≥ 16 px, target sentuh ≥ 44 px, animasi hanya kalau gerak diizinkan,
    lebar mulai 360 px sampai proyektor.
 
@@ -14,20 +15,21 @@
   --warna-teks-redup: #4a5260;
   --warna-latar: #f5f3ee;
   --warna-permukaan: #ffffff;
-  --warna-permukaan-redup: #f5f3ee;
+  --warna-permukaan-redup: var(--warna-latar);
   --warna-garis: #747b86;
   --warna-garis-halus: #dcd8cf;
   --warna-aksen: #0d5c5c;
   --warna-aksen-tekan: #094545;
   --warna-aksen-teks: #ffffff;
   --warna-mati-latar: #dfe1e4;
-  --warna-mati-teks: #4a5260;
+  --warna-mati-teks: var(--warna-teks-redup);
   --warna-fokus: #0a58ca;
-  --warna-tautan: #0a58ca;
+  --warna-tautan: var(--warna-fokus);
   --warna-galat: #b0251b;
   --warna-sorotan-latar: #ffe08a;
-  --warna-sorotan-teks: #1b1f24;
-  --bayangan-kartu: 0 1px 2px rgb(27 31 36 / 6%), 0 4px 16px rgb(27 31 36 / 6%);
+  --warna-sorotan-teks: var(--warna-teks);
+  --bayangan-tinta: color-mix(in srgb, var(--warna-teks) 6%, transparent);
+  --bayangan-kartu: 0 1px 2px var(--bayangan-tinta), 0 4px 16px var(--bayangan-tinta);
 
   /* Label: warna + ikon + kata. Teks gelap di atas latar pucat. */
   --warna-rendah-teks: #1c4f8f;
@@ -39,9 +41,9 @@
 
   /* Peringatan tetap Risiko rendah: netral, tidak meminjam warna Waspada,
      supaya tidak terbaca sebagai Label kedua. */
-  --warna-peringatan-teks: #1b1f24;
-  --warna-peringatan-latar: #f5f3ee;
-  --warna-peringatan-garis: #1c4f8f;
+  --warna-peringatan-teks: var(--warna-teks);
+  --warna-peringatan-latar: var(--warna-latar);
+  --warna-peringatan-garis: var(--warna-rendah-teks);
 
   /* Jarak (skala 4 px) */
   --jarak-1: 0.25rem;
@@ -57,7 +59,6 @@
   --radius-kecil: 0.375rem;
   --radius: 0.625rem;
   --radius-besar: 1rem;
-  --radius-bulat: 999px;
 
   /* Garis */
   --tebal-garis-halus: 1px;
@@ -87,8 +88,9 @@
 
   /* Ukuran komponen */
   --target-min: 2.75rem;
-  --ikon-label: 2.75rem;
+  --ikon-label: var(--target-min);
   --lebar-halaman: 42rem;
+  --skala-proyektor: 112.5%;
   --lebar-tombol-min: 12rem;
   --tinggi-kotak-teks: 11rem;
   --tinggi-teks-asli: 16rem;
@@ -102,7 +104,7 @@
 /* Proyektor kelas dan layar lebar: semua ukuran rem ikut membesar. */
 @media (min-width: 64rem) {
   :root {
-    font-size: 112.5%;
+    font-size: var(--skala-proyektor);
   }
 }
 
@@ -318,8 +320,10 @@ textarea[aria-invalid="true"] {
   scroll-margin-top: var(--jarak-4);
 }
 
-/* Fokus dari skrip ke judul hasil tidak perlu cincin fokus. */
-.hasil h2:focus {
+/* Fokus dari skrip ke judul hasil: tanpa cincin untuk sentuh dan tetikus,
+   tapi pengguna keyboard (Enter di tombol Cek) tetap melihat ke mana fokus
+   pindah. */
+.hasil h2:focus:not(:focus-visible) {
   outline: none;
 }
 
