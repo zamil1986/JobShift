@@ -38,6 +38,36 @@ describe("cek: R04 Gaji tidak wajar untuk kerja dalam negeri", () => {
     for (const hasil of [titik, harian, inggris]) expect(tanda(hasil, "R04")?.modus).toBe("lokal");
   });
 
+  it("mengenali gaji bulanan tanpa kata gaji, seperti gaji harian", async () => {
+    const dapat = await cek(
+      "Kerja input data dari rumah, cukup modal HP. Kamu bisa dapat Rp15 juta per bulan tanpa target apa pun.",
+    );
+    const garisMiring = await cek(
+      "Dicari admin media sosial di Yogyakarta, lulusan SMA boleh. Penghasilan bisa 15.000.000/bulan, kerja santai.",
+    );
+    const sebulan = await cek(
+      "Lowongan packing barang di rumah, kerja 3 jam sehari. Hasilkan 20 jt sebulan, pendaftaran lewat WA saja.",
+    );
+
+    expect(tanda(dapat, "R04")?.kutipan).toBe("Rp15 juta per bulan");
+    expect(tanda(garisMiring, "R04")?.kutipan).toBe("15.000.000/bulan");
+    expect(tanda(sebulan, "R04")?.kutipan).toBe("20 jt sebulan");
+  });
+
+  it("tidak cocok untuk angka bulanan yang bukan bayaran", async () => {
+    const target = await cek(
+      "Dicari supervisor sales di Makassar untuk mengejar target penjualan Rp 100 juta per bulan bersama tim.",
+    );
+    const cicilan = await cek(
+      "Staf penagihan leasing di Palembang, bertugas memantau cicilan Rp20 juta per bulan dari nasabah korporat.",
+    );
+    const rentang = await cek(
+      "Kepala gudang di Cirebon wajib terbiasa mengelola omzet 10-20 juta per bulan dan stok barang harian.",
+    );
+
+    for (const hasil of [target, cicilan, rentang]) expect(tanda(hasil, "R04")).toBeUndefined();
+  });
+
   it("tidak cocok untuk gaji wajar atau angka besar yang bukan gaji", async () => {
     const bulanan = await cek(
       "Dibutuhkan admin gudang di Bekasi. Gaji Rp 8.000.000 per bulan, BPJS, dan THR. Kirim CV ke kantor kami.",

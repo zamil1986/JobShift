@@ -419,9 +419,10 @@ export const R05: Aturan = {
   ]),
 };
 
-// R04: angka besar juga muncul sebagai modal atau omzet, jadi nominal bulanan
-// harus langsung mengikuti kata gaji. Gaji harian ≥ Rp500 ribu sudah tidak
-// wajar sendirian. Gaji luar negeri dinilai R05, bukan R04.
+// R04: nominal cocok kalau langsung mengikuti kata gaji ("Gaji Rp15 juta"), atau
+// kalau diikuti satuan waktu ("Rp15 juta per bulan", "Rp500 ribu per hari"),
+// selama tidak didahului kata seperti omzet atau cicilan. Gaji luar negeri
+// dinilai R05, bukan R04.
 const KATA_GAJI = ["gaji", "penghasilan", "pendapatan", "upah", "salary", "income", "take home pay", "thp"].join("|");
 /** Angka di depan "juta" tidak boleh lanjutan angka lain: "Rp4,25 juta" bukan "25 juta". */
 const BUKAN_LANJUTAN_ANGKA = String.raw`(?<![\d.,])`;
@@ -435,10 +436,36 @@ const GAJI_BULANAN_TINGGI = [
 /** ≥ Rp500 ribu: "Rp500 ribu", "750rb", "Rp500.000", "Rp1 juta", "Rp1,5 jt". */
 const NOMINAL_HARIAN_TINGGI = String.raw`(?:rp\.? ?)?${BUKAN_LANJUTAN_ANGKA}(?:[5-9]\d{2} ?(?:ribu|rb|k)|[5-9]\d{2}${RIBUAN}|\d(?:[.,]\d+)? ?(?:juta|jt)|\d${RIBUAN}${RIBUAN})`;
 const PER_HARI = String.raw`(?: ?/ ?| (?:per|tiap|setiap) )(?:hari|day)|(?: )?(?:perhari|sehari)| a day| daily`;
+const PER_BULAN = String.raw`(?: ?/ ?| (?:per|tiap|setiap) )(?:bulan|bln|month)|(?: )?(?:perbulan|sebulan)| a month| monthly`;
 /** "Gaji 180 juta per tahun" setara 15 juta sebulan. */
 const BUKAN_PER_TAHUN = String.raw`(?!(?: ?/ ?| (?:per|tiap|setiap) )(?:tahun|year)| setahun| a year| per annum| annually)`;
-/** Uang harian yang bukan bayaran: "omzet Rp 5 juta per hari", "denda Rp500.000 per hari". Juga saat dicocokkan mulai dari angkanya. */
-const BUKAN_BAYARAN = String.raw`(?<!(?:${["omzet", "omset", "denda", "biaya", "sewa", "harga", "modal", "target", "penjualan", "transaksi"].join("|")}) (?:rp\.? ?)?)`;
+const BUKAN_BAYARAN_KATA = [
+  "omzet",
+  "omset",
+  "denda",
+  "biaya",
+  "sewa",
+  "harga",
+  "modal",
+  "target",
+  "penjualan",
+  "transaksi",
+  "cicilan",
+  "tagihan",
+  "anggaran",
+  "budget",
+  "pinjaman",
+  "kredit",
+  "plafon",
+  "premi",
+  "iuran",
+].join("|");
+/**
+ * Awal nominal tanpa kata gaji. Bukan uang lain ("omzet Rp 5 juta per hari",
+ * "cicilan Rp20 juta per bulan"), juga saat dicocokkan mulai dari angkanya,
+ * dan bukan ujung rentang ("omzet 10-20 juta" tidak cocok sebagai "20 juta").
+ */
+const AWAL_NOMINAL = String.raw`(?<!(?:${BUKAN_BAYARAN_KATA}) (?:rp\.? ?)?)(?<!\d ?(?:-|–|s/d|sampai|hingga|to) ?(?:rp\.? ?)?)`;
 
 export const R04: Aturan = {
   id: "R04",
@@ -450,8 +477,10 @@ export const R04: Aturan = {
   pola: [
     // "Gaji Rp15 juta", "gaji pokok 15.000.000", "salary up to 20 million"
     { cari: `(?:${KATA_GAJI})(?: (?:${KETERANGAN_GAJI}))*:? (?:${GAJI_BULANAN_TINGGI})${BUKAN_PER_TAHUN}`, bahasa: "id" },
+    // "bisa dapat Rp15 juta per bulan", "15.000.000/bulan"
+    { cari: `${AWAL_NOMINAL}(?:${GAJI_BULANAN_TINGGI})(?:${PER_BULAN})`, bahasa: "id" },
     // "Rp500 ribu per hari", "gaji harian 750rb"
-    { cari: `${BUKAN_BAYARAN}${NOMINAL_HARIAN_TINGGI}(?:${PER_HARI})`, bahasa: "id" },
+    { cari: `${AWAL_NOMINAL}${NOMINAL_HARIAN_TINGGI}(?:${PER_HARI})`, bahasa: "id" },
     { cari: `(?:gaji|upah) harian:? ${NOMINAL_HARIAN_TINGGI}`, bahasa: "id" },
     { cari: "high(?:ly)? (?:salary|income|pay(?:ing)?)", bahasa: "en" },
   ],
