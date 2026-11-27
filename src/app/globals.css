@@ -16,7 +16,7 @@
   --warna-latar: #f5f3ee;
   --warna-permukaan: #ffffff;
   --warna-permukaan-redup: var(--warna-latar);
-  --warna-garis: #747b86;
+  --warna-garis: #656b75;
   --warna-garis-halus: #dcd8cf;
   --warna-aksen: #0d5c5c;
   --warna-aksen-tekan: #094545;
@@ -460,7 +460,7 @@ textarea[aria-invalid="true"] {
    padding vertikal membuat area sentuh tiap baris ≥ 44 px tanpa mengubah
    tata letak. */
 .daftar-langkah {
-  gap: var(--jarak-4);
+  gap: var(--jarak-5);
   margin-top: var(--jarak-3);
 }
 
