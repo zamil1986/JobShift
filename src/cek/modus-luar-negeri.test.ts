@@ -55,11 +55,14 @@ describe("cek: R03 Kerja luar negeri dengan visa kunjungan atau wisata", () => {
     const pelanggan = await cek(
       "Agen perjalanan di Surabaya mencari staf CS untuk membantu pelanggan berangkat dengan visa turis ke Jepang.",
     );
+    const tamu = await cek(
+      "Staf travel bekerja melayani tamu yang berangkat dengan visa turis ke Jepang setiap musim liburan.",
+    );
     const bandara = await cek(
       "Petugas informasi bandara di Bali, bertugas membantu turis asing yang masuk dengan visa on arrival setiap hari.",
     );
 
-    for (const hasil of [travel, visaKerja, pelanggan, bandara]) {
+    for (const hasil of [travel, visaKerja, pelanggan, tamu, bandara]) {
       expect(tanda(hasil, "R03")).toBeUndefined();
       expect(hasil.label).toBe("risiko_rendah");
     }
@@ -134,6 +137,14 @@ describe("cek: R05 Gaji luar negeri tinggi tanpa syarat keahlian", () => {
     for (const hasil of [dalamNegeri, berpengalaman, gajiWajar, restoran]) expect(tanda(hasil, "R05")).toBeUndefined();
   });
 
+  it("tidak cocok untuk kalimat penyangkalan tentang gaji tinggi", async () => {
+    const hasil = await cek(
+      "Kerja di Jepang lewat P3MI resmi. Gaji tidak sampai 20 juta, dan peserta tanpa pengalaman wajib pelatihan dulu.",
+    );
+
+    expect(tanda(hasil, "R05")).toBeUndefined();
+  });
+
   it("tidak dibatalkan kalimat penyangkalan, karena bukan Aturan kritis", async () => {
     const hasil = await cek(
       "Kerja di Jepang tidak mungkin gaji 50 juta tanpa pengalaman. Waspadai tawaran seperti itu dan cek ke KP2MI.",
@@ -196,6 +207,15 @@ describe("cek: R12 Proses berangkat ke luar negeri cepat di luar jalur resmi", (
       expect(tanda(hasil, "R12")).toBeUndefined();
       expect(hasil.label).toBe("risiko_rendah");
     }
+  });
+
+  it("tidak cocok untuk kalimat penyangkalan tentang jalur cepat", async () => {
+    const hasil = await cek(
+      "Penempatan ke Taiwan lewat P3MI resmi. Kami tidak memberangkatkan pekerja secara kilat dan tidak mengurus paspor.",
+    );
+
+    expect(tanda(hasil, "R12")).toBeUndefined();
+    expect(hasil.skor).toBe(0);
   });
 
   it("tidak dibatalkan kalimat penyangkalan, karena bukan Aturan kritis", async () => {
@@ -264,6 +284,15 @@ describe("cek: R16 Negara tujuan rawan TPPO untuk kerja online", () => {
       expect(tanda(hasil, "R16")).toBeUndefined();
       expect(hasil.label).toBe("risiko_rendah");
     }
+  });
+
+  it("tidak cocok untuk kalimat penyangkalan tentang negara rawan", async () => {
+    const hasil = await cek(
+      "Kami tidak menempatkan pekerja di Kamboja atau Myanmar. Posisi yang dibuka hanya teknisi pabrik di Malaysia.",
+    );
+
+    expect(tanda(hasil, "R16")).toBeUndefined();
+    expect(hasil.skor).toBe(0);
   });
 
   it("tidak dibatalkan kalimat penyangkalan, karena bukan Aturan kritis", async () => {

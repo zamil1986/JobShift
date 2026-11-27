@@ -34,6 +34,8 @@ const DATA_RAHASIA = ["kode otp", "otp", "pin(?! lokasi| point| map)", "kata san
 // pola Indonesia, supaya "kirim no HP dan PIN" tetap tertangkap.
 const DATA_RAHASIA_EN = ["otp code", "verification code", "security code"].join("|");
 
+const DITANGGUNG_PERUSAHAAN = String.raw`(?! (?:ditanggung|disediakan|digratiskan|gratis)| dibayar(?:kan)? (?:oleh )?(?:perusahaan|kantor|pt))`;
+
 export const R01: Aturan = {
   id: "R01",
   alasan: "Meminta uang sebelum kamu resmi diterima kerja.",
@@ -42,7 +44,8 @@ export const R01: Aturan = {
   modus: "lokal",
   pakaiPenyangkal: true,
   pola: [
-    { cari: `(?:biaya|uang) ${daftar(JENIS_BIAYA)}`, bahasa: "id" },
+    // "Biaya seragam ditanggung perusahaan" bukan permintaan uang.
+    { cari: `(?:biaya|uang) ${daftar(JENIS_BIAYA)}${DITANGGUNG_PERUSAHAAN}`, bahasa: "id" },
     { cari: "(?:transfer|bayar|membayar) (?:dulu|terlebih dahulu|di awal|di muka)", bahasa: "id" },
     {
       cari: `${daftar("registration|training|uniform|administration|admin|processing|medical")} fees?`,
@@ -103,6 +106,10 @@ const KATA_SEKALIMAT = String.raw`\S*[^\s.!?]`;
  * ("komisi, lakukan top up"). Malas supaya kutipan sependek mungkin.
  */
 const celah = (n: number) => `[,;:]?(?: ${KATA_SEKALIMAT}){0,${n}}?`;
+
+/** Seperti `celah`, tetapi tidak melewati kata utuh dari `larangan`. */
+const celahTanpa = (n: number, larangan: string) =>
+  String.raw`[,;:]?(?: (?!(?:${larangan})(?![\p{L}\p{N}]))${KATA_SEKALIMAT}){0,${n}}?`;
 
 // R07 kritis, jadi kata tunggal ("deposit", "top up", "VIP") tidak cukup:
 // teller bank, konter pulsa, dan ruang VIP hotel bukan penipuan. Penyangkal
@@ -333,8 +340,11 @@ const diLuarNegeri = (pola: Pola[]): Pola[] =>
 const VISA_KUNJUNGAN = ["turis", "wisata", "kunjungan", "pelancong", "on arrival", "voa", "free"].join("|");
 // "masuk" tidak dipakai: petugas bandara membantu turis yang masuk dengan visa on arrival.
 const BERANGKAT_KERJA = ["berangkat", "diberangkatkan", "kerja", "bekerja", "dipekerjakan"].join("|");
-/** Yang berangkat adalah pelanggan, bukan pekerja: "membantu pelanggan berangkat dengan visa turis". */
-const BUKAN_PEKERJA = ["pelanggan", "klien", "turis", "wisatawan", "tamu", "jamaah", "jemaah", "penumpang", "customer"].join("|");
+/**
+ * Yang berangkat adalah pelanggan, bukan pekerja: "membantu pelanggan berangkat
+ * dengan visa turis", "melayani tamu yang berangkat dengan visa turis".
+ */
+const BUKAN_PEKERJA = ["pelanggan", "klien", "turis", "wisatawan", "tamu", "jamaah", "jemaah", "penumpang", "customer", "yang"].join("|");
 const CARA_VISA = ["pakai", "memakai", "menggunakan", "dengan", "lewat", "via"].join("|");
 // "Holiday" tidak dipakai: Working Holiday Visa memang mengizinkan bekerja.
 const VISA_KUNJUNGAN_EN = ["tourist", "visit", "visitor", "visiting"].join("|");
@@ -348,7 +358,10 @@ export const R03: Aturan = {
   pakaiPenyangkal: true,
   pola: [
     // "berangkat pakai visa wisata", "bekerja di Kamboja dengan visa turis"
-    { cari: `(?<!(?:${BUKAN_PEKERJA}) )(?:${BERANGKAT_KERJA})${celah(4)} (?:${CARA_VISA}) visa (?:${VISA_KUNJUNGAN})`, bahasa: "id" },
+    {
+      cari: `(?<!(?:${BUKAN_PEKERJA}) )(?:${BERANGKAT_KERJA})${celahTanpa(4, BUKAN_PEKERJA)} (?:${CARA_VISA}) visa (?:${VISA_KUNJUNGAN})`,
+      bahasa: "id",
+    },
     // "cukup visa turis", "modal visa on arrival"
     { cari: `(?:cukup|hanya|modal)(?: (?:${CARA_VISA}))? visa (?:${VISA_KUNJUNGAN})`, bahasa: "id" },
     // "visa kunjungan untuk kerja", "bebas visa untuk kerja". Kata "bebas" di

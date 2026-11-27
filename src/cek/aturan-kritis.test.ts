@@ -73,6 +73,15 @@ describe("cek: R01 Minta uang di awal", () => {
     expect(tanda(hasil, "R01")?.kutipan).toBe("biaya seragam");
   });
 
+  it("tidak cocok untuk biaya yang ditanggung perusahaan", async () => {
+    const hasil = await cek(
+      "Pendaftaran gratis. Biaya seragam ditanggung perusahaan, kirim CV ke HRD PT Maju Jaya sekarang juga.",
+    );
+
+    expect(tanda(hasil, "R01")).toBeUndefined();
+    expect(hasil.skor).toBe(0);
+  });
+
   it("Penyangkal di kalimat sebelumnya tidak membatalkan", async () => {
     const teks =
       "Lowongan staf gudang, langsung kerja tanpa tes. Biaya seragam Rp250.000 dibayar di awal ke admin, ya!";
