@@ -43,7 +43,7 @@ describe("cek: R04 Gaji tidak wajar untuk kerja dalam negeri", () => {
       "Kerja input data dari rumah, cukup modal HP. Kamu bisa dapat Rp15 juta per bulan tanpa target apa pun.",
     );
     const garisMiring = await cek(
-      "Dicari admin media sosial di Yogyakarta, lulusan SMA boleh. Penghasilan bisa 15.000.000/bulan, kerja santai.",
+      "Dicari admin media sosial di Yogyakarta, lulusan SMA boleh. Hasilnya bisa 15.000.000/bulan, kerja santai.",
     );
     const sebulan = await cek(
       "Lowongan packing barang di rumah, kerja 3 jam sehari. Hasilkan 20 jt sebulan, pendaftaran lewat WA saja.",
@@ -52,6 +52,27 @@ describe("cek: R04 Gaji tidak wajar untuk kerja dalam negeri", () => {
     expect(tanda(dapat, "R04")?.kutipan).toBe("Rp15 juta per bulan");
     expect(tanda(garisMiring, "R04")?.kutipan).toBe("15.000.000/bulan");
     expect(tanda(sebulan, "R04")?.kutipan).toBe("20 jt sebulan");
+  });
+
+  it("mengenali kata gaji yang diikuti bisa atau dapat", async () => {
+    const bisa = await cek(
+      "Lowongan admin chat di Bandung, cukup lulusan SMP. Gaji bisa mencapai Rp15 juta kalau rajin, daftar sekarang.",
+    );
+    const dapat = await cek(
+      "Kerja paruh waktu dari rumah untuk ibu rumah tangga. Penghasilan dapat 20 juta, tanpa modal dan tanpa target.",
+    );
+
+    expect(tanda(bisa, "R04")?.kutipan).toBe("Gaji bisa mencapai Rp15 juta");
+    expect(tanda(dapat, "R04")?.kutipan).toBe("Penghasilan dapat 20 juta");
+  });
+
+  it("tidak cocok untuk gaji wajar yang diikuti bisa atau dapat", async () => {
+    const hasil = await cek(
+      "Dibutuhkan staf administrasi di Tangerang. Gaji bisa mencapai Rp 9 juta sesuai pengalaman, plus BPJS dan THR.",
+    );
+
+    expect(tanda(hasil, "R04")).toBeUndefined();
+    expect(hasil.label).toBe("risiko_rendah");
   });
 
   it("tidak cocok untuk angka bulanan yang bukan bayaran", async () => {

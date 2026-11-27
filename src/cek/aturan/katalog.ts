@@ -424,6 +424,8 @@ export const R05: Aturan = {
 // selama tidak didahului kata seperti omzet atau cicilan. Gaji luar negeri
 // dinilai R05, bukan R04.
 const KATA_GAJI = ["gaji", "penghasilan", "pendapatan", "upah", "salary", "income", "take home pay", "thp"].join("|");
+/** Keterangan gaji R05 ditambah "bisa"/"dapat": "Gaji bisa mencapai Rp15 juta". Daftar R05 tidak ikut berubah. */
+const KETERANGAN_GAJI_R04 = [KETERANGAN_GAJI, "bisa", "dapat"].join("|");
 /** Angka di depan "juta" tidak boleh lanjutan angka lain: "Rp4,25 juta" bukan "25 juta". */
 const BUKAN_LANJUTAN_ANGKA = String.raw`(?<![\d.,])`;
 const RIBUAN = String.raw`[.,]\d{3}`;
@@ -476,7 +478,7 @@ export const R04: Aturan = {
   pakaiPenyangkal: false,
   pola: [
     // "Gaji Rp15 juta", "gaji pokok 15.000.000", "salary up to 20 million"
-    { cari: `(?:${KATA_GAJI})(?: (?:${KETERANGAN_GAJI}))*:? (?:${GAJI_BULANAN_TINGGI})${BUKAN_PER_TAHUN}`, bahasa: "id" },
+    { cari: `(?:${KATA_GAJI})(?: (?:${KETERANGAN_GAJI_R04}))*:? (?:${GAJI_BULANAN_TINGGI})${BUKAN_PER_TAHUN}`, bahasa: "id" },
     // "bisa dapat Rp15 juta per bulan", "15.000.000/bulan"
     { cari: `${AWAL_NOMINAL}(?:${GAJI_BULANAN_TINGGI})(?:${PER_BULAN})`, bahasa: "id" },
     // "Rp500 ribu per hari", "gaji harian 750rb"
