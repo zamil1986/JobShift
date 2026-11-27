@@ -54,6 +54,21 @@ describe("cek: Penyamaran sebelum Teks dikirim ke AI", () => {
     expect(rekaman[0]).toContain(harapan);
   });
 
+  it.each([
+    ["nama perusahaan berakhiran Corp", "Astra Corp 3174012345678901", "3174012345678901"],
+    ["kata Sharp", "Sharp 081234567890", "081234567890"],
+    ["Rp di baris sebelumnya", "Rp\n081234567891", "081234567891"],
+    ["rekening setelah Corp", "rek Corp 1234567890", "1234567890"],
+  ])("tetap menyamarkan data setelah %s", async (_nama, potongan, data) => {
+    const { penilai, rekaman } = penilaiPerekam();
+
+    await cek(`Lowongan staf gudang untuk kantor cabang, hubungi ${potongan} untuk info.`, {
+      ai: penilai,
+    });
+
+    expect(rekaman[0]).not.toContain(data);
+  });
+
   it("Aturan tetap menilai Teks asli: kutipan Tanda bahaya diambil dari Teks sebelum disamarkan", async () => {
     const { penilai } = penilaiPerekam();
     const teks =
@@ -368,13 +383,21 @@ describe("cek: butir AI yang dibuang", () => {
     expect(hasil.tandaBahaya.map((t) => t.kutipan)).toEqual(["kantor cabang di Bandung"]);
   });
 
-  it("memakai kemunculan kutipan berikutnya kalau kemunculan pertama beririsan", async () => {
+  it("membuang butir yang kemunculan pertamanya beririsan, walaupun kutipan muncul lagi", async () => {
     const teks = "Ada biaya seragam di awal. Setelah itu, kata mereka, biaya seragam dikembalikan bulan depan.";
     const hasil = await cek(teks, { ai: penilaiPalsu(jawabanAI([butir("biaya seragam")])) });
 
-    const ai = hasil.tandaBahaya.filter((t) => t.sumber === "ai");
-    expect(ai).toHaveLength(1);
-    expect(ai[0].rentang[0]).toBe(teks.lastIndexOf("biaya seragam"));
+    expect(hasil.tandaBahaya.map((t) => t.sumber)).toEqual(["aturan"]);
+    expect(hasil.skor).toBe(60);
+  });
+
+  it("frasa yang berulang hanya dihitung sekali", async () => {
+    const teks = "Proses cepat untuk admin online. Proses cepat juga untuk kurir. Proses cepat untuk semua posisi.";
+    const hasil = await cek(teks, {
+      ai: penilaiPalsu(jawabanAI([butir("Proses cepat"), butir("proses cepat"), butir("PROSES CEPAT")])),
+    });
+
+    expect(hasil.skor).toBe(10);
   });
 
   it("AI sendirian dengan label bahaya hanya sampai Waspada", async () => {
@@ -429,6 +452,11 @@ describe("cek: Penjelasan AI", () => {
       jawabanAI([], "risiko_rendah", "Satu kalimat. Dua kalimat. Tiga kalimat. Empat kalimat."),
     ],
     ["kosong", jawabanAI([], "risiko_rendah", "   ")],
+    [
+      "lebih dari 3 baris tanpa tanda baca",
+      jawabanAI([], "risiko_rendah", "Baris satu\nBaris dua\nBaris tiga\nBaris empat"),
+    ],
+    ["memuat penanda huruf kecil", jawabanAI([], "risiko_rendah", "Hubungi [nomor] dulu.")],
     ["memuat penanda Penyamaran", jawabanAI([], "risiko_rendah", "Hubungi [NOMOR] dulu.")],
   ])("tidak dipakai kalau %s", async (_nama, keluaran) => {
     const hasil = await cek(TEKS_NETRAL, { ai: penilaiPalsu(keluaran) });

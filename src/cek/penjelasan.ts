@@ -54,9 +54,11 @@ export function penjelasanTemplat(
 
 /**
  * Jumlah kalimat: dipisah titik, tanda tanya, atau tanda seru yang diikuti
- * spasi atau akhir teks, jadi titik di dalam "Rp8.000.000" tidak dihitung.
+ * spasi atau akhir teks (jadi titik di dalam "Rp8.000.000" tidak dihitung),
+ * dan setiap baris baru dianggap memulai kalimat baru.
  */
-const jumlahKalimat = (teks: string) => teks.split(/(?<=[.!?])(?:\s+|$)/u).filter(Boolean).length;
+const jumlahKalimat = (teks: string) =>
+  teks.split(/(?<=[.!?])\s+|\s*\n\s*/u).filter((k) => k.trim()).length;
 
 /**
  * Penjelasan AI yang boleh menggantikan templat, atau null (spec, "Penjelasan

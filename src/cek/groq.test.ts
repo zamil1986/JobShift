@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cek } from "@/cek";
 import { buatPenilaiGroq, penilaiGroqDariEnv } from "@/cek/groq";
-import { skemaJsonKeluaranAI } from "@/cek/skema-ai";
 
 // Adapter Groq dites tanpa jaringan: SDK menerima `fetch` palsu yang merekam
 // permintaan dan mengembalikan respons buatan.
@@ -51,9 +50,32 @@ describe("adapter Groq", () => {
     expect(url).toMatch(/\/openai\/v1\/chat\/completions$/);
     expect(new Headers(init.headers).get("authorization")).toBe("Bearer kunci-uji");
     expect(body.model).toBe("openai/gpt-oss-120b");
+    // Skema spec: { label, tanda_bahaya: [{ kutipan, alasan }], penjelasan }, tanpa skor dan
+    // Modus. Strict mode: semua properti required dan additionalProperties false.
     expect(body.response_format).toEqual({
       type: "json_schema",
-      json_schema: { name: "penilaian_lowongan", strict: true, schema: skemaJsonKeluaranAI() },
+      json_schema: {
+        name: "penilaian_lowongan",
+        strict: true,
+        schema: {
+          type: "object",
+          properties: {
+            label: { type: "string", enum: ["risiko_rendah", "waspada", "bahaya"] },
+            tanda_bahaya: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: { kutipan: { type: "string" }, alasan: { type: "string" } },
+                required: ["kutipan", "alasan"],
+                additionalProperties: false,
+              },
+            },
+            penjelasan: { type: "string" },
+          },
+          required: ["label", "tanda_bahaya", "penjelasan"],
+          additionalProperties: false,
+        },
+      },
     });
     expect(body.stream).toBeFalsy();
 

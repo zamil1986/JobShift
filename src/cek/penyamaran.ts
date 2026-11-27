@@ -6,8 +6,11 @@
 // pemisah ribuan ("8.000.000") tidak pernah jadi deret digit, dan angka yang
 // didahului "Rp" dilewati, supaya informasi gaji tetap terbaca AI.
 
-/** Tidak didahului digit, dan tidak didahului "Rp" (boleh dengan spasi). */
-const BUKAN_NOMINAL = String.raw`(?<!\d)(?<!rp\s*)`;
+/**
+ * Tidak didahului digit, dan tidak didahului kata utuh "Rp" atau "Rp." di
+ * baris yang sama (boleh dengan spasi). "Corp" dan "Sharp" bukan "Rp".
+ */
+const BUKAN_NOMINAL = String.raw`(?<!\d)(?<!(?<![\p{L}\p{N}])rp\.?[ \t]*)`;
 
 const LANGKAH: readonly [RegExp, string][] = [
   [/[\p{L}\p{N}._%+-]+@[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)*\.\p{L}{2,}/giu, "[EMAIL]"],
@@ -20,7 +23,7 @@ const LANGKAH: readonly [RegExp, string][] = [
 ];
 
 /** Semua penanda Penyamaran. Kutipan AI yang memuat salah satunya dibuang. */
-export const PENANDA = /\[(?:EMAIL|NIK|NOMOR|REKENING)\]/u;
+export const PENANDA = /\[(?:EMAIL|NIK|NOMOR|REKENING)\]/iu;
 
 /** Teks dengan email, NIK, nomor HP, dan rekening diganti penanda. */
 export function samarkan(teks: string): string {

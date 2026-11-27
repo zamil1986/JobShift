@@ -21,18 +21,14 @@ const beririsan = (a: Rentang, b: Rentang) => a[0] < b[1] && b[0] < a[1];
 /** Kutipan dalam bentuk normal: huruf kecil, spasi tunggal, tanpa spasi di ujung. */
 const kutipanNormal = (kutipan: string) => normalisasi(kutipan).teks.trim();
 
-/** Semua posisi awal `cari` di `teks`, berurutan. */
-function* posisi(teks: string, cari: string): Generator<number> {
-  for (let i = teks.indexOf(cari); i !== -1; i = teks.indexOf(cari, i + 1)) yield i;
-}
-
 /**
  * Tanda bahaya AI yang sah, dengan `kutipan` dan `rentang` dari Teks asli.
  *
  * Kutipan dicocokkan ternormalisasi ke Teks tersamar. Karena kutipan yang sah
  * tidak memuat penanda, kutipan itu juga ada di Teks asli, jadi `rentang`
- * dicari langsung di Teks asli: kemunculan pertama yang tidak beririsan dengan
- * rentang yang sudah terpakai.
+ * dicari langsung di Teks asli (kemunculan pertama). Butir yang rentangnya
+ * beririsan dengan Tanda bahaya Aturan atau butir AI sebelumnya dibuang, jadi
+ * frasa yang berulang tidak dihitung dua kali.
  */
 export function tandaBahayaAI(
   teks: string,
@@ -50,22 +46,21 @@ export function tandaBahayaAI(
     if (!alasanBersih || memuatKataTerlarang(alasanBersih)) continue;
 
     const cari = kutipanNormal(kutipan);
-    if (!cari || PENANDA.test(cari.toUpperCase()) || !tersamar.includes(cari)) continue;
+    if (!cari || PENANDA.test(cari) || !tersamar.includes(cari)) continue;
 
-    for (const dari of posisi(asli.teks, cari)) {
-      const rentang = rentangAsli(asli, dari, dari + cari.length);
-      if (terpakai.some((r) => beririsan(r, rentang))) continue;
+    const dari = asli.teks.indexOf(cari);
+    if (dari === -1) continue;
+    const rentang = rentangAsli(asli, dari, dari + cari.length);
+    if (terpakai.some((r) => beririsan(r, rentang))) continue;
 
-      terpakai.push(rentang);
-      hasil.push({
-        sumber: "ai",
-        alasan: alasanBersih,
-        kutipan: teks.slice(rentang[0], rentang[1]),
-        rentang,
-        bobot: BOBOT_TANDA_AI,
-      });
-      break;
-    }
+    terpakai.push(rentang);
+    hasil.push({
+      sumber: "ai",
+      alasan: alasanBersih,
+      kutipan: teks.slice(rentang[0], rentang[1]),
+      rentang,
+      bobot: BOBOT_TANDA_AI,
+    });
   }
 
   return hasil;
