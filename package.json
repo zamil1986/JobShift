@@ -11,7 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "eval": "node scripts/eval.mjs",
-    "cek-dataset": "tsx scripts/cek-dataset.ts"
+    "cek-dataset": "node scripts/cek-dataset.mjs"
   },
   "dependencies": {
     "groq-sdk": "^1.6.0",
