@@ -13,6 +13,7 @@ import {
   TAMPILAN_LABEL,
   TAMPILAN_MODUS,
 } from "./salinan";
+import { IkonLabel } from "./IkonLabel";
 import { TeksBersorotan } from "./TeksBersorotan";
 
 type Props = { hasil: HasilCek; teks: string };
@@ -46,7 +47,7 @@ export function TampilanHasil({ hasil, teks }: Props) {
 
       <p className={`label label-${hasil.label}`}>
         <span className="label-ikon" aria-hidden="true">
-          {label.ikon}
+          <IkonLabel label={hasil.label} />
         </span>
         <span className="label-kata">{label.kata}</span>
         <span className="label-skor">Skor {hasil.skor} dari 100</span>
@@ -58,9 +59,9 @@ export function TampilanHasil({ hasil, teks }: Props) {
         </p>
       )}
 
-      <p>{hasil.penjelasan}</p>
+      <p className="penjelasan">{hasil.penjelasan}</p>
 
-      {hasil.catatanAI && <p className="disclaimer">{CATATAN_AI_TIDAK_TERSEDIA}</p>}
+      {hasil.catatanAI && <p className="disclaimer catatan-ai">{CATATAN_AI_TIDAK_TERSEDIA}</p>}
 
       {hasil.modus.length > 0 && (
         <p>
@@ -71,9 +72,9 @@ export function TampilanHasil({ hasil, teks }: Props) {
       )}
 
       {hasil.tandaBahaya.length > 0 && (
-        <section aria-labelledby="judul-tanda-bahaya">
+        <section className="bagian" aria-labelledby="judul-tanda-bahaya">
           <h3 id="judul-tanda-bahaya">Tanda bahaya</h3>
-          <ul className="daftar">
+          <ul className="daftar daftar-tanda">
             {hasil.tandaBahaya.map((t) => (
               <li key={`${t.rentang[0]}-${t.rentang[1]}-${t.alasan}`}>
                 {t.alasan}
@@ -85,7 +86,7 @@ export function TampilanHasil({ hasil, teks }: Props) {
       )}
 
       {hasil.tandaBahayaTersirat.length > 0 && (
-        <section aria-labelledby="judul-tersirat">
+        <section className="bagian bagian-tersirat" aria-labelledby="judul-tersirat">
           <h3 id="judul-tersirat">Yang tidak disebutkan di teks</h3>
           <ul className="daftar">
             {hasil.tandaBahayaTersirat.map((t) => (
@@ -95,13 +96,13 @@ export function TampilanHasil({ hasil, teks }: Props) {
         </section>
       )}
 
-      <section aria-labelledby="judul-langkah">
+      <section className="bagian" aria-labelledby="judul-langkah">
         <h3 id="judul-langkah">{JUDUL_LANGKAH}</h3>
         <DaftarLangkah langkah={[...hasil.langkahAman.umum, ...hasil.langkahAman.spesifik]} />
       </section>
 
       {hasil.langkahDarurat && (
-        <section aria-labelledby="judul-darurat">
+        <section className="bagian bagian-darurat" aria-labelledby="judul-darurat">
           <h3 id="judul-darurat">{JUDUL_LANGKAH_DARURAT}</h3>
           <section aria-labelledby="judul-sudah-transfer">
             <h4 id="judul-sudah-transfer">{JUDUL_SUDAH_TRANSFER}</h4>
@@ -114,7 +115,7 @@ export function TampilanHasil({ hasil, teks }: Props) {
         </section>
       )}
 
-      <section aria-labelledby="judul-teks">
+      <section className="bagian" aria-labelledby="judul-teks">
         <h3 id="judul-teks">Teks yang dicek</h3>
         {hasil.tandaBahaya.length > 0 && (
           <p className="petunjuk-sorotan">Kalimat yang menjadi tanda bahaya diberi tanda di bawah ini.</p>
@@ -134,7 +135,7 @@ export function TampilanHasil({ hasil, teks }: Props) {
  */
 function DaftarLangkah({ langkah }: { langkah: Langkah[] }) {
   return (
-    <ul className="daftar">
+    <ul className="daftar daftar-langkah">
       {/* Daftar statis yang tidak pernah diurutkan ulang, jadi indeks cukup sebagai key. */}
       {langkah.map((l, i) => (
         <li key={i}>
