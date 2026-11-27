@@ -158,7 +158,7 @@ Error 400: `{ error: { kode: "teks_kosong" | "teks_terlalu_pendek" | "teks_terla
   - Teks dinormalisasi untuk pencocokan saja: huruf kecil, spasi berlebih dipadatkan, dengan peta offset kembali ke Teks asli.
   - `kutipan` selalu diambil dari Teks asli lewat `rentang`.
   - Satu Aturan menghasilkan paling banyak satu Tanda bahaya, yaitu kecocokan pertama yang sah.
-- Penyangkal ("tidak", "tanpa", "bebas", "jangan", "gratis", plus "no"/"free" untuk pola Inggris) yang muncul ≤ 3 kata sebelum kata pemicu, dalam kalimat yang sama, membatalkan kecocokan itu. Ini hanya berlaku untuk Aturan kritis R01, R02, R03, dan R07 (ADR-0002). Kecocokan berikutnya di Teks yang sama tetap diperiksa.
+- Penyangkal ("tidak", "tanpa", "bebas", "jangan", "gratis", plus "no"/"free" untuk pola Inggris) yang muncul ≤ 3 kata sebelum kata pemicu, dalam klausa yang sama (tidak melewati ".", "!", "?", atau "," yang diikuti spasi), membatalkan kecocokan itu. Ini hanya berlaku untuk Aturan kritis R01, R02, R03, dan R07 (ADR-0002). Kecocokan berikutnya di Teks yang sama tetap diperiksa.
 - R04 (gaji tidak wajar) tidak berlaku kalau Teks memuat penanda luar negeri, yaitu nama negara atau kota tujuan umum atau kata "luar negeri"/"overseas".
 - Deterministik: tidak ada waktu, acak, atau jaringan di mesin Aturan.
 

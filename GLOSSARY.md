@@ -82,7 +82,7 @@ Aturan untuk perilaku yang praktis tidak pernah dilakukan lowongan asli, misalny
 _Hindari_: aturan berat, aturan utama
 
 **Penyangkal**:
-Kata seperti "tidak", "tanpa", "bebas", "jangan", atau "gratis" yang muncul paling jauh tiga kata sebelum kata pemicu, di kalimat yang sama, dan membatalkan kecocokan Aturan kritis "Minta uang di awal", "Minta OTP/PIN/password", "Kerja luar negeri dengan visa kunjungan atau wisata", atau "Deposit untuk naik level", misalnya "tidak dipungut biaya". Penyangkal hanya membatalkan, tidak pernah mengurangi Skor.
+Kata seperti "tidak", "tanpa", "bebas", "jangan", atau "gratis" yang muncul paling jauh tiga kata sebelum kata pemicu, di klausa yang sama (tidak melewati titik atau koma), dan membatalkan kecocokan Aturan kritis "Minta uang di awal", "Minta OTP/PIN/password", "Kerja luar negeri dengan visa kunjungan atau wisata", atau "Deposit untuk naik level", misalnya "tidak dipungut biaya". Penyangkal hanya membatalkan, tidak pernah mengurangi Skor.
 _Hindari_: negasi (di teks antarmuka)
 
 **Modus**:

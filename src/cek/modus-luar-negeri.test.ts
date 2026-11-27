@@ -77,6 +77,15 @@ describe("cek: R03 Kerja luar negeri dengan visa kunjungan atau wisata", () => {
     expect(hasil.skor).toBe(0);
   });
 
+  it("Penyangkal sebelum koma tidak membatalkan: 'Gratis tiket, berangkat pakai visa turis'", async () => {
+    const hasil = await cek(
+      "Lowongan admin restoran di Kamboja. Gratis tiket, berangkat pakai visa turis, nanti diurus di sana oleh bos.",
+    );
+
+    expect(tanda(hasil, "R03")?.kutipan).toBe("berangkat pakai visa turis");
+    expect(hasil.label).toBe("bahaya");
+  });
+
   it("tetap menangkap kecocokan kedua yang tidak didahului Penyangkal", async () => {
     const teks =
       "Kami tidak memakai visa turis untuk kerja seperti agen lain. Tapi kalau mau cepat, kamu bisa berangkat dengan visa turis.";

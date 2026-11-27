@@ -44,8 +44,10 @@ export const R01: Aturan = {
   modus: "lokal",
   pakaiPenyangkal: true,
   pola: [
+    // "biaya pendaftaran, biaya seragam" satu daftar, supaya Penyangkal di depannya
+    // berlaku untuk seluruh daftar walau koma memutus jangkauannya.
     // "Biaya seragam ditanggung perusahaan" bukan permintaan uang.
-    { cari: `(?:biaya|uang) ${daftar(JENIS_BIAYA)}${DITANGGUNG_PERUSAHAAN}`, bahasa: "id" },
+    { cari: `(?:biaya|uang) ${daftar(`(?:(?:biaya|uang) )?(?:${JENIS_BIAYA})`)}${DITANGGUNG_PERUSAHAAN}`, bahasa: "id" },
     { cari: "(?:transfer|bayar|membayar) (?:dulu|terlebih dahulu|di awal|di muka)", bahasa: "id" },
     {
       cari: `${daftar("registration|training|uniform|administration|admin|processing|medical")} fees?`,

@@ -22,8 +22,10 @@ Semula hanya R01 dan R02. R07 (tiket 04) ditambahkan karena peringatan anti-peni
 - Penyangkal hanya diperiksa sebelum awal kecocokan. Pola R07 yang diawali kata tujuan ("untuk naik level, tidak perlu deposit") memuat Penyangkal di dalam kecocokan, jadi tidak batal.
 - "Never", "not", dan "don't" tidak ada di daftar, jadi "we never ask for a deposit to upgrade to VIP" tetap Bahaya.
 
-## Revisi 2026-11-27: R03 ikut memakai Penyangkal, dan Penyangkal tidak melewati akhir kalimat
+## Revisi 2026-11-27: R03 ikut memakai Penyangkal, dan Penyangkal tidak melewati batas klausa
 
 R03 "Kerja luar negeri dengan visa kunjungan atau wisata" (tiket 06) ditambahkan karena peringatan resmi seperti "jangan berangkat kerja pakai visa turis" punya bentuk yang sama dengan pemicunya, dan sebagai Aturan kritis satu kalimat itu langsung memberi Label Bahaya. Penipu yang menulis "kami tidak memakai visa turis untuk kerja" lalu "kamu bisa berangkat dengan visa turis" tetap tertangkap lewat kecocokan kedua.
 
-Penyangkal sekarang hanya dicari di kalimat yang sama dengan pemicu. Semula jendela tiga kata melewati akhir kalimat, sehingga "gaji 20 juta tanpa pengalaman. Berangkat pakai visa wisata" membatalkan R03, dan "langsung kerja tanpa tes. Biaya seragam Rp250.000" membatalkan R01. Akhir kalimat adalah ".", "!", atau "?" yang diikuti spasi; "Rp200.000" dan "s.id" tidak memutus, sedangkan baris baru tanpa tanda baca tidak memutus kalimat. Daftar Penyangkal dan jarak tiga kata tidak berubah.
+Penyangkal sekarang hanya dicari di klausa yang sama dengan pemicu. Semula jendela tiga kata melewati akhir kalimat dan koma, sehingga "gaji 20 juta tanpa pengalaman. Berangkat pakai visa wisata" dan "Gratis tiket, berangkat pakai visa turis" membatalkan R03, dan "kerja tanpa tes, biaya seragam Rp250.000" membatalkan R01. Batas klausa adalah ".", "!", "?", atau "," yang diikuti spasi; "Rp200.000", "Rp1,5 juta", dan "s.id" tidak memutus, sedangkan baris baru tanpa tanda baca tidak memutus. Daftar Penyangkal dan jarak tiga kata tidak berubah.
+
+Konsekuensinya, daftar yang dipisah koma harus cocok sebagai satu kecocokan supaya Penyangkal di depannya tetap berlaku: R01 menerima "biaya pendaftaran, biaya seragam, atau biaya pelatihan" sebagai satu daftar, jadi "tidak dipungut biaya pendaftaran, biaya seragam" tetap batal. Pola kritis baru yang memuat daftar perlu tes serupa.

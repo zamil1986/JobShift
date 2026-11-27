@@ -24,7 +24,7 @@ export type Aturan = {
   /** Aturan kritis (spec: selalu berbobot 60); satu saja sudah cukup untuk Label Bahaya. */
   kritis: boolean;
   modus?: Modus;
-  /** Penyangkal ≤ 3 kata sebelum pemicu, dalam kalimat yang sama, membatalkan kecocokan (ADR-0002: hanya R01, R02, R03, R07). */
+  /** Penyangkal ≤ 3 kata sebelum pemicu, dalam klausa yang sama, membatalkan kecocokan (ADR-0002: hanya R01, R02, R03, R07). */
   pakaiPenyangkal: boolean;
   pola: Pola[];
 };
@@ -54,14 +54,17 @@ function regexDari(pola: Pola): RegExp {
   return regex;
 }
 
-/** Akhir kalimat: ".", "!", atau "?" yang diikuti spasi. "Rp200.000" dan "s.id" tidak memutus. */
-const AKHIR_KALIMAT = /[.!?] /gu;
+/**
+ * Batas klausa: ".", "!", "?", atau "," yang diikuti spasi. "Rp200.000",
+ * "Rp1,5 juta", dan "s.id" tidak memutus.
+ */
+const BATAS_KLAUSA = /[.!?,] /gu;
 
-/** Penyangkal hanya dicari di kalimat yang sama, paling jauh JARAK_PENYANGKAL kata sebelum pemicu. */
+/** Penyangkal hanya dicari di klausa yang sama, paling jauh JARAK_PENYANGKAL kata sebelum pemicu. */
 function didahuluiPenyangkal(teksNormal: string, posisi: number, bahasa: Bahasa): boolean {
   const sebelum = teksNormal.slice(0, posisi);
-  const awalKalimat = Math.max(0, ...Array.from(sebelum.matchAll(AKHIR_KALIMAT), (m) => m.index + m[0].length));
-  const kataSebelum = sebelum.slice(awalKalimat).match(KATA) ?? [];
+  const awalKlausa = Math.max(0, ...Array.from(sebelum.matchAll(BATAS_KLAUSA), (m) => m.index + m[0].length));
+  const kataSebelum = sebelum.slice(awalKlausa).match(KATA) ?? [];
   return kataSebelum.slice(-JARAK_PENYANGKAL).some((kata) => PENYANGKAL[bahasa].has(kata));
 }
 
