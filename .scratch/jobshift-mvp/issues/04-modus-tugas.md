@@ -14,9 +14,9 @@
 
 ## Comments
 
-- 2026-11-27 (Claude): semua kriteria selesai. `npm test` (256 tes), `npm run lint`, dan `npm run typecheck` lulus. Tes baru di `src/cek/modus-tugas.test.ts`, semuanya lewat `cek()`. `mesin.ts`, `skor.ts`, dan `tipe.ts` tidak diubah; bobot sesuai spec (R06b 20, R07 60 kritis, R08 25, semuanya Modus Tugas, `pakaiPenyangkal: false`).
+- 2026-11-27 (Claude): semua kriteria selesai. `npm test` (258 tes), `npm run lint`, dan `npm run typecheck` lulus. Tes baru di `src/cek/modus-tugas.test.ts`, semuanya lewat `cek()`. `mesin.ts`, `skor.ts`, dan `tipe.ts` tidak diubah; bobot sesuai spec (R06b 20, R07 60 kritis, R08 25, semuanya Modus Tugas, `pakaiPenyangkal: false`).
 - **Pola dipersempit dari "Contoh pola" spec.** Kata tunggal tidak cukup untuk memicu aturan:
-  - **R07** (kritis, tanpa Penyangkal) baru cocok kalau uang masuk (deposit, top up, isi saldo, setor dana) menjadi syarat tujuan Modus Tugas (naik level, VIP n, cairkan/tarik komisi, "komisi bisa dicairkan") dalam satu kalimat. Kalau uang disebut lebih dulu, harus ada kata tujuan ("untuk", "supaya", "agar", "to"…). Akibatnya iklan teller bank ("deposit nasabah"), konter pulsa ("top up e-wallet"), ruang VIP hotel, CS game, dan CS e-wallet tidak berlabel Bahaya.
+  - **R07** (kritis, tanpa Penyangkal) baru cocok kalau uang masuk (deposit, top up, isi saldo, setor dana) menjadi syarat tujuan Modus Tugas (naik level, VIP n, cairkan/tarik komisi, "komisi bisa dicairkan") dalam satu kalimat, dan urutan mana pun wajib memakai kata penghubung: "deposit Rp200.000 **untuk** naik level", "**untuk** mencairkan komisi, lakukan top up", atau "komisi bisa dicairkan **setelah** kamu deposit". "Upgrade akun" saja bukan tujuan; harus menuju level atau VIP. Akibatnya iklan teller bank ("deposit nasabah"), konter pulsa ("top up e-wallet"), ruang VIP hotel, serta daftar tugas CS game dan CS e-wallet ("upgrade akun dan top up saldo", juga dalam bentuk butir) tidak berlabel Bahaya. Satu kalimat berarti celah tidak melewati kata yang berakhir ".", "!", atau "?"; baris baru tanpa titik tidak memutus kalimat.
   - **R08** butuh kata bayaran atau nominal ("dibayar Rp5.000 per like", "ulasan dibayar", "per tugas Rp12.000"), supaya "follow up klien" dan "rating driver" tidak kena.
   - **R06b** butuh kata kerja ajakan sebelum "Telegram" ("lanjut di", "join grup", "move to"), atau tautan `t.me/…`. "Mengelola akun Telegram perusahaan" tidak kena.
 - **Keputusan terbuka untuk penyetel Aturan (Set dev):**
@@ -25,4 +25,4 @@
   - "Aplikasi lain" di R06b hanya cocok lewat frasa harfiah "pindah/lanjut ke aplikasi (chat) lain". "Lanjut ke WhatsApp admin" dibiarkan untuk R06a (tiket 07).
   - R06b juga menerima "hubungi/kontak/chat … di Telegram". Bobotnya 20, jadi sendirian tetap Risiko rendah.
   - R08 cocok untuk iklan mystery shopper sungguhan ("dapat Rp50.000 per ulasan" → Waspada). Ini bisa diterima di bobot 25.
-
+- Kutipan R07 berupa frasa utuh, jadi kutipan R06b/R08 bisa berada di dalamnya ("top up lewat chat Telegram untuk naik level"). `TeksBersorotan` sudah menggabungkan rentang yang beririsan. `POST /api/cek` di dev server memberi Bahaya 85 / Modus Tugas untuk Teks gabungan dan Risiko rendah untuk iklan CS e-wallet. Halaman hasil tidak dicek di browser karena dev server milik sesi lain.

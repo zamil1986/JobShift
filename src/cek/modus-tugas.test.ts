@@ -35,7 +35,7 @@ describe("cek: R07 Deposit untuk naik level atau mencairkan komisi", () => {
       "Your account is ready. Please make a deposit of $50 to upgrade to VIP and receive higher daily commissions.",
     );
 
-    expect(tanda(id, "R07")?.kutipan).toBe("mencairkan komisi, lakukan top up");
+    expect(tanda(id, "R07")?.kutipan).toBe("Untuk mencairkan komisi, lakukan top up");
     expect(id.label).toBe("bahaya");
     expect(tanda(en, "R07")?.kutipan).toBe("deposit of $50 to upgrade to VIP");
   });
@@ -69,6 +69,31 @@ describe("cek: R07 Deposit untuk naik level atau mencairkan komisi", () => {
     );
 
     for (const hasil of [asuransi, game, ewallet]) expect(tanda(hasil, "R07")).toBeUndefined();
+  });
+
+  it("tidak cocok kalau tujuan disebut lebih dulu tanpa kata tujuan atau syarat", async () => {
+    const ewallet = await cek(
+      "Customer service e-wallet bertugas menjelaskan cara upgrade akun dan top up saldo kepada pengguna baru.",
+    );
+    const butir = await cek(
+      "Tugas CS e-wallet:\n- Membantu upgrade akun premium\n- Melayani top up saldo\n- Menjawab keluhan pengguna",
+    );
+    const game = await cek(
+      "CS game online: bantu pemain yang ingin naik level lebih cepat dan melayani top up diamond setiap hari.",
+    );
+    const untukAkun = await cek(
+      "Staf CS e-wallet membantu pengguna melakukan top up saldo untuk upgrade akun premium di aplikasi resmi.",
+    );
+
+    for (const hasil of [ewallet, butir, game, untukAkun]) expect(tanda(hasil, "R07")).toBeUndefined();
+  });
+
+  it("mengenali tujuan yang disebut lebih dulu dengan kata syarat: 'dicairkan setelah deposit'", async () => {
+    const hasil = await cek(
+      "Komisi kamu sudah terkumpul Rp400.000. Komisi bisa dicairkan setelah kamu deposit Rp150.000 ke admin.",
+    );
+
+    expect(tanda(hasil, "R07")?.kutipan).toBe("Komisi bisa dicairkan setelah kamu deposit");
   });
 
   it("mengenali bentuk pasif 'supaya komisi bisa dicairkan'", async () => {

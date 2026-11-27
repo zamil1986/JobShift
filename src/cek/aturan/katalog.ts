@@ -109,7 +109,8 @@ const celah = (n: number) => `[,;:]?(?: ${KATA_SEKALIMAT}){0,${n}}?`;
 // Uang masuk harus menjadi syarat tujuan Modus Tugas dalam satu kalimat.
 const UANG_MASUK = ["(?:men)?deposit(?:kan)?", "top ?-?up", "isi (?:ulang )?saldo", "setor (?:dana|saldo|uang)"].join("|");
 const TUJUAN_TUGAS = [
-  "(?:naik|naikkan|menaikkan|upgrade)(?: ke)? (?:level|vip|akun)(?! (?:jabatan|karier|karir))",
+  // "Upgrade akun" saja wajar di CS e-wallet; harus menuju level atau VIP.
+  "(?:naik|naikkan|menaikkan|upgrade)(?: ke)?(?: akun)? (?:level|vip)(?! (?:jabatan|karier|karir))",
   "level ?\\d",
   "vip ?\\d",
   "member vip",
@@ -119,9 +120,10 @@ const TUJUAN_TUGAS = [
   "membuka (?:level|tugas)",
 ].join("|");
 const KATA_TUJUAN = ["untuk", "supaya", "agar", "biar", "sebelum", "baru"].join("|");
+const KATA_SYARAT = ["setelah", "sesudah", "kalau", "jika", "asalkan", "wajib", "harus", "perlu", "syaratnya"].join("|");
 const UANG_MASUK_EN = ["deposit", "top ?-?up", "recharge"].join("|");
 const TUJUAN_TUGAS_EN = [
-  "upgrade(?: to)? (?:vip|level|your account)",
+  "upgrade(?: your account)?(?: to)? (?:vip|level)",
   "level up",
   "next level",
   "vip ?\\d",
@@ -129,16 +131,20 @@ const TUJUAN_TUGAS_EN = [
   "unlock (?:the )?(?:next )?(?:level|tasks?)",
 ].join("|");
 const KATA_TUJUAN_EN = ["to", "for", "so", "before"].join("|");
+const KATA_SYARAT_EN = ["after", "once", "if", "must", "need to", "have to"].join("|");
 
 /**
- * Uang lalu tujuan ("deposit Rp200.000 untuk naik level") wajib dihubungkan
- * kata tujuan, supaya "melayani top up saldo dan upgrade akun" tidak cocok.
- * Tujuan lalu uang ("untuk mencairkan komisi, lakukan top up") sudah
- * menyatakan syaratnya sendiri.
+ * Uang hanya cocok sebagai syarat tujuan, dan urutan mana pun wajib memakai
+ * kata penghubung, supaya daftar tugas CS ("upgrade akun dan top up saldo")
+ * tidak cocok:
+ * - uang, kata tujuan, tujuan: "deposit Rp200.000 untuk naik level";
+ * - kata tujuan, tujuan, uang: "untuk mencairkan komisi, lakukan top up";
+ * - tujuan, kata syarat, uang: "komisi bisa dicairkan setelah kamu deposit".
  */
-const uangSebagaiSyarat = (uang: string, tujuan: string, kataTujuan: string) => [
+const uangSebagaiSyarat = (uang: string, tujuan: string, kataTujuan: string, kataSyarat: string) => [
   `(?:${uang})${celah(4)} (?:${kataTujuan})${celah(3)} (?:${tujuan})`,
-  `(?:${tujuan})${celah(6)} (?:${uang})`,
+  `(?:${kataTujuan}) (?:${tujuan})${celah(6)} (?:${uang})`,
+  `(?:${tujuan})${celah(3)} (?:${kataSyarat})${celah(3)} (?:${uang})`,
 ];
 
 export const R07: Aturan = {
@@ -149,8 +155,8 @@ export const R07: Aturan = {
   modus: "tugas",
   pakaiPenyangkal: false,
   pola: [
-    ...uangSebagaiSyarat(UANG_MASUK, TUJUAN_TUGAS, KATA_TUJUAN).map((cari) => ({ cari, bahasa: "id" as const })),
-    ...uangSebagaiSyarat(UANG_MASUK_EN, TUJUAN_TUGAS_EN, KATA_TUJUAN_EN).map((cari) => ({
+    ...uangSebagaiSyarat(UANG_MASUK, TUJUAN_TUGAS, KATA_TUJUAN, KATA_SYARAT).map((cari) => ({ cari, bahasa: "id" as const })),
+    ...uangSebagaiSyarat(UANG_MASUK_EN, TUJUAN_TUGAS_EN, KATA_TUJUAN_EN, KATA_SYARAT_EN).map((cari) => ({
       cari,
       bahasa: "en" as const,
     })),
