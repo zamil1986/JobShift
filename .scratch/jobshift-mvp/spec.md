@@ -158,7 +158,7 @@ Error 400: `{ error: { kode: "teks_kosong" | "teks_terlalu_pendek" | "teks_terla
   - Teks dinormalisasi untuk pencocokan saja: huruf kecil, spasi berlebih dipadatkan, dengan peta offset kembali ke Teks asli.
   - `kutipan` selalu diambil dari Teks asli lewat `rentang`.
   - Satu Aturan menghasilkan paling banyak satu Tanda bahaya, yaitu kecocokan pertama yang sah.
-- Penyangkal ("tidak", "tanpa", "bebas", "jangan", "gratis", plus "no"/"free" untuk pola Inggris) yang muncul ≤ 3 kata sebelum kata pemicu membatalkan kecocokan itu. Ini hanya berlaku untuk R01 dan R02 (ADR-0002). Kecocokan berikutnya di Teks yang sama tetap diperiksa.
+- Penyangkal ("tidak", "tanpa", "bebas", "jangan", "gratis", plus "no"/"free" untuk pola Inggris) yang muncul ≤ 3 kata sebelum kata pemicu membatalkan kecocokan itu. Ini hanya berlaku untuk Aturan kritis R01, R02, dan R07 (ADR-0002). Kecocokan berikutnya di Teks yang sama tetap diperiksa.
 - R04 (gaji tidak wajar) tidak berlaku kalau Teks memuat penanda luar negeri, yaitu nama negara atau kota tujuan umum atau kata "luar negeri"/"overseas".
 - Deterministik: tidak ada waktu, acak, atau jaringan di mesin Aturan.
 
@@ -253,7 +253,7 @@ Error 400: `{ error: { kode: "teks_kosong" | "teks_terlalu_pendek" | "teks_terla
 - **Satu seam: `cek(teks, { ai })`.** Semua tes perilaku masuk lewat fungsi ini dan memeriksa `HasilCek`. Tes tidak memeriksa fungsi internal (regex, normalisasi, penggabung), supaya katalog dan implementasi bisa disetel tanpa memecahkan tes.
 - **Pengecualian: `buatCek(katalog)`.** `cek` dibuat sebagai `buatCek(KATALOG)`. Tes yang butuh bobot di luar katalog asli (batas Label 24/25/59/60, batas Skor 100, seri Modus terkuat) memakai `buatCek` dengan katalog sintetis, jadi tetap melewati jalur `cek()` yang lengkap. `buatCek` tidak diekspor dari `@/cek` dan tidak pernah dipakai route, UI, atau eval. Alasannya, semua bobot katalog kelipatan 5 dan AI paling banyak +25, jadi Skor 24 dan 59 tidak pernah bisa dihasilkan katalog asli.
 - Tes yang baik menyatakan perilaku yang terlihat pengguna: "Teks ini memberi Label Bahaya dengan Tanda bahaya R01 berkutipan 'biaya seragam'". Bukan "fungsi X dipanggil".
-- Setiap Aturan punya minimal satu tes positif dan satu tes negatif. R01 dan R02 juga punya tes negatif berisi penyangkalan dan tes "penyangkal lalu kecocokan kedua tetap tertangkap" (ADR-0002).
+- Setiap Aturan punya minimal satu tes positif dan satu tes negatif. R01, R02, dan R07 juga punya tes negatif berisi penyangkalan dan tes "penyangkal lalu kecocokan kedua tetap tertangkap" (ADR-0002).
 - Yang dites lewat seam:
   - batas panjang 49/50/3.000/3.001;
   - batas Label 24/25/59/60;
@@ -286,6 +286,6 @@ Error 400: `{ error: { kode: "teks_kosong" | "teks_terlalu_pendek" | "teks_terla
 
 ## Further Notes
 
-- **Keputusan baru yang menyimpang dari PRD:** timeout AI 3,5 detik (bukan 6 detik); cakupan kata terlarang hanya untuk teks hasil yang dihasilkan; Penyangkal hanya untuk R01/R02 (glossary diselaraskan). PRD, glossary, dan ADR-0001 diperbarui agar sesuai.
+- **Keputusan baru yang menyimpang dari PRD:** timeout AI 3,5 detik (bukan 6 detik); cakupan kata terlarang hanya untuk teks hasil yang dihasilkan; Penyangkal hanya untuk Aturan kritis R01/R02/R07 (glossary diselaraskan; R07 ditambahkan di tiket 04). PRD, glossary, dan ADR-0001 diperbarui agar sesuai.
 - Pertanyaan terbuka yang memblokir pekerjaan manusia, bukan agen: siapa memegang Set test, pembagian peran A–E, dan apakah Free plan Groq mendukung ZDR. Kalau ZDR tidak tersedia, halaman Cara kerja memuat kalimat log 30 hari.
 - Milestone: M2 (27 November) butuh seluruh FR P0 jalan di lokal. Urutan yang disarankan untuk `/to-tickets`: kerangka Next.js + deploy kosong (M1) → inti Cek dengan Aturan saja → UI teks → Langkah aman → AI → OCR → contoh → Cara kerja + eval.

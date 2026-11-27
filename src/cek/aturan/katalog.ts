@@ -104,8 +104,9 @@ const KATA_SEKALIMAT = String.raw`\S*[^\s.!?]`;
  */
 const celah = (n: number) => `[,;:]?(?: ${KATA_SEKALIMAT}){0,${n}}?`;
 
-// R07 kritis tanpa Penyangkal, jadi kata tunggal ("deposit", "top up", "VIP")
-// tidak cukup: teller bank, konter pulsa, dan ruang VIP hotel bukan penipuan.
+// R07 kritis, jadi kata tunggal ("deposit", "top up", "VIP") tidak cukup:
+// teller bank, konter pulsa, dan ruang VIP hotel bukan penipuan. Penyangkal
+// berlaku (ADR-0002) supaya peringatan "tidak pernah meminta deposit …" batal.
 // Uang masuk harus menjadi syarat tujuan Modus Tugas dalam satu kalimat.
 const UANG_MASUK = ["(?:men)?deposit(?:kan)?", "top ?-?up", "isi (?:ulang )?saldo", "setor (?:dana|saldo|uang)"].join("|");
 const TUJUAN_TUGAS = [
@@ -153,7 +154,7 @@ export const R07: Aturan = {
   bobot: 60,
   kritis: true,
   modus: "tugas",
-  pakaiPenyangkal: false,
+  pakaiPenyangkal: true,
   pola: [
     ...uangSebagaiSyarat(UANG_MASUK, TUJUAN_TUGAS, KATA_TUJUAN, KATA_SYARAT).map((cari) => ({ cari, bahasa: "id" as const })),
     ...uangSebagaiSyarat(UANG_MASUK_EN, TUJUAN_TUGAS_EN, KATA_TUJUAN_EN, KATA_SYARAT_EN).map((cari) => ({

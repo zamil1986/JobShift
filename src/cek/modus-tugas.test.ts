@@ -112,6 +112,26 @@ describe("cek: R07 Deposit untuk naik level atau mencairkan komisi", () => {
     expect(tanda(hasil, "R07")).toBeUndefined();
     expect(hasil.skor).toBe(0);
   });
+
+  it("dibatalkan Penyangkal: peringatan 'tidak pernah meminta deposit … untuk pencairan komisi'", async () => {
+    const hasil = await cek(
+      "Hati-hati penipuan. Kami tidak pernah meminta deposit atau top up untuk pencairan komisi. Laporkan ke HRD.",
+    );
+
+    expect(tanda(hasil, "R07")).toBeUndefined();
+    expect(hasil.skor).toBe(0);
+  });
+
+  it("tetap menangkap kecocokan kedua yang tidak didahului Penyangkal", async () => {
+    const teks =
+      "Level 1 tanpa deposit untuk naik level. Mulai level 2, kamu wajib deposit Rp100.000 untuk naik level berikutnya.";
+    const hasil = await cek(teks);
+
+    const r07 = tanda(hasil, "R07");
+    expect(r07?.kutipan).toBe("level 2, kamu wajib deposit");
+    expect(teks.slice(...r07!.rentang)).toBe(r07!.kutipan);
+    expect(hasil.label).toBe("bahaya");
+  });
 });
 
 describe("cek: R08 Bayaran per like, rating, ulasan, atau follow", () => {
