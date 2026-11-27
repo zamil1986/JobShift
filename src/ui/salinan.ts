@@ -3,6 +3,7 @@
 // "terpercaya" (spec, "Penjelasan dan kata terlarang"). Tagline dikecualikan.
 
 import type { Label, Modus } from "@/cek/tipe";
+import type { KodeGalatGambar } from "./gambar";
 
 export const TAGLINE = "JobShift — cek dulu sebelum transfer.";
 
@@ -38,3 +39,28 @@ export const JUDUL_LANGKAH = "Langkah berikutnya";
 export const JUDUL_LANGKAH_DARURAT = "Kalau sudah telanjur";
 export const JUDUL_SUDAH_TRANSFER = "Sudah telanjur transfer?";
 export const JUDUL_SUDAH_KIRIM_DATA = "Sudah telanjur kirim data?";
+
+/** Petunjuk di bawah tombol unggah screenshot (FR-02). */
+export const PETUNJUK_SCREENSHOT =
+  "PNG, JPG, atau WebP, maksimal 5 MB. Gambar dibaca di perangkat kamu dan tidak dikirim ke mana pun.";
+
+/** Pesan penolakan screenshot sebelum OCR. Batas 5 MB sama dengan UKURAN_GAMBAR_MAKS. */
+export const PESAN_GAMBAR: Record<KodeGalatGambar, string> = {
+  tipe_tidak_didukung:
+    "File ini tidak bisa dibaca. Pilih screenshot berformat PNG, JPG, atau WebP, atau tempel teks lowongannya di kotak teks.",
+  terlalu_besar:
+    "Ukuran gambar lebih dari 5 MB. Pilih screenshot yang lebih kecil, atau tempel teks lowongannya di kotak teks.",
+  kosong: "File gambar ini kosong. Pilih screenshot lain, atau tempel teks lowongannya di kotak teks.",
+};
+
+export const PESAN_OCR_BERHASIL =
+  "Teks dari screenshot sudah masuk ke kotak teks. Periksa dan perbaiki kalau ada salah baca, lalu tekan Cek.";
+
+export const PESAN_OCR_TERLALU_PANJANG =
+  "Teksnya lebih dari 3.000 karakter, jadi pangkas dulu bagian yang tidak perlu sebelum dicek.";
+
+export const PESAN_OCR_KOSONG =
+  "Tidak ada teks yang terbaca dari screenshot ini. Tempel teks lowongannya langsung di kotak teks.";
+
+export const PESAN_OCR_GAGAL =
+  "Screenshot ini gagal dibaca. Tempel teks lowongannya langsung di kotak teks, atau coba screenshot lain.";
