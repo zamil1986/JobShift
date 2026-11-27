@@ -70,6 +70,36 @@ describe("cek: R04 Gaji tidak wajar untuk kerja dalam negeri", () => {
     }
   });
 
+  it("tidak cocok untuk omzet, denda, atau gaji tahunan", async () => {
+    const omzet = await cek(
+      "Dicari kepala toko di Medan yang terbiasa mengelola omzet Rp 5 juta per hari dan menyusun laporan stok mingguan.",
+    );
+    const denda = await cek(
+      "Staf administrasi gudang di Gresik. Keterlambatan setor laporan dikenai denda Rp500.000 per hari sesuai kontrak.",
+    );
+    const tahunan = await cek(
+      "Dibutuhkan akuntan senior bersertifikat di Jakarta, pengalaman 5 tahun. Gaji 180 juta per tahun, belum termasuk bonus.",
+    );
+
+    for (const hasil of [omzet, denda, tahunan]) expect(tanda(hasil, "R04")).toBeUndefined();
+  });
+
+  it("tidak cocok untuk kalimat penyangkalan tentang gaji tinggi", async () => {
+    const hasil = await cek(
+      "Lowongan kasir di Solo. Gaji tidak sampai Rp15 juta, hanya sesuai UMK, jadi hati-hati dengan tawaran yang berlebihan.",
+    );
+
+    expect(tanda(hasil, "R04")).toBeUndefined();
+  });
+
+  it("tidak dibatalkan kalimat penyangkalan, karena bukan Aturan kritis", async () => {
+    const hasil = await cek(
+      "Lowongan admin online di Bogor tanpa pengalaman. Tidak ada potongan, gaji Rp20 juta per bulan langsung masuk rekening.",
+    );
+
+    expect(tanda(hasil, "R04")?.kutipan).toBe("gaji Rp20 juta");
+  });
+
   it("tetap cocok kalau nama negara hanya menjadi kata sifat", async () => {
     const hasil = await cek(
       "Restoran Jepang di Jakarta Selatan mencari juru masak berpengalaman. Gaji Rp 20 juta per bulan plus servis.",
@@ -125,9 +155,47 @@ describe("cek: R11 Mengatasnamakan perusahaan besar dengan kontak tidak resmi", 
       expect(hasil.label).toBe("risiko_rendah");
     }
   });
+
+  it("tidak cocok kalau nama perusahaan besar hanya menjadi tempat atau bank rekening gaji", async () => {
+    const spbu = await cek(
+      "Dicari operator SPBU Pertamina di Klaten, shift pagi dan malam. Lamaran diantar langsung atau hubungi 0812-5555-1234.",
+    );
+    const dekat = await cek(
+      "Warung makan dekat Indomaret Jalan Kaliurang mencari juru masak. Hubungi Pak Joko di 0857-1111-2222 untuk info.",
+    );
+    const rekening = await cek(
+      "CV Maju Jaya mencari staf gudang. Gaji dibayar ke rekening Bank BCA milik karyawan. Info lowongan: majujaya.cv@gmail.com.",
+    );
+
+    for (const hasil of [spbu, dekat, rekening]) expect(tanda(hasil, "R11")).toBeUndefined();
+  });
+
+  it("tidak cocok untuk kalimat penyangkalan tanpa kontak tidak resmi", async () => {
+    const hasil = await cek(
+      "PT Pertamina tidak pernah merekrut lewat email gratisan atau nomor pribadi. Lamaran hanya lewat situs karier resmi.",
+    );
+
+    expect(tanda(hasil, "R11")).toBeUndefined();
+  });
+
+  it("tidak dibatalkan kalimat penyangkalan, karena bukan Aturan kritis", async () => {
+    const hasil = await cek(
+      "Rekrutmen PT Telkom Indonesia tidak dipungut biaya. Kirim CV ke karier.telkom@gmail.com atau WA +62 812-3456-7890.",
+    );
+
+    expect(tanda(hasil, "R11")?.kutipan).toBe("karier.telkom@gmail.com");
+  });
+
+  it("mengenali PT Telkom dan nomor dengan pemisah setelah kode negara", async () => {
+    const hasil = await cek(
+      "Lowongan PT Telkom wilayah Jawa Barat untuk teknisi jaringan. Pendaftaran hanya lewat WA +62-812-9999-0000 ya.",
+    );
+
+    expect(tanda(hasil, "R11")?.kutipan).toBe("+62-812-9999-0000");
+  });
 });
 
-describe("cek: Teks loker pabrik palsu atas nama PT besar", () => {
+describe("cek: Lowongan pabrik atas nama PT besar dengan email gratisan", () => {
   it("berlabel Waspada dengan Modus terkuat Lokal", async () => {
     const teks =
       "LOWONGAN KERJA PT ASTRA HONDA MOTOR CIKARANG\nPosisi: operator produksi, lulusan SMP/SMA.\n" +

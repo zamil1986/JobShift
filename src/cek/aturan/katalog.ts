@@ -435,6 +435,10 @@ const GAJI_BULANAN_TINGGI = [
 /** ≥ Rp500 ribu: "Rp500 ribu", "750rb", "Rp500.000", "Rp1 juta", "Rp1,5 jt". */
 const NOMINAL_HARIAN_TINGGI = String.raw`(?:rp\.? ?)?${BUKAN_LANJUTAN_ANGKA}(?:[5-9]\d{2} ?(?:ribu|rb|k)|[5-9]\d{2}${RIBUAN}|\d(?:[.,]\d+)? ?(?:juta|jt)|\d${RIBUAN}${RIBUAN})`;
 const PER_HARI = String.raw`(?: ?/ ?| (?:per|tiap|setiap) )(?:hari|day)|(?: )?(?:perhari|sehari)| a day| daily`;
+/** "Gaji 180 juta per tahun" setara 15 juta sebulan. */
+const BUKAN_PER_TAHUN = String.raw`(?!(?: ?/ ?| (?:per|tiap|setiap) )(?:tahun|year)| setahun| a year| per annum| annually)`;
+/** Uang harian yang bukan bayaran: "omzet Rp 5 juta per hari", "denda Rp500.000 per hari". Juga saat dicocokkan mulai dari angkanya. */
+const BUKAN_BAYARAN = String.raw`(?<!(?:${["omzet", "omset", "denda", "biaya", "sewa", "harga", "modal", "target", "penjualan", "transaksi"].join("|")}) (?:rp\.? ?)?)`;
 
 export const R04: Aturan = {
   id: "R04",
@@ -445,9 +449,9 @@ export const R04: Aturan = {
   pakaiPenyangkal: false,
   pola: [
     // "Gaji Rp15 juta", "gaji pokok 15.000.000", "salary up to 20 million"
-    { cari: `(?:${KATA_GAJI})(?: (?:${KETERANGAN_GAJI}))*:? (?:${GAJI_BULANAN_TINGGI})`, bahasa: "id" },
+    { cari: `(?:${KATA_GAJI})(?: (?:${KETERANGAN_GAJI}))*:? (?:${GAJI_BULANAN_TINGGI})${BUKAN_PER_TAHUN}`, bahasa: "id" },
     // "Rp500 ribu per hari", "gaji harian 750rb"
-    { cari: `${NOMINAL_HARIAN_TINGGI}(?:${PER_HARI})`, bahasa: "id" },
+    { cari: `${BUKAN_BAYARAN}${NOMINAL_HARIAN_TINGGI}(?:${PER_HARI})`, bahasa: "id" },
     { cari: `(?:gaji|upah) harian:? ${NOMINAL_HARIAN_TINGGI}`, bahasa: "id" },
     { cari: "high(?:ly)? (?:salary|income|pay(?:ing)?)", bahasa: "en" },
   ],
@@ -542,51 +546,53 @@ export const R16: Aturan = {
 
 // R11: Kutipan pemicu adalah kontak tidak resmi, dan nama perusahaan besar
 // cukup ada di Teks (sering di judul, jauh dari kontak). Nama yang juga kata
-// biasa atau merek ("mandiri", "Honda", "rekening BCA") wajib didahului "PT"
-// atau "Bank", supaya sopir mobil Toyota atau ART yang bekerja mandiri tidak cocok.
-const PT = "pt\\.? (?:\\(persero\\) |persero )?";
-const PERUSAHAAN_BESAR = [
-  `(?:${PT})?(?:${[
-    "pertamina",
-    "pln",
-    "telkom indonesia",
-    "telkomsel",
-    "indosat",
-    "xl axiata",
-    "astra(?: international| honda motor| daihatsu motor)?",
-    "indofood(?: sukses makmur| cbp)?",
-    "unilever",
-    "garudafood",
-    "mayora",
-    "sampoerna",
-    "gudang garam",
-    "djarum",
-    "alfamart",
-    "sumber alfaria trijaya",
-    "indomaret",
-    "indomarco",
-    "freeport",
-    "aneka tambang",
-    "pegadaian",
-    "angkasa pura",
-    "garuda indonesia",
-    "kereta api indonesia",
-    "krakatau steel",
-    "semen indonesia",
-    "pupuk indonesia",
-    "bulog",
-    "pelindo",
-    "jasa marga",
-    "united tractors",
-    "kalbe farma",
-    "bumn",
-  ].join("|")})`,
-  `${PT}(?:${["toyota", "honda", "yamaha", "suzuki", "daihatsu", "kai", "pos indonesia", "wings", "antam", "wika", "wijaya karya", "sinar mas"].join("|")})`,
-  `(?:${PT})?bank (?:${["mandiri", "bri", "bni", "btn", "bca", "bsi", "rakyat indonesia", "negara indonesia", "tabungan negara", "central asia", "syariah indonesia"].join("|")})`,
+// biasa atau merek ("mandiri", "Honda", "Telkom") wajib didahului "PT", dan
+// bank wajib didahului "Bank", supaya sopir mobil Toyota atau ART yang bekerja
+// mandiri tidak cocok.
+const AWALAN_PT = String.raw`pt\.? (?:\(persero\) |persero )?`;
+const NAMA_BESAR = [
+  "pertamina",
+  "pln",
+  "telkom indonesia",
+  "telkomsel",
+  "indosat",
+  "xl axiata",
+  "astra(?: international| honda motor| daihatsu motor)?",
+  "indofood(?: sukses makmur| cbp)?",
+  "unilever",
+  "garudafood",
+  "mayora",
+  "sampoerna",
+  "gudang garam",
+  "djarum",
+  "alfamart",
+  "sumber alfaria trijaya",
+  "indomaret",
+  "indomarco",
+  "freeport",
+  "aneka tambang",
+  "pegadaian",
+  "angkasa pura",
+  "garuda indonesia",
+  "kereta api indonesia",
+  "krakatau steel",
+  "semen indonesia",
+  "pupuk indonesia",
+  "bulog",
+  "pelindo",
+  "jasa marga",
+  "united tractors",
+  "kalbe farma",
+  "bumn",
 ].join("|");
+const NAMA_PERLU_PT = ["toyota", "honda", "yamaha", "suzuki", "daihatsu", "telkom", "kai", "pos indonesia", "wings", "antam", "wika", "wijaya karya", "sinar mas"].join("|");
+const NAMA_BANK = ["mandiri", "bri", "bni", "btn", "bca", "bsi", "rakyat indonesia", "negara indonesia", "tabungan negara", "central asia", "syariah indonesia"].join("|");
+/** Nama yang hanya menunjuk tempat atau rekening gaji: "SPBU Pertamina", "dekat Indomaret", "rekening Bank BCA". */
+const BUKAN_PEREKRUT = ["spbu", "dekat", "depan", "samping", "sebelah", "belakang", "seberang", "rekening", "tabungan", "payroll", "atm", "kartu"].join("|");
+const PERUSAHAAN_BESAR = `(?<!(?:${BUKAN_PEREKRUT}) )(?:(?:${AWALAN_PT})?(?:${NAMA_BESAR})|${AWALAN_PT}(?:${NAMA_PERLU_PT})|(?:${AWALAN_PT})?bank (?:${NAMA_BANK}))`;
 const EMAIL_GRATIS = String.raw`[a-z0-9._%+-]+@(?:gmail|googlemail|yahoo|ymail|rocketmail|hotmail|outlook|live|aol|icloud|proton(?:mail)?)(?:\.[a-z]{2,}){1,2}`;
 /** Nomor HP Indonesia, sama dengan Penyamaran: (+62|62|0)8 + 7–11 digit, boleh dipisah spasi atau tanda hubung. */
-const NOMOR_PRIBADI = String.raw`(?:\+62|62|0) ?8(?:[ -]?\d){7,11}`;
+const NOMOR_PRIBADI = String.raw`(?:\+62|62|0)[ -]?8(?:[ -]?\d){7,11}`;
 
 export const R11: Aturan = {
   id: "R11",
