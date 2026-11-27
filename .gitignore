@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# dokumen lomba dan proposal (biner besar, disimpan di luar git)
+/PROPOSAL SOFTWARE DEVELOPMENT SEVENT X 2026.docx
+/SEVENT X - Software Development Rulebook.pdf
+/.scratch/proposal/*.pdf
+/.scratch/proposal/*.docx

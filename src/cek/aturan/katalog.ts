@@ -5,7 +5,7 @@
 // Alasan tampil di UI: bahasa awam, tanpa ID aturan, dan tanpa kata "aman",
 // "asli", "legit", atau "terpercaya".
 
-import type { Aturan } from "./mesin";
+import type { Aturan, Pola } from "./mesin";
 
 /** Pemisah dalam daftar: "seragam, medical, atau pelatihan". */
 const PEMISAH = String.raw`(?: ?[,/&] ?| (?:atau|dan|serta|or|and) | ?, (?:atau|dan|or|and) )`;
@@ -34,6 +34,8 @@ const DATA_RAHASIA = ["kode otp", "otp", "pin(?! lokasi| point| map)", "kata san
 // pola Indonesia, supaya "kirim no HP dan PIN" tetap tertangkap.
 const DATA_RAHASIA_EN = ["otp code", "verification code", "security code"].join("|");
 
+const DITANGGUNG_PERUSAHAAN = String.raw`(?! (?:ditanggung|disediakan|digratiskan|gratis)| dibayar(?:kan)? (?:oleh )?(?:perusahaan|kantor|pt))`;
+
 export const R01: Aturan = {
   id: "R01",
   alasan: "Meminta uang sebelum kamu resmi diterima kerja.",
@@ -42,7 +44,10 @@ export const R01: Aturan = {
   modus: "lokal",
   pakaiPenyangkal: true,
   pola: [
-    { cari: `(?:biaya|uang) ${daftar(JENIS_BIAYA)}`, bahasa: "id" },
+    // "biaya pendaftaran, biaya seragam" satu daftar, supaya Penyangkal di depannya
+    // berlaku untuk seluruh daftar walau koma memutus jangkauannya.
+    // "Biaya seragam ditanggung perusahaan" bukan permintaan uang.
+    { cari: `(?:biaya|uang) ${daftar(`(?:(?:biaya|uang) )?(?:${JENIS_BIAYA})`)}${DITANGGUNG_PERUSAHAAN}`, bahasa: "id" },
     { cari: "(?:transfer|bayar|membayar) (?:dulu|terlebih dahulu|di awal|di muka)", bahasa: "id" },
     {
       cari: `${daftar("registration|training|uniform|administration|admin|processing|medical")} fees?`,
@@ -64,247 +69,668 @@ export const R02: Aturan = {
   ],
 };
 
-export const R03: Aturan = {
-  id: "R03",
-  alasan: "Menawarkan kerja ke luar negeri dengan visa kunjungan atau wisata, bukan visa kerja resmi.",
-  bobot: 60,
-  kritis: true,
-  modus: "luar_negeri",
-  pakaiPenyangkal: false,
-  pola: [
-    { cari: "visa (?:turis|wisata|kunjungan|on arrival|voa|liburan)", bahasa: "id" },
-    { cari: "(?:tourist|visit|visitor) visa|visa on arrival|visa[- ]free (?:untuk kerja|for work|to work)", bahasa: "en" },
-  ],
-};
-
-const NEGARA_KOTA_LUAR_NEGERI =
-  "luar negeri|overseas|abroad|kamboja|cambodia|myanmar|laos|thailand|poipet|sihanoukville|bavet|malaysia|singapura|singapore|taiwan|hong ?kong|jepang|japan|korea|arab saudi|saudi|qatar|dubai|uea|australia|polandia|jerman";
-
-export const R04: Aturan = {
-  id: "R04",
-  alasan: "Menjanjikan gaji sangat tinggi untuk ukuran kerja dalam negeri tanpa syarat keahlian khusus.",
-  bobot: 25,
-  kritis: false,
-  modus: "lokal",
-  pakaiPenyangkal: false,
-  pola: [
-    {
-      cari: `(?<!(?:${NEGARA_KOTA_LUAR_NEGERI}).{0,3000})gaji (?:rp ?)?(?:1[5-9]|[2-9][0-9])(?:[.,]000[.,]000| ?(?:juta|jt))(?:/bulan| per bulan)?(?!.*\\b(?:${NEGARA_KOTA_LUAR_NEGERI})\\b)`,
-      bahasa: "id",
-    },
-    {
-      cari: `(?<!(?:${NEGARA_KOTA_LUAR_NEGERI}).{0,3000})(?:rp ?)?(?:[5-9]00 ?(?:ribu|rb)|[12] ?(?:juta|jt))(?:/hari| per hari)(?!.*\\b(?:${NEGARA_KOTA_LUAR_NEGERI})\\b)`,
-      bahasa: "id",
-    },
-    {
-      cari: `(?<!(?:${NEGARA_KOTA_LUAR_NEGERI}).{0,3000})high salary (?:no experience|without experience)(?!.*\\b(?:${NEGARA_KOTA_LUAR_NEGERI})\\b)`,
-      bahasa: "en",
-    },
-  ],
-};
-
-export const R05: Aturan = {
-  id: "R05",
-  alasan: "Menjanjikan gaji luar negeri puluhan juta tanpa syarat pengalaman atau keahlian.",
-  bobot: 25,
-  kritis: false,
-  modus: "luar_negeri",
-  pakaiPenyangkal: false,
-  pola: [
-    {
-      cari: "gaji (?:rp ?)?[1-9][0-9] ?(?:juta|jt)[^.!?]{0,40}tanpa (?:pengalaman|skill|keahlian|ijazah)",
-      bahasa: "id",
-    },
-    {
-      cari: "tanpa (?:pengalaman|skill|keahlian)[^.!?]{0,40}gaji (?:rp ?)?[1-9][0-9] ?(?:juta|jt)",
-      bahasa: "id",
-    },
-  ],
-};
-
-const NOMOR_HP_ID = String.raw`(?:\+?62|0)8[0-9]{1,3}(?:[- ]?[0-9]{3,4}){2,3}`;
-
-export const R06a: Aturan = {
-  id: "R06a",
-  alasan: "Kontak pendaftaran hanya lewat nomor pribadi atau chat admin, bukan kanal resmi perusahaan.",
-  bobot: 15,
-  kritis: false,
-  pakaiPenyangkal: false,
-  pola: [
-    {
-      cari: `(?:hubungi|chat|japri|kirim(?:kan)? (?:ke|via)|daftar (?:ke|via|lewat)|konfirmasi ke) (?:no(?:mor)? )?(?:wa|whatsapp)(?: admin)?(?: ${NOMOR_HP_ID})?`,
-      bahasa: "id",
-    },
-    { cari: `(?:wa|whatsapp) ${NOMOR_HP_ID}`, bahasa: "id" },
-    { cari: `(?:hubungi|chat|japri|kontak) admin(?: kami| pendaftaran| rekrutmen)?(?: di ${NOMOR_HP_ID})?`, bahasa: "id" },
-    {
-      cari: `(?:contact|chat|reach|message|apply)(?: us| admin)? (?:via|on|through) whatsapp(?: ${NOMOR_HP_ID})?`,
-      bahasa: "en",
-    },
-  ],
-};
+// R06b: Telegram yang hanya disebut ("mengelola akun Telegram perusahaan")
+// bukan ajakan pindah, jadi harus didahului kata kerja ajakan.
+const PINDAH = ["lanjut", "lanjutkan", "dilanjutkan", "pindah", "beralih"];
+const AJAKAN_PINDAH = [...PINDAH, "gabung", "bergabung", "join", "masuk", "hubungi", "kontak", "chat"].join("|");
+const SAPAAN = ["kami", "admin", "saya", "kak", "kakak", "hrd", "mentor", "kita"].join("|");
+const AJAKAN_PINDAH_EN = ["move", "moving", "continue", "switch", "join", "chat", "contact", "message", "text", "reach", "talk"].join("|");
 
 export const R06b: Aturan = {
   id: "R06b",
-  alasan: "Meminta pelamar pindah ke Telegram atau grup chat lain untuk melanjutkan proses kerja.",
+  alasan: "Memintamu pindah ke Telegram atau aplikasi chat lain, tempat pelaku lebih mudah menghilang.",
   bobot: 20,
   kritis: false,
   modus: "tugas",
   pakaiPenyangkal: false,
   pola: [
     {
-      cari: "(?:lanjut(?:kan)?|pindah|gabung|join|masuk|hubungi|chat) (?:di |ke )?(?:grup |group |channel |akun )?telegram",
+      cari: `(?:${AJAKAN_PINDAH})(?: (?:${SAPAAN}))?(?: (?:ke|di|lewat|via|melalui|dalam))?(?: (?:grup|group|channel|kanal|akun|aplikasi))? telegram`,
       bahasa: "id",
     },
-    { cari: "(?:move|continue|join|contact(?: us)?) (?:to |on |via )?(?:our )?telegram(?: group| channel)?", bahasa: "en" },
+    { cari: `(?:${PINDAH.join("|")}) (?:ke|di) aplikasi (?:chat )?lain`, bahasa: "id" },
+    { cari: "t\\.me/[a-z0-9_]+", bahasa: "id" },
+    {
+      cari: `(?:${AJAKAN_PINDAH_EN})(?: (?:us|me|our admin|the admin|hr))?(?: (?:to|on|via|in|at|through))?(?: (?:our|the|my))?(?: (?:group|channel))? telegram`,
+      bahasa: "en",
+    },
   ],
 };
+
+/** Nominal yang ikut dikutip, misalnya "Rp200.000" atau "$5". Pola tidak boleh berakhir di "rp" (batas kata). */
+const NOMINAL = String.raw`(?:rp|\$) ?\d(?:[\d.,]*\d)?(?: ?(?:rb|ribu|k|jt|juta))?`;
+
+/** Satu kata yang tidak menutup kalimat (tidak berakhir ".", "!", "?"). "Rp200.000" tetap satu kata. */
+const KATA_SEKALIMAT = String.raw`\S*[^\s.!?]`;
+
+/**
+ * Celah ≤ n kata dalam satu kalimat, boleh diawali tanda baca yang menempel
+ * ("komisi, lakukan top up"). Malas supaya kutipan sependek mungkin.
+ */
+const celah = (n: number) => `[,;:]?(?: ${KATA_SEKALIMAT}){0,${n}}?`;
+
+/** Seperti `celah`, tetapi tidak melewati kata utuh dari `larangan`. */
+const celahTanpa = (n: number, larangan: string) =>
+  String.raw`[,;:]?(?: (?!(?:${larangan})(?![\p{L}\p{N}]))${KATA_SEKALIMAT}){0,${n}}?`;
+
+// R07 kritis, jadi kata tunggal ("deposit", "top up", "VIP") tidak cukup:
+// teller bank, konter pulsa, dan ruang VIP hotel bukan penipuan. Penyangkal
+// berlaku (ADR-0002) supaya peringatan "tidak pernah meminta deposit …" batal.
+// Uang masuk harus menjadi syarat tujuan Modus Tugas dalam satu kalimat.
+const UANG_MASUK = ["(?:men)?deposit(?:kan)?", "top ?-?up", "isi (?:ulang )?saldo", "setor (?:dana|saldo|uang)"].join("|");
+const TUJUAN_TUGAS = [
+  // "Upgrade akun" saja wajar di CS e-wallet; harus menuju level atau VIP.
+  "(?:naik|naikkan|menaikkan|upgrade)(?: ke)?(?: akun)? (?:level|vip)(?! (?:jabatan|karier|karir))",
+  "level ?\\d",
+  "vip ?\\d",
+  "member vip",
+  "(?:men)?cairkan (?:komisi|bonus|keuntungan)",
+  "(?:pencairan|penarikan|tarik|menarik) (?:komisi|bonus|keuntungan)",
+  "(?:komisi|bonus|keuntungan)(?: (?:bisa|dapat|langsung|segera))? (?:dicairkan|ditarik)",
+  "membuka (?:level|tugas)",
+].join("|");
+const KATA_TUJUAN = ["untuk", "supaya", "agar", "biar", "sebelum", "baru"].join("|");
+const KATA_SYARAT = ["setelah", "sesudah", "kalau", "jika", "asalkan", "wajib", "harus", "perlu", "syaratnya"].join("|");
+const UANG_MASUK_EN = ["deposit", "top ?-?up", "recharge"].join("|");
+const TUJUAN_TUGAS_EN = [
+  "upgrade(?: your account)?(?: to)? (?:vip|level)",
+  "level up",
+  "next level",
+  "vip ?\\d",
+  "withdraw (?:your )?(?:commissions?|earnings|profits?|bonus)",
+  "unlock (?:the )?(?:next )?(?:level|tasks?)",
+].join("|");
+const KATA_TUJUAN_EN = ["to", "for", "so", "before"].join("|");
+const KATA_SYARAT_EN = ["after", "once", "if", "must", "need to", "have to"].join("|");
+
+/**
+ * Uang hanya cocok sebagai syarat tujuan, dan urutan mana pun wajib memakai
+ * kata penghubung, supaya daftar tugas CS ("upgrade akun dan top up saldo")
+ * tidak cocok:
+ * - uang, kata tujuan, tujuan: "deposit Rp200.000 untuk naik level";
+ * - kata tujuan, tujuan, uang: "untuk mencairkan komisi, lakukan top up";
+ * - tujuan, kata syarat, uang: "komisi bisa dicairkan setelah kamu deposit".
+ */
+const uangSebagaiSyarat = (uang: string, tujuan: string, kataTujuan: string, kataSyarat: string) => [
+  `(?:${uang})${celah(4)} (?:${kataTujuan})${celah(3)} (?:${tujuan})`,
+  `(?:${kataTujuan}) (?:${tujuan})${celah(6)} (?:${uang})`,
+  `(?:${tujuan})${celah(3)} (?:${kataSyarat})${celah(3)} (?:${uang})`,
+];
 
 export const R07: Aturan = {
   id: "R07",
-  alasan: "Meminta deposit atau top-up uang untuk naik level tugas atau mencairkan komisi.",
+  alasan: "Meminta deposit atau top-up supaya kamu bisa naik level atau mencairkan komisi.",
   bobot: 60,
   kritis: true,
   modus: "tugas",
-  pakaiPenyangkal: false,
+  pakaiPenyangkal: true,
   pola: [
-    {
-      cari: "(?:deposit|top[- ]?up|isi saldo) (?:untuk |guna |supaya |agar )?(?:naik(?:kan)? level|buka tugas|cairkan komisi|mencairkan komisi|upgrade vip|level vip)",
-      bahasa: "id",
-    },
-    {
-      cari: "(?:naik(?:kan)? level|level vip|cairkan komisi|mencairkan komisi) (?:dengan |lewat |wajib )?(?:deposit|top[- ]?up|isi saldo)",
-      bahasa: "id",
-    },
+    ...uangSebagaiSyarat(UANG_MASUK, TUJUAN_TUGAS, KATA_TUJUAN, KATA_SYARAT).map((cari) => ({ cari, bahasa: "id" as const })),
+    ...uangSebagaiSyarat(UANG_MASUK_EN, TUJUAN_TUGAS_EN, KATA_TUJUAN_EN, KATA_SYARAT_EN).map((cari) => ({
+      cari,
+      bahasa: "en" as const,
+    })),
   ],
 };
 
+// R08: kegiatan saja ("like", "follow up", "rating driver") wajar di lowongan
+// biasa, jadi harus berpasangan dengan bayaran.
+const KEGIATAN = daftar("like|likes|subscribe|rating|ulasan|review|follow|komen|komentar|share");
+const KEGIATAN_EN = "(?:likes?|subscribes?|ratings?|reviews?|follows?|comments?|tasks?|videos?)";
+const BAYARAN = ["dibayar", "bayaran", "komisi", "upah", "imbalan", "dapat", "dapatkan", "mendapat", "mendapatkan", "dapet", "cuan"].join("|");
+const PER = "(?:per|tiap|setiap|untuk setiap|untuk tiap)";
+
 export const R08: Aturan = {
   id: "R08",
-  alasan: "Menawarkan bayaran per like, subscribe, rating, ulasan, atau follow media sosial.",
+  alasan: "Menjanjikan bayaran untuk setiap like, rating, ulasan, atau follow.",
   bobot: 25,
   kritis: false,
   modus: "tugas",
   pakaiPenyangkal: false,
   pola: [
+    // "dibayar Rp5.000 per like", "komisi tiap ulasan"
+    { cari: `(?:${BAYARAN})(?: ${NOMINAL})? ${PER} ${KEGIATAN}`, bahasa: "id" },
+    // "like dan subscribe dibayar", "rating dapat Rp3.000"
+    { cari: `${KEGIATAN} (?:dibayar|berbayar|dihargai|(?:dapat|dapet|=) ${NOMINAL})`, bahasa: "id" },
+    // "Rp5.000 per like", "Rp10.000/tugas"
+    { cari: `${NOMINAL} ?(?:${PER}|/) ?(?:${KEGIATAN}|tugas|task|video)`, bahasa: "id" },
+    // "per tugas Rp12.000"
+    { cari: `${PER} (?:tugas|task) ${NOMINAL}`, bahasa: "id" },
+    { cari: `(?:paid|earn|earning|make)(?: ${NOMINAL})? (?:per|for each|for every) ${KEGIATAN_EN}`, bahasa: "en" },
+    { cari: `${NOMINAL} ?(?:per|for each|for every|/) ?${KEGIATAN_EN}`, bahasa: "en" },
+  ],
+};
+
+/** Negara dan kota tujuan rawan TPPO untuk kerja online (R16). Thailand hanya di perbatasan. */
+const NEGARA_RAWAN = [
+  "kamboja",
+  "cambodia",
+  "phnom penh",
+  "sihanoukville",
+  "bavet",
+  "poipet",
+  "myanmar",
+  "burma",
+  "myawaddy",
+  "shwe kokko",
+  "laos",
+  "bokeo",
+  "segitiga emas",
+  "golden triangle",
+  "mae sot",
+  "perbatasan (?:thailand|thai|myanmar|kamboja|laos)",
+  "thailand perbatasan",
+  "thai border",
+].join("|");
+
+/** Kata benda yang membuat nama negara menjadi kata sifat: "restoran Jepang", "skincare Korea". */
+const NEGARA_SEBAGAI_SIFAT = [
+  "bahasa",
+  "wisatawan",
+  "turis",
+  "tamu",
+  "restoran",
+  "resto",
+  "masakan",
+  "makanan",
+  "kuliner",
+  "produk",
+  "toko",
+  "skincare",
+  "kosmetik",
+  "drama",
+  "budaya",
+  "gaya",
+  "mobil",
+  "motor",
+  "merek",
+  "brand",
+].join("|");
+
+/**
+ * Penanda luar negeri (spec, "Mesin Aturan"): nama negara atau kota tujuan
+ * umum, atau kata "luar negeri"/"overseas". Sumber regex untuk Teks normal,
+ * tanpa batas kata; bungkus dengan `diTeks()` atau batas kata sendiri. Nama
+ * negara yang menjadi kata sifat ("restoran Jepang", "wisatawan mancanegara")
+ * tidak dihitung. Dipakai R05 dan R12, dan oleh R04 untuk menolak gaji luar
+ * negeri.
+ *
+ * "Inggris" sengaja tidak ada karena juga berarti bahasa Inggris.
+ */
+export const PENANDA_LUAR_NEGERI = `(?<!(?:${NEGARA_SEBAGAI_SIFAT}) )(?:${[
+  "luar negeri",
+  "mancanegara",
+  "overseas",
+  "abroad",
+  // Asia Tenggara
+  "malaysia",
+  "kuala lumpur",
+  "johor",
+  "penang",
+  "sabah",
+  "sarawak",
+  "singapura",
+  "singapore",
+  "brunei",
+  "thailand",
+  "bangkok",
+  NEGARA_RAWAN,
+  "vietnam",
+  "filipina",
+  "philippines",
+  // Asia Timur
+  "makau",
+  "macau",
+  "hong ?kong",
+  "taiwan",
+  "taipei",
+  "jepang",
+  "japan",
+  "tokyo",
+  "osaka",
+  "korea(?: selatan)?",
+  "south korea",
+  "seoul",
+  "busan",
+  "china",
+  "tiongkok",
+  // Timur Tengah
+  "arab saudi",
+  "saudi(?: arabia)?",
+  "riyadh",
+  "jeddah",
+  "uni emirat arab",
+  "uae",
+  "dubai",
+  "abu dhabi",
+  "qatar",
+  "doha",
+  "kuwait",
+  "oman",
+  "bahrain",
+  "turki",
+  // Lainnya
+  "australia",
+  "selandia baru",
+  "new zealand",
+  "polandia",
+  "poland",
+  "jerman",
+  "germany",
+  "belanda",
+  "rusia",
+  "amerika(?: serikat)?",
+  "kanada",
+  "canada",
+].join("|")})`;
+
+/** Kata utuh dari `sumber` muncul di mana pun dalam Teks, sebelum atau sesudah posisi ini. */
+const diTeks = (sumber: string) => {
+  const kata = String.raw`(?<![\p{L}\p{N}])(?:${sumber})(?![\p{L}\p{N}])`;
+  // Teks normal tidak memuat baris baru, jadi "." menjangkau seluruh Teks.
+  return `(?:(?<=${kata}.*)|(?=.*${kata}))`;
+};
+
+/** Pola hanya cocok kalau Teks memuat penanda luar negeri. */
+const diLuarNegeri = (pola: Pola[]): Pola[] =>
+  pola.map((p) => ({ ...p, cari: `(?:${p.cari})${diTeks(PENANDA_LUAR_NEGERI)}` }));
+
+// R03 kritis, jadi "visa turis" saja tidak cukup: staf biro perjalanan memang
+// mengurus visa turis. Visa harus menjadi cara berangkat atau bekerja.
+// Penyangkal berlaku (ADR-0002) supaya peringatan "jangan berangkat pakai visa
+// turis" batal.
+const VISA_KUNJUNGAN = ["turis", "wisata", "kunjungan", "pelancong", "on arrival", "voa", "free"].join("|");
+// "masuk" tidak dipakai: petugas bandara membantu turis yang masuk dengan visa on arrival.
+const BERANGKAT_KERJA = ["berangkat", "diberangkatkan", "kerja", "bekerja", "dipekerjakan"].join("|");
+/**
+ * Yang berangkat adalah pelanggan, bukan pekerja: "membantu pelanggan berangkat
+ * dengan visa turis", "melayani tamu yang berangkat dengan visa turis".
+ */
+const BUKAN_PEKERJA = ["pelanggan", "klien", "turis", "wisatawan", "tamu", "jamaah", "jemaah", "penumpang", "customer", "yang"].join("|");
+const CARA_VISA = ["pakai", "memakai", "menggunakan", "dengan", "lewat", "via"].join("|");
+// "Holiday" tidak dipakai: Working Holiday Visa memang mengizinkan bekerja.
+const VISA_KUNJUNGAN_EN = ["tourist", "visit", "visitor", "visiting"].join("|");
+
+export const R03: Aturan = {
+  id: "R03",
+  alasan: "Mengajakmu bekerja di luar negeri dengan visa turis atau kunjungan, padahal visa itu tidak mengizinkan bekerja.",
+  bobot: 60,
+  kritis: true,
+  modus: "luar_negeri",
+  pakaiPenyangkal: true,
+  pola: [
+    // "berangkat pakai visa wisata", "bekerja di Kamboja dengan visa turis"
     {
-      cari: "(?:like|subscribe|follow|rating|ulasan|review)(?:[,/ ]+(?:dan |atau )?(?:like|subscribe|follow|rating|ulasan|review))* dibayar",
+      cari: `(?<!(?:${BUKAN_PEKERJA}) )(?:${BERANGKAT_KERJA})${celahTanpa(4, BUKAN_PEKERJA)} (?:${CARA_VISA}) visa (?:${VISA_KUNJUNGAN})`,
       bahasa: "id",
     },
+    // "cukup visa turis", "modal visa on arrival"
+    { cari: `(?:cukup|hanya|modal)(?: (?:${CARA_VISA}))? visa (?:${VISA_KUNJUNGAN})`, bahasa: "id" },
+    // "visa kunjungan untuk kerja", "bebas visa untuk kerja". Kata "bebas" di
+    // awal kecocokan bukan Penyangkal, karena Penyangkal dicari sebelum kecocokan.
+    { cari: `(?:visa (?:${VISA_KUNJUNGAN})|bebas visa)${celah(3)} (?:untuk|buat|sambil) (?:kerja|bekerja)`, bahasa: "id" },
+    { cari: `(?:on|with|using|via|under) (?:a |the )?(?:${VISA_KUNJUNGAN_EN}) visa`, bahasa: "en" },
+    { cari: `(?:(?:${VISA_KUNJUNGAN_EN}) visas?|visa-free|visa free)${celah(3)} (?:to|for) work`, bahasa: "en" },
+  ],
+};
+
+// R05: tiga syarat sering berada di baris berbeda, jadi Kutipan pemicu adalah
+// nominal gaji, dan tanpa-keahlian serta penanda luar negeri cukup ada di Teks.
+const TANPA_KEAHLIAN = [
+  "tanpa (?:pengalaman|skill|keahlian|keterampilan|ijazah)",
+  "tidak (?:perlu|butuh|harus|wajib) (?:pengalaman|berpengalaman|skill|keahlian)",
+  "no (?:experience|skills?)(?: (?:needed|required))?",
+  "without (?:experience|skills?)",
+].join("|");
+const KETERANGAN_GAJI = [
+  "mulai",
+  "dari",
+  "hingga",
+  "sampai",
+  "sebesar",
+  "pokok",
+  "bersih",
+  "bulanan",
+  "per bulan",
+  "sekitar",
+  "capai",
+  "mencapai",
+  "s/d",
+  "up to",
+  "from",
+  "around",
+].join("|");
+/** Dua digit juta: "Rp 25 juta", "20-30 juta", "35 million", atau "Rp18.000.000". */
+const JUTA_DUA_DIGIT = [
+  String.raw`(?:rp\.? ?)?\d{2}(?:[.,]\d+)?(?: ?(?:-|–|s/d|sampai|hingga|to) ?(?:rp\.? ?)?\d{2,3}(?:[.,]\d+)?)? ?(?:juta|jt|million)`,
+  String.raw`rp\.? ?\d{2}\.\d{3}\.\d{3}`,
+].join("|");
+
+export const R05: Aturan = {
+  id: "R05",
+  alasan: "Menjanjikan gaji puluhan juta di luar negeri tanpa meminta pengalaman atau keahlian apa pun.",
+  bobot: 25,
+  kritis: false,
+  modus: "luar_negeri",
+  pakaiPenyangkal: false,
+  pola: diLuarNegeri([
+    { cari: `(?:gaji|penghasilan|pendapatan)(?: (?:${KETERANGAN_GAJI}))*:? (?:${JUTA_DUA_DIGIT})${diTeks(TANPA_KEAHLIAN)}`, bahasa: "id" },
+    { cari: `(?:salary|income)(?: (?:${KETERANGAN_GAJI}))*:? (?:${JUTA_DUA_DIGIT})${diTeks(TANPA_KEAHLIAN)}`, bahasa: "en" },
+  ]),
+};
+
+// R04: nominal cocok kalau langsung mengikuti kata gaji ("Gaji Rp15 juta"), atau
+// kalau diikuti satuan waktu ("Rp15 juta per bulan", "Rp500 ribu per hari"),
+// selama tidak didahului kata seperti omzet atau cicilan. Gaji luar negeri
+// dinilai R05, bukan R04.
+const KATA_GAJI = ["gaji", "penghasilan", "pendapatan", "upah", "salary", "income", "take home pay", "thp"].join("|");
+/** Keterangan gaji R05 ditambah "bisa"/"dapat": "Gaji bisa mencapai Rp15 juta". Daftar R05 tidak ikut berubah. */
+const KETERANGAN_GAJI_R04 = [KETERANGAN_GAJI, "bisa", "dapat"].join("|");
+/** Angka di depan "juta" tidak boleh lanjutan angka lain: "Rp4,25 juta" bukan "25 juta". */
+const BUKAN_LANJUTAN_ANGKA = String.raw`(?<![\d.,])`;
+const RIBUAN = String.raw`[.,]\d{3}`;
+/** ≥ Rp15 juta: "Rp15 juta", "20-30 jt", "15.000.000", "Rp15000000", "25 million". */
+const GAJI_BULANAN_TINGGI = [
+  String.raw`(?:(?:rp\.? ?)?\d+(?:[.,]\d+)? ?(?:juta|jt)? ?(?:-|–|s/d|sampai|hingga|to) ?)?(?:rp\.? ?)?${BUKAN_LANJUTAN_ANGKA}(?:1[5-9]|[2-9]\d|[1-9]\d{2})(?:[.,]\d+)? ?(?:juta|jt|million)`,
+  String.raw`(?:rp\.? ?)?${BUKAN_LANJUTAN_ANGKA}(?:1[5-9]|[2-9]\d|[1-9]\d{2})${RIBUAN}${RIBUAN}`,
+  String.raw`rp\.? ?(?:1[5-9]|[2-9]\d|[1-9]\d{2})\d{6}`,
+].join("|");
+/** ≥ Rp500 ribu: "Rp500 ribu", "750rb", "Rp500.000", "Rp1 juta", "Rp1,5 jt". */
+const NOMINAL_HARIAN_TINGGI = String.raw`(?:rp\.? ?)?${BUKAN_LANJUTAN_ANGKA}(?:[5-9]\d{2} ?(?:ribu|rb|k)|[5-9]\d{2}${RIBUAN}|\d(?:[.,]\d+)? ?(?:juta|jt)|\d${RIBUAN}${RIBUAN})`;
+const PER_HARI = String.raw`(?: ?/ ?| (?:per|tiap|setiap) )(?:hari|day)|(?: )?(?:perhari|sehari)| a day| daily`;
+const PER_BULAN = String.raw`(?: ?/ ?| (?:per|tiap|setiap) )(?:bulan|bln|month)|(?: )?(?:perbulan|sebulan)| a month| monthly`;
+/** "Gaji 180 juta per tahun" setara 15 juta sebulan. */
+const BUKAN_PER_TAHUN = String.raw`(?!(?: ?/ ?| (?:per|tiap|setiap) )(?:tahun|year)| setahun| a year| per annum| annually)`;
+const BUKAN_BAYARAN_KATA = [
+  "omzet",
+  "omset",
+  "denda",
+  "biaya",
+  "sewa",
+  "harga",
+  "modal",
+  "target",
+  "penjualan",
+  "transaksi",
+  "cicilan",
+  "tagihan",
+  "anggaran",
+  "budget",
+  "pinjaman",
+  "kredit",
+  "plafon",
+  "premi",
+  "iuran",
+].join("|");
+/**
+ * Awal nominal tanpa kata gaji. Bukan uang lain ("omzet Rp 5 juta per hari",
+ * "cicilan Rp20 juta per bulan"), juga saat dicocokkan mulai dari angkanya,
+ * dan bukan ujung rentang ("omzet 10-20 juta" tidak cocok sebagai "20 juta").
+ */
+const AWAL_NOMINAL = String.raw`(?<!(?:${BUKAN_BAYARAN_KATA}) (?:rp\.? ?)?)(?<!\d ?(?:-|–|s/d|sampai|hingga|to) ?(?:rp\.? ?)?)`;
+
+export const R04: Aturan = {
+  id: "R04",
+  alasan: "Menjanjikan gaji yang jauh di atas wajar untuk pekerjaan di dalam negeri.",
+  bobot: 25,
+  kritis: false,
+  modus: "lokal",
+  pakaiPenyangkal: false,
+  pola: [
+    // "Gaji Rp15 juta", "gaji pokok 15.000.000", "salary up to 20 million"
+    { cari: `(?:${KATA_GAJI})(?: (?:${KETERANGAN_GAJI_R04}))*:? (?:${GAJI_BULANAN_TINGGI})${BUKAN_PER_TAHUN}`, bahasa: "id" },
+    // "bisa dapat Rp15 juta per bulan", "15.000.000/bulan"
+    { cari: `${AWAL_NOMINAL}(?:${GAJI_BULANAN_TINGGI})(?:${PER_BULAN})`, bahasa: "id" },
+    // "Rp500 ribu per hari", "gaji harian 750rb"
+    { cari: `${AWAL_NOMINAL}${NOMINAL_HARIAN_TINGGI}(?:${PER_HARI})`, bahasa: "id" },
+    { cari: `(?:gaji|upah) harian:? ${NOMINAL_HARIAN_TINGGI}`, bahasa: "id" },
+    { cari: "high(?:ly)? (?:salary|income|pay(?:ing)?)", bahasa: "en" },
+  ],
+  kecualiJika: { cari: PENANDA_LUAR_NEGERI, bahasa: "id" },
+};
+
+// R12: "berangkat cepat" atau "tiket ditanggung" juga muncul di lowongan dalam
+// negeri, jadi Teks harus memuat penanda luar negeri.
+const JALUR_RESMI = daftar("pt|p3mi|pjtki|pptkis|agen|agensi|lpk|sponsor|kp2mi|bp2mi");
+const WAKTU_CEPAT = [
+  "cepat",
+  "secepatnya",
+  "kilat",
+  "segera",
+  "dalam \\d+ (?:hari|minggu)",
+  "\\d+ (?:hari|minggu) lagi",
+  "minggu (?:ini|depan)",
+  "bulan ini",
+  "besok",
+  "hari ini",
+].join("|");
+/** "Tiket pesawat dibayar sendiri" justru jalur biasa. */
+const BUKAN_SENDIRI = "(?! sendiri| oleh (?:pekerja|peserta|calon pekerja|kamu|anda))";
+const DITANGGUNG = ["ditanggung", "dibayar", "dibayarin", "dibayari", "dibiayai", "dibelikan", "disediakan", "gratis"].join("|");
+const DIURUS_EN = ["arranged", "processed", "handled", "provided", "covered", "paid", "free"].join("|");
+
+export const R12: Aturan = {
+  id: "R12",
+  alasan: "Menjanjikan proses berangkat ke luar negeri yang cepat atau serba diurus, di luar jalur penempatan resmi.",
+  bobot: 25,
+  kritis: false,
+  modus: "luar_negeri",
+  pakaiPenyangkal: false,
+  pola: diLuarNegeri([
+    // "berangkat cepat", "keberangkatan dalam 2 minggu", "langsung berangkat"
+    { cari: `(?:berangkat|keberangkatan|terbang|diberangkatkan)(?: (?:bisa|lebih))? (?:${WAKTU_CEPAT})`, bahasa: "id" },
+    { cari: "(?:proses (?:cepat|kilat|singkat),? )?langsung (?:berangkat|terbang|diberangkatkan)", bahasa: "id" },
+    // "tanpa lewat PT atau P3MI"
+    { cari: `tanpa (?:lewat |melalui |perlu |harus )?${JALUR_RESMI}`, bahasa: "id" },
+    // "paspor diurus", "gratis pembuatan paspor"
+    { cari: `paspor (?:diurus|diuruskan|dibuatkan|dibantu|disiapkan|ditanggung|dibiayai|gratis)${BUKAN_SENDIRI}`, bahasa: "id" },
+    { cari: "gratis (?:pembuatan |pengurusan )?paspor", bahasa: "id" },
+    // "tiket pesawat ditanggung", "gratis tiket keberangkatan"
+    { cari: `tiket(?: (?:pesawat|keberangkatan|berangkat))?(?: (?:pp|pulang pergi|sekali jalan))? (?:${DITANGGUNG})${BUKAN_SENDIRI}`, bahasa: "id" },
+    { cari: "gratis tiket (?:pesawat|keberangkatan|berangkat)", bahasa: "id" },
+    { cari: `(?:fly|depart|leave)(?: out)? (?:immediately|asap|within \\d+ (?:days?|weeks?)|next week|this week)`, bahasa: "en" },
+    { cari: `passports? (?:(?:will be|is|are) )?(?:${DIURUS_EN})`, bahasa: "en" },
+    { cari: `(?:free (?:air ?|flight |plane )?tickets?|(?:air|flight|plane) tickets? (?:(?:is|are|will be) )?(?:${DIURUS_EN}))`, bahasa: "en" },
+    { cari: "no (?:agency|agent|recruitment agency) (?:needed|required)", bahasa: "en" },
+  ]),
+};
+
+// R16: pekerjaan online saja wajar, negara rawan saja juga (guru di Kamboja).
+// Kalau keduanya sekalimat, Kutipan pemicu memuat keduanya; kalau tidak,
+// Kutipan pemicu adalah pekerjaannya dan negara rawan cukup ada di Teks.
+// Spec: admin, operator, atau customer service online. "Operator mesin" dan
+// "staf marketing" di Kamboja atau Laos tidak cocok.
+const PEKERJAAN_ONLINE = [
+  `(?:admin|operator|customer service|cs|telemarketing|marketing)(?: (?:${[
+    "online",
+    "chat",
+    "sosmed",
+    "media sosial",
+    "game",
+    "judi",
+    "kasino",
+    "casino",
+    "slot",
+    "crypto",
+    "kripto",
+    "trading",
+    "investasi",
+  ].join("|")}))(?: (?:staff|staf))?`,
+  "(?:kerja|bekerja) online",
+].join("|");
+
+export const R16: Aturan = {
+  id: "R16",
+  alasan: "Menawarkan kerja online di negara yang sering menjadi tujuan perdagangan orang untuk penipuan daring.",
+  bobot: 25,
+  kritis: false,
+  modus: "luar_negeri",
+  pakaiPenyangkal: false,
+  pola: [
+    // "admin online untuk perusahaan di Kamboja"
+    { cari: `(?:${PEKERJAAN_ONLINE})${celah(8)} (?:${NEGARA_RAWAN})`, bahasa: "id" },
+    // "di Myanmar sebagai operator chat"
+    { cari: `(?:${NEGARA_RAWAN})${celah(8)} (?:${PEKERJAAN_ONLINE})`, bahasa: "id" },
+    { cari: `(?:${PEKERJAAN_ONLINE})${diTeks(NEGARA_RAWAN)}`, bahasa: "id" },
+  ],
+};
+
+// R11: Kutipan pemicu adalah kontak tidak resmi, dan nama perusahaan besar
+// cukup ada di Teks (sering di judul, jauh dari kontak). Nama yang juga kata
+// biasa atau merek ("mandiri", "Honda", "Telkom") wajib didahului "PT", dan
+// bank wajib didahului "Bank", supaya sopir mobil Toyota atau ART yang bekerja
+// mandiri tidak cocok.
+const AWALAN_PT = String.raw`pt\.? (?:\(persero\) |persero )?`;
+const NAMA_BESAR = [
+  "pertamina",
+  "pln",
+  "telkom indonesia",
+  "telkomsel",
+  "indosat",
+  "xl axiata",
+  "astra(?: international| honda motor| daihatsu motor)?",
+  "indofood(?: sukses makmur| cbp)?",
+  "unilever",
+  "garudafood",
+  "mayora",
+  "sampoerna",
+  "gudang garam",
+  "djarum",
+  "alfamart",
+  "sumber alfaria trijaya",
+  "indomaret",
+  "indomarco",
+  "freeport",
+  "aneka tambang",
+  "pegadaian",
+  "angkasa pura",
+  "garuda indonesia",
+  "kereta api indonesia",
+  "krakatau steel",
+  "semen indonesia",
+  "pupuk indonesia",
+  "bulog",
+  "pelindo",
+  "jasa marga",
+  "united tractors",
+  "kalbe farma",
+  "bumn",
+].join("|");
+const NAMA_PERLU_PT = ["toyota", "honda", "yamaha", "suzuki", "daihatsu", "telkom", "kai", "pos indonesia", "wings", "antam", "wika", "wijaya karya", "sinar mas"].join("|");
+const NAMA_BANK = ["mandiri", "bri", "bni", "btn", "bca", "bsi", "rakyat indonesia", "negara indonesia", "tabungan negara", "central asia", "syariah indonesia"].join("|");
+/** Nama yang hanya menunjuk tempat atau rekening gaji: "SPBU Pertamina", "dekat Indomaret", "rekening Bank BCA". */
+const BUKAN_PEREKRUT = ["spbu", "dekat", "depan", "samping", "sebelah", "belakang", "seberang", "rekening", "tabungan", "payroll", "atm", "kartu"].join("|");
+const PERUSAHAAN_BESAR = `(?<!(?:${BUKAN_PEREKRUT}) )(?:(?:${AWALAN_PT})?(?:${NAMA_BESAR})|${AWALAN_PT}(?:${NAMA_PERLU_PT})|(?:${AWALAN_PT})?bank (?:${NAMA_BANK}))`;
+const EMAIL_GRATIS = String.raw`[a-z0-9._%+-]+@(?:gmail|googlemail|yahoo|ymail|rocketmail|hotmail|outlook|live|aol|icloud|proton(?:mail)?)(?:\.[a-z]{2,}){1,2}`;
+/** Nomor HP Indonesia, sama dengan Penyamaran: (+62|62|0)8 + 7–11 digit, boleh dipisah spasi atau tanda hubung. */
+const NOMOR_PRIBADI = String.raw`(?:\+62|62|0)[ -]?8(?:[ -]?\d){7,11}`;
+
+export const R11: Aturan = {
+  id: "R11",
+  alasan: "Mengatasnamakan perusahaan besar, tetapi kontaknya email gratisan atau nomor pribadi.",
+  bobot: 20,
+  kritis: false,
+  modus: "lokal",
+  pakaiPenyangkal: false,
+  pola: [{ cari: `(?:${EMAIL_GRATIS}|${NOMOR_PRIBADI})${diTeks(PERUSAHAAN_BESAR)}`, bahasa: "id" }],
+};
+
+// R06a: menyebut WhatsApp saja wajar ("grup WA karyawan"), jadi harus berupa
+// ajakan menghubungi, atau nomor pribadi yang ditempelkan ke WA.
+const AJAKAN_KONTAK = ["hubungi", "hub", "chat", "japri", "kontak", "konfirmasi (?:ke|via|lewat)", "kirim(?:kan)? (?:ke|via|lewat)", "daftar (?:ke|via|lewat)"].join("|");
+const WA = "(?:wa|whatsapp|whats app)";
+
+export const R06a: Aturan = {
+  id: "R06a",
+  alasan: "Memintamu menghubungi nomor pribadi atau chat admin, bukan kontak resmi perusahaan.",
+  bobot: 15,
+  kritis: false,
+  pakaiPenyangkal: false,
+  pola: [
+    // "Hubungi WA 0812-3456-7890", "kirim ke WhatsApp admin"
+    { cari: `(?:${AJAKAN_KONTAK})(?: (?:no|nomor|nomer))? ${WA}(?: admin)?(?::? ${NOMOR_PRIBADI})?`, bahasa: "id" },
+    // "WA: 0812 3456 7890"
+    { cari: `${WA}(?: admin)?:? ${NOMOR_PRIBADI}`, bahasa: "id" },
+    // "chat admin", "hubungi admin kami"
+    { cari: "(?:hubungi|chat|japri|kontak) admin(?: (?:kami|pendaftaran|rekrutmen))?", bahasa: "id" },
     {
-      cari: "(?:dibayar|komisi|upah|bayaran) per (?:tugas|like|subscribe|follow|rating|ulasan|misi)(?: rp ?[0-9.,]+)?",
-      bahasa: "id",
+      cari: "(?:contact|chat|reach|message|text|apply)(?: (?:us|me|(?:the |our )?admin|hr))? (?:via|on|through|at|by) whatsapp",
+      bahasa: "en",
     },
-    { cari: "per tugas rp ?[0-9.,]+", bahasa: "id" },
   ],
 };
 
 export const R09: Aturan = {
   id: "R09",
-  alasan: "Menjanjikan pelamar langsung diterima kerja tanpa wawancara atau seleksi apa pun.",
+  alasan: "Menjanjikan kamu langsung diterima kerja tanpa wawancara atau seleksi.",
   bobot: 15,
   kritis: false,
   pakaiPenyangkal: false,
   pola: [
-    {
-      cari: "tanpa (?:interview|wawancara|tes|seleksi)(?:[, ]+(?:tanpa |dan |atau )?(?:interview|wawancara|tes|seleksi))*",
-      bahasa: "id",
-    },
-    { cari: "langsung (?:diterima(?: kerja)?|masuk kerja|kerja(?: hari ini| besok)?)", bahasa: "id" },
-    { cari: "pasti diterima(?: kerja)?|auto diterima|100% diterima", bahasa: "id" },
+    { cari: `tanpa ${daftar("(?:tanpa )?(?:interview|wawancara|seleksi)")}`, bahasa: "id" },
+    { cari: "langsung (?:diterima(?: kerja)?|masuk kerja|kerja)", bahasa: "id" },
+    { cari: "(?:pasti|dijamin|auto|otomatis|100%) diterima(?: kerja)?", bahasa: "id" },
+    { cari: "no (?:interview|selection)(?: (?:needed|required))?|(?:guaranteed|instantly|directly) hired", bahasa: "en" },
   ],
 };
 
+// R10: "dibutuhkan segera" lazim di lowongan biasa, jadi "segera" harus berupa
+// desakan kepada pelamar.
 export const R10: Aturan = {
   id: "R10",
-  alasan: "Mendesak pelamar dengan batas waktu sangat sempit atau klaim kuota terbatas.",
+  alasan: "Mendesakmu cepat memutuskan dengan kuota terbatas atau batas waktu yang sangat singkat.",
   bobot: 10,
   kritis: false,
   pakaiPenyangkal: false,
   pola: [
-    { cari: "(?:kuota|slot) (?:sangat )?terbatas", bahasa: "id" },
+    { cari: "(?:kuota|slot|tempat) (?:sangat |sangat sangat )?terbatas", bahasa: "id" },
+    { cari: "hari ini juga", bahasa: "id" },
     {
-      cari: "(?:daftar|kirim(?:kan)?|lamar|hubungi|konfirmasi) hari ini juga|hari ini juga(?: sebelum| maksimal| paling lambat| ditutup| berakhir)",
+      cari: "(?:daftar|kirim(?:kan)?|hubungi|transfer|konfirmasi) segera|segera (?:daftar|hubungi|kirim(?:kan)?|transfer|konfirmasi|ambil slot)",
       bahasa: "id",
     },
-    {
-      cari: "(?:daftar|kirim(?:kan)?|hubungi|transfer|konfirmasi) segera|segera (?:daftar|hubungi|kirim(?:kan)?|ambil slot)",
-      bahasa: "id",
-    },
-    {
-      cari: "limited (?:slots?|quota)|apply (?:immediately|now|today)|urgent(?:ly)? (?:hiring|needed)",
-      bahasa: "en",
-    },
-  ],
-};
-
-export const R11: Aturan = {
-  id: "R11",
-  alasan: "Mengatasnamakan perusahaan besar atau BUMN tetapi memakai alamat email gratisan.",
-  bobot: 20,
-  kritis: false,
-  modus: "lokal",
-  pakaiPenyangkal: false,
-  pola: [
-    {
-      cari: "(?:pertamina|pln|kai|kereta api indonesia|telkom|garuda indonesia|antam|freeport|astra|indofood|unilever|bank mandiri|bri|bni)[^]{0,120}?@[a-z0-9._-]*?(?:gmail|yahoo|ymail|outlook|hotmail)\\.com",
-      bahasa: "id",
-    },
-  ],
-};
-
-export const R12: Aturan = {
-  id: "R12",
-  alasan: "Menjanjikan keberangkatan cepat ke luar negeri tanpa jalur penempatan resmi.",
-  bobot: 25,
-  kritis: false,
-  modus: "luar_negeri",
-  pakaiPenyangkal: false,
-  pola: [
-    {
-      cari: "tanpa (?:melalui )?(?:p3mi|bp2mi|pt resmi|agensi resmi)|berangkat cepat ke luar negeri|paspor diurus(?:kan)? dan tiket ditanggung",
-      bahasa: "id",
-    },
+    { cari: "urgent(?:ly)?(?: (?:hiring|needed|dibutuhkan))?|dibutuhkan urgent", bahasa: "id" },
+    { cari: "limited (?:slots?|quota|seats?)", bahasa: "en" },
   ],
 };
 
 /**
- * Penanda bahwa Teks menyebut nama badan usaha atau toko/tempat usaha.
- * Kalau salah satu dari ini ATAU penanda alamat cocok, R13 tidak muncul.
+ * Kata yang tidak bisa menjadi nama atau alamat: "PT resmi", "perusahaan
+ * besar", "alamat kantor akan diberikan". Mencegah R13 batal tanpa nama atau
+ * alamat yang sungguh disebut.
  */
+const BUKAN_NAMA = [
+  "dan", "atau", "di", "ke", "dari", "yang", "kami", "kita", "ini", "itu", "tersebut", "untuk", "dengan",
+  "akan", "nanti", "menyusul", "dirahasiakan", "tidak", "belum", "via", "lewat", "melalui",
+  "resmi", "besar", "ternama", "terkenal", "bonafit", "bonafide", "swasta", "asing", "luar",
+  "online", "baju", "pakaian", "kue", "roti", "bangunan", "sembako", "kelontong", "elektronik", "hp", "ponsel", "kosmetik", "emas", "buku", "ritel", "retail",
+].join("|");
+const NAMA = String.raw`(?!(?:${BUKAN_NAMA})(?![\p{L}\p{N}]))[\p{L}\p{N}]{2,}`;
+
+/** Nama badan usaha atau tempat usaha (spec: PT/CV/Tbk/nama toko). */
 const PENANDA_BADAN_USAHA = [
-  "(?:pt|cv|ud|pd|yayasan|koperasi|perum|perumda|firma|fa)\\.? [\\p{L}0-9]{2,}",
-  "[\\p{L}0-9]{2,} tbk\\.?",
-  "perusahaan kami|perusahaan [\\p{L}0-9]{3,}",
-  "(?:toko|warung|kedai|restoran|rumah makan|rm|cafe|kafe|klinik|apotek|bengkel|salon|laundry|hotel|pabrik|garmen|konveksi|gudang) [\\p{L}0-9]{2,}",
-  "[\\p{L}0-9]{2,} (?:corp(?:oration)?|inc|ltd|llc|gmbh|co\\.? ltd)",
+  String.raw`(?:pt|cv|ud|pd|yayasan|koperasi|perum|perumda|firma)\.? ${NAMA}`,
+  String.raw`[\p{L}\p{N}]{2,} tbk`,
+  `(?:toko|warung|kedai|restoran|resto|rumah makan|rm|cafe|kafe|klinik|apotek|bengkel|salon|laundry|hotel) ${NAMA}`,
+  String.raw`[\p{L}\p{N}]{2,} (?:corp(?:oration)?|inc|ltd|llc|gmbh|co\.? ltd)`,
+].join("|");
+
+const KOTA = [
+  "jakarta", "surabaya", "bandung", "medan", "semarang", "makassar", "palembang", "depok", "tangerang", "bekasi", "bogor",
+  "cikarang", "karawang", "batam", "yogyakarta", "jogja", "solo", "malang", "denpasar", "bali", "balikpapan", "samarinda",
+  "pekanbaru", "padang", "banjarmasin", "manado", "pontianak", "cirebon", "serang", "cilegon", "sidoarjo", "gresik",
 ].join("|");
 
 /**
- * Penanda bahwa Teks menyebut alamat atau lokasi kantor/tempat kerja.
+ * Alamat atau lokasi kantor. Domisili (milik pelamar) dan penempatan (bisa di
+ * luar negeri) bukan alamat kantor.
  */
 const PENANDA_ALAMAT = [
-  "(?:jl|jln|jalan)\\.? [\\p{L}0-9]{2,}",
-  "(?:alamat(?: kantor| lengkap| toko| pabrik)?|lokasi(?: kerja| kantor)?|beralamat di|berkantor di|penempatan(?: di)?|domisili(?: di)?)[: ]+[\\p{L}0-9]{2,}",
-  "(?:kantor(?: pusat| cabang)?|cabang|gedung|ruko|kawasan industri|kompleks|blok|lantai|lt\\.?|rt\\.? ?[0-9]+|kecamatan|kec\\.?|kelurahan|kel\\.?|kabupaten|kab\\.?) (?:di )?[\\p{L}0-9]{2,}",
-  "(?:kantor|cabang|gudang|pabrik|toko|penempatan|area|wilayah|kota) (?:di )?(?:jakarta|surabaya|bandung|medan|semarang|makassar|palembang|depok|tangerang|bekasi|bogor|cikarang|karawang|batam|yogyakarta|jogja|solo|malang|denpasar|bali|balikpapan|samarinda|pekanbaru|padang|banjarmasin|manado|pontianak)",
-].join("|");
-
-/**
- * Kalimat di tes lama yang fokus menguji satu aturan spesifik atau AI tanpa
- * menyebut PT/alamat, supaya penambahan R13 di katalog tidak mengubah ekspektasi
- * Skor pada file tes lama.
- */
-const PENGECUALIAN_TES_LAMA = [
-  "aktivasi akun karyawan, kirimkan kode otp",
-  "proses cepat untuk admin online\\. proses cepat juga untuk kurir",
-  "ada biaya seragam di awal\\. setelah itu, kata mereka",
-  "lowongan admin toko online, hubungi 0812-3456-7890",
-  "congratulations, you are hired as an online assistant",
-  "untuk pencairan gaji pertama, kirim no hp dan pin",
-  "jangan bagikan otp ke orang lain ya kak",
-  "pendaftaran gratis, tidak ada biaya pendaftaran",
-  "tidak perlu pengalaman kerja sebelumnya, cukup biaya seragam",
+  String.raw`(?:jl|jln|jalan)\.? ${NAMA}`,
+  `(?:alamat(?: kantor| lengkap| toko| pabrik)?|beralamat|berkantor|lokasi(?: kerja| kantor)?):?(?: di)? ${NAMA}`,
+  String.raw`(?:gedung|ruko|kawasan industri|kompleks|komplek|blok|lantai|lt|kecamatan|kec|kelurahan|kel|kabupaten|kab)\.? ${NAMA}`,
+  String.raw`(?:rt|rw)\.? ?\d+`,
+  `(?:kantor|cabang|gudang|pabrik|toko|outlet)(?: (?:pusat|cabang))?(?: (?:di|kota))? (?:${KOTA})`,
 ].join("|");
 
 export const R13: Aturan = {
@@ -317,61 +743,45 @@ export const R13: Aturan = {
   pola: [
     { cari: PENANDA_BADAN_USAHA, bahasa: "id" },
     { cari: PENANDA_ALAMAT, bahasa: "id" },
-    { cari: PENGECUALIAN_TES_LAMA, bahasa: "id" },
   ],
 };
 
+// R14: data ini wajar disebut tanpa diminta ("gaji ditransfer ke nomor
+// rekening"), jadi harus didahului kata kerja permintaan. Selfie dengan KTP dan
+// nama ibu kandung hampir selalu permintaan, jadi cukup disebut.
+const MINTA_DATA = ["kirim", "kirimkan", "lampirkan", "sertakan", "siapkan", "isi", "isikan", "masukkan", "upload", "unggah", "berikan", "cantumkan", "sebutkan"].join("|");
 const DATA_SENSITIF = [
   "foto (?:e-?)?ktp",
-  "selfie (?:dengan |bersama |pegang )?(?:e-?)?ktp",
-  "swafoto (?:e-?)?ktp",
-  "(?:nomor|no\\.?) rekening",
-  "(?:foto |scan |nomor )?(?:kartu keluarga|kk)",
+  "(?:nomor|no\\.?|nomer) (?:rekening|rek)",
+  "(?:foto |scan )?(?:kartu keluarga|kk)",
   "nama (?:gadis )?ibu kandung",
+  "selfie (?:dengan |bersama |pegang |memegang )?(?:e-?)?ktp",
 ].join("|");
 
 export const R14: Aturan = {
   id: "R14",
-  alasan: "Meminta data pribadi sensitif seperti foto KTP, kartu keluarga, nomor rekening, atau nama ibu kandung di awal pendaftaran.",
+  alasan: "Meminta data pribadi seperti foto KTP, KK, nomor rekening, atau nama ibu kandung sejak awal pendaftaran.",
   bobot: 20,
   kritis: false,
   pakaiPenyangkal: false,
   pola: [
-    { cari: `(?:kirim(?:kan)?|lampirkan|sertakan|isi|masukkan|upload|unggah) ${daftar(DATA_SENSITIF)}`, bahasa: "id" },
-    { cari: daftar(DATA_SENSITIF), bahasa: "id" },
+    { cari: `(?:${MINTA_DATA})${celah(3)} ${daftar(DATA_SENSITIF)}`, bahasa: "id" },
+    { cari: "(?:selfie|swafoto) (?:dengan |bersama |pegang |memegang )?(?:e-?)?ktp|nama (?:gadis )?ibu kandung", bahasa: "id" },
   ],
 };
 
+// R15: pemendek tautan selalu dicurigai. Formulir Google wajar untuk usaha
+// kecil, jadi hanya dicurigai kalau mengatasnamakan perusahaan besar (spec).
 export const R15: Aturan = {
   id: "R15",
-  alasan: "Memakai tautan pemendek URL atau formulir gratisan untuk pendaftaran lowongan.",
+  alasan: "Memakai tautan pendek atau formulir gratisan untuk pendaftaran, bukan situs resmi perusahaan.",
   bobot: 15,
   kritis: false,
   pakaiPenyangkal: false,
   pola: [
+    { cari: "(?:https?://)?(?:bit\\.ly|s\\.id|tinyurl\\.com|cutt\\.ly|rb\\.gy|shorturl\\.at|t\\.ly|is\\.gd)/[a-z0-9_-]+", bahasa: "id" },
     {
-      cari: "(?:https?://)?(?:bit\\.ly|s\\.id|tinyurl\\.com|cutt\\.ly|rb\\.gy|shorturl\\.at|forms\\.gle)/[a-z0-9_-]+",
-      bahasa: "id",
-    },
-    { cari: "(?:https?://)?docs\\.google\\.com/forms(?:/[a-z0-9/_-]+)?", bahasa: "id" },
-    { cari: "(?:isi|daftar|klik|buka|lewat|melalui|link) (?:form google|google forms?)", bahasa: "id" },
-  ],
-};
-
-export const R16: Aturan = {
-  id: "R16",
-  alasan: "Menawarkan kerja admin atau operator online di negara rawan penipuan kerja paksa.",
-  bobot: 25,
-  kritis: false,
-  modus: "luar_negeri",
-  pakaiPenyangkal: false,
-  pola: [
-    {
-      cari: "(?:admin|operator|customer service|cs|marketing|scammer) (?:online |judi |slot |kasino )?(?:di |penempatan )?(?:kamboja|myanmar|laos|poipet|sihanoukville|bavet)",
-      bahasa: "id",
-    },
-    {
-      cari: "(?:kamboja|myanmar|laos|poipet|sihanoukville|bavet)[^.!?]{0,50}(?:admin|operator|customer service) online",
+      cari: `(?:(?:https?://)?(?:forms\\.gle/[a-z0-9_-]+|docs\\.google\\.com/forms(?:/[a-z0-9/_-]+)?)|google forms?|form google)${diTeks(PERUSAHAAN_BESAR)}`,
       bahasa: "id",
     },
   ],

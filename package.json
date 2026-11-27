@@ -9,7 +9,9 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "eval": "node scripts/eval.mjs",
+    "cek-dataset": "node scripts/cek-dataset.mjs"
   },
   "dependencies": {
     "groq-sdk": "^1.6.0",

@@ -237,57 +237,31 @@ describe("cek: cakupan katalog Aturan (FR-03: minimal 15 aturan)", () => {
 
     expect(aturanTerpicu.size).toBeGreaterThanOrEqual(15);
   });
+});
+
+describe("cek: batas aturan umum (tidak cocok untuk Teks wajar)", () => {
+  it.each([
+    ["R06a", "PT Sinar Jaya di Bekasi membuka lowongan. Karyawan akan dimasukkan ke grup WA divisi setelah kontrak ditandatangani."],
+    ["R10", "PT Sinar Jaya di Bekasi. Dibutuhkan segera staf gudang, pendaftaran dibuka sampai akhir bulan."],
+    ["R10", "PT Global Tech in Jakarta is hiring support officers. Apply now through our careers page."],
+    ["R14", "PT Sinar Jaya di Bekasi. Gaji ditransfer ke nomor rekening karyawan setiap tanggal 25."],
+    ["R15", "Toko Berkah Jaya di Bandung mencari kasir. Isi form Google yang kami bagikan di Instagram toko."],
+  ])("%s tidak cocok: %s", async (id, teks) => {
+    expect(tanda(await cek(teks), id)).toBeUndefined();
+  });
+
+  it("R15 mencurigai formulir Google yang mengatasnamakan perusahaan besar", async () => {
+    const hasil = await cek("Rekrutmen PT Pertamina tahun ini. Daftar lewat forms.gle/rekrutmen2026 sebelum kuota penuh.");
+
+    expect(tanda(hasil, "R15")?.kutipan).toBe("forms.gle/rekrutmen2026");
+  });
 
   it.each([
-    [
-      "R03",
-      "Lowongan kerja restoran di Jepang dengan visa turis, berangkat minggu depan dari Jakarta.",
-      "Lowongan kerja di PT Maju Jaya Jakarta untuk teknisi mesin dengan pengalaman kerja dua tahun.",
-    ],
-    [
-      "R04",
-      "Lowongan admin gudang PT Sinar Jaya di Bekasi, gaji Rp18 juta per bulan untuk lulusan baru.",
-      "Lowongan kerja pabrik di Jepang melalui PT Resmi, gaji Rp18 juta per bulan dengan kontrak resmi.",
-    ],
-    [
-      "R05",
-      "Lowongan operator di Kamboja, gaji 25 juta tanpa pengalaman kerja sama sekali, makan ditanggung.",
-      "Lowongan perangkat lunak di PT Teknologi Nusantara Jakarta, syarat pengalaman minimal tiga tahun.",
-    ],
-    [
-      "R06b",
-      "Lowongan paruh waktu PT Media Kreatif di Bandung, silakan lanjut di Telegram untuk pengarahan tugas.",
-      "Lowongan staf akuntansi PT Media Kreatif di Bandung, kirim berkas lamaran melalui portal karir.",
-    ],
-    [
-      "R07",
-      "Kerja paruh waktu dari rumah di Bandung, peserta wajib deposit untuk naik level komisi harian.",
-      "Lowongan kasir toko buku di Bandung, gaji bulanan tetap dan tunjangan kehadiran setiap bulan.",
-    ],
-    [
-      "R08",
-      "Lowongan kerja sampingan di Jakarta, tugas mudah like dan subscribe dibayar langsung ke rekening.",
-      "Lowongan pengelola media sosial PT Kreatif di Jakarta, menyusun jadwal konten bulanan perusahaan.",
-    ],
-    [
-      "R11",
-      "Rekrutmen nasional PT Pertamina di Jakarta, kirim berkas lamaran ke hrd.pertamina@gmail.com.",
-      "Rekrutmen nasional PT Pertamina di Jakarta, pendaftaran hanya melalui situs recruitment.pertamina.com.",
-    ],
-    [
-      "R12",
-      "Lowongan kerja perkebunan di luar negeri, proses berangkat cepat ke luar negeri tanpa seleksi.",
-      "Lowongan kerja staf logistik PT Nusantara di Surabaya, penempatan gudang cabang Jawa Timur.",
-    ],
-    [
-      "R16",
-      "Lowongan kerja customer service online di Kamboja, fasilitas asrama dan makan tiga kali sehari.",
-      "Lowongan kerja customer service PT Telekomunikasi di Jakarta, melayani keluhan pelanggan telepon.",
-    ],
-  ])("aturan katalog %s punya kasus positif dan negatif lewat cek()", async (id, teksPositif, teksNegatif) => {
-    const [positif, negatif] = await Promise.all([cek(teksPositif), cek(teksNegatif)]);
-
-    expect(tanda(positif, id)?.aturanId).toBe(id);
-    expect(tanda(negatif, id)).toBeUndefined();
+    ["perusahaan ternama", "Dibutuhkan admin untuk perusahaan ternama. Kerja dari rumah, gaji dibayar mingguan sesuai target."],
+    ["PT resmi", "Kerja ke luar negeri lewat PT resmi, proses mudah. Gaji dibayar setiap bulan langsung ke pekerja."],
+    ["penempatan", "Dibutuhkan operator pabrik, penempatan Kamboja. Gaji dibayar setiap bulan langsung ke pekerja."],
+    ["domisili pelamar", "Dibutuhkan admin input data, domisili Bandung diutamakan. Kerja dari rumah, gaji mingguan."],
+  ])("R13 tetap muncul walau Teks menyebut %s", async (_kasus, teks) => {
+    expect((await cek(teks)).tandaBahayaTersirat).toHaveLength(1);
   });
 });

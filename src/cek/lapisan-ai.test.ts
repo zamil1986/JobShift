@@ -210,7 +210,7 @@ const butir = (kutipan: string, alasan = "Gaji dibayar dengan cara yang tidak bi
 
 /** Lowongan dengan Tanda bahaya R01 di kutipan "biaya seragam". */
 const TEKS_R01 =
-  "Selamat, kamu diterima kerja di gudang kami. Wajib transfer biaya seragam Rp250.000 hari ini juga ya kak.";
+  "Selamat, kamu diterima kerja di gudang PT Sinar Jaya. Wajib transfer biaya seragam Rp250.000 sebelum mulai kerja ya kak.";
 
 describe("cek: Tanda bahaya AI yang sah", () => {
   it("menambah Tanda bahaya AI berbobot 10 dengan kutipan dan rentang dari Teks asli", async () => {
@@ -276,12 +276,12 @@ describe("cek: Tanda bahaya AI yang sah", () => {
   });
 
   it("menambah Skor AI di atas Skor Aturan dan mengurutkan menurut bobot", async () => {
-    const hasil = await cek(TEKS_R01, { ai: penilaiPalsu(jawabanAI([butir("hari ini juga")])) });
+    const hasil = await cek(TEKS_R01, { ai: penilaiPalsu(jawabanAI([butir("sebelum mulai kerja")])) });
 
     expect(hasil.skor).toBe(70);
     expect(hasil.tandaBahaya.map((t) => [t.sumber, t.kutipan])).toEqual([
       ["aturan", "biaya seragam"],
-      ["ai", "hari ini juga"],
+      ["ai", "sebelum mulai kerja"],
     ]);
   });
 
@@ -400,7 +400,8 @@ describe("cek: butir AI yang dibuang", () => {
     const hasil = await cek(teks, { ai: penilaiPalsu(jawabanAI([butir("biaya seragam")])) });
 
     expect(hasil.tandaBahaya.map((t) => t.sumber)).toEqual(["aturan"]);
-    expect(hasil.skor).toBe(60);
+    // + R13 tersirat (10): Teks tidak menyebut nama badan usaha maupun alamat.
+    expect(hasil.skor).toBe(70);
   });
 
   it("frasa yang berulang hanya dihitung sekali", async () => {
@@ -409,7 +410,8 @@ describe("cek: butir AI yang dibuang", () => {
       ai: penilaiPalsu(jawabanAI([butir("Proses cepat"), butir("proses cepat"), butir("PROSES CEPAT")])),
     });
 
-    expect(hasil.skor).toBe(10);
+    // + R13 tersirat (10): Teks tidak menyebut nama badan usaha maupun alamat.
+    expect(hasil.skor).toBe(20);
   });
 
   it("AI sendirian dengan label bahaya hanya sampai Waspada", async () => {
