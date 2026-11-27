@@ -419,6 +419,41 @@ export const R05: Aturan = {
   ]),
 };
 
+// R04: angka besar juga muncul sebagai modal atau omzet, jadi nominal bulanan
+// harus langsung mengikuti kata gaji. Gaji harian ≥ Rp500 ribu sudah tidak
+// wajar sendirian. Gaji luar negeri dinilai R05, bukan R04.
+const KATA_GAJI = ["gaji", "penghasilan", "pendapatan", "upah", "salary", "income", "take home pay", "thp"].join("|");
+/** Angka di depan "juta" tidak boleh lanjutan angka lain: "Rp4,25 juta" bukan "25 juta". */
+const BUKAN_LANJUTAN_ANGKA = String.raw`(?<![\d.,])`;
+const RIBUAN = String.raw`[.,]\d{3}`;
+/** ≥ Rp15 juta: "Rp15 juta", "20-30 jt", "15.000.000", "Rp15000000", "25 million". */
+const GAJI_BULANAN_TINGGI = [
+  String.raw`(?:(?:rp\.? ?)?\d+(?:[.,]\d+)? ?(?:juta|jt)? ?(?:-|–|s/d|sampai|hingga|to) ?)?(?:rp\.? ?)?${BUKAN_LANJUTAN_ANGKA}(?:1[5-9]|[2-9]\d|[1-9]\d{2})(?:[.,]\d+)? ?(?:juta|jt|million)`,
+  String.raw`(?:rp\.? ?)?${BUKAN_LANJUTAN_ANGKA}(?:1[5-9]|[2-9]\d|[1-9]\d{2})${RIBUAN}${RIBUAN}`,
+  String.raw`rp\.? ?(?:1[5-9]|[2-9]\d|[1-9]\d{2})\d{6}`,
+].join("|");
+/** ≥ Rp500 ribu: "Rp500 ribu", "750rb", "Rp500.000", "Rp1 juta", "Rp1,5 jt". */
+const NOMINAL_HARIAN_TINGGI = String.raw`(?:rp\.? ?)?${BUKAN_LANJUTAN_ANGKA}(?:[5-9]\d{2} ?(?:ribu|rb|k)|[5-9]\d{2}${RIBUAN}|\d(?:[.,]\d+)? ?(?:juta|jt)|\d${RIBUAN}${RIBUAN})`;
+const PER_HARI = String.raw`(?: ?/ ?| (?:per|tiap|setiap) )(?:hari|day)|(?: )?(?:perhari|sehari)| a day| daily`;
+
+export const R04: Aturan = {
+  id: "R04",
+  alasan: "Menjanjikan gaji yang jauh di atas wajar untuk pekerjaan di dalam negeri.",
+  bobot: 25,
+  kritis: false,
+  modus: "lokal",
+  pakaiPenyangkal: false,
+  pola: [
+    // "Gaji Rp15 juta", "gaji pokok 15.000.000", "salary up to 20 million"
+    { cari: `(?:${KATA_GAJI})(?: (?:${KETERANGAN_GAJI}))*:? (?:${GAJI_BULANAN_TINGGI})`, bahasa: "id" },
+    // "Rp500 ribu per hari", "gaji harian 750rb"
+    { cari: `${NOMINAL_HARIAN_TINGGI}(?:${PER_HARI})`, bahasa: "id" },
+    { cari: `(?:gaji|upah) harian:? ${NOMINAL_HARIAN_TINGGI}`, bahasa: "id" },
+    { cari: "high(?:ly)? (?:salary|income|pay(?:ing)?)", bahasa: "en" },
+  ],
+  kecualiJika: { cari: PENANDA_LUAR_NEGERI, bahasa: "id" },
+};
+
 // R12: "berangkat cepat" atau "tiket ditanggung" juga muncul di lowongan dalam
 // negeri, jadi Teks harus memuat penanda luar negeri.
 const JALUR_RESMI = daftar("pt|p3mi|pjtki|pptkis|agen|agensi|lpk|sponsor|kp2mi|bp2mi");
@@ -505,4 +540,62 @@ export const R16: Aturan = {
   ],
 };
 
-export const KATALOG: readonly Aturan[] = [R01, R02, R03, R05, R06b, R07, R08, R12, R16];
+// R11: Kutipan pemicu adalah kontak tidak resmi, dan nama perusahaan besar
+// cukup ada di Teks (sering di judul, jauh dari kontak). Nama yang juga kata
+// biasa atau merek ("mandiri", "Honda", "rekening BCA") wajib didahului "PT"
+// atau "Bank", supaya sopir mobil Toyota atau ART yang bekerja mandiri tidak cocok.
+const PT = "pt\\.? (?:\\(persero\\) |persero )?";
+const PERUSAHAAN_BESAR = [
+  `(?:${PT})?(?:${[
+    "pertamina",
+    "pln",
+    "telkom indonesia",
+    "telkomsel",
+    "indosat",
+    "xl axiata",
+    "astra(?: international| honda motor| daihatsu motor)?",
+    "indofood(?: sukses makmur| cbp)?",
+    "unilever",
+    "garudafood",
+    "mayora",
+    "sampoerna",
+    "gudang garam",
+    "djarum",
+    "alfamart",
+    "sumber alfaria trijaya",
+    "indomaret",
+    "indomarco",
+    "freeport",
+    "aneka tambang",
+    "pegadaian",
+    "angkasa pura",
+    "garuda indonesia",
+    "kereta api indonesia",
+    "krakatau steel",
+    "semen indonesia",
+    "pupuk indonesia",
+    "bulog",
+    "pelindo",
+    "jasa marga",
+    "united tractors",
+    "kalbe farma",
+    "bumn",
+  ].join("|")})`,
+  `${PT}(?:${["toyota", "honda", "yamaha", "suzuki", "daihatsu", "kai", "pos indonesia", "wings", "antam", "wika", "wijaya karya", "sinar mas"].join("|")})`,
+  `(?:${PT})?bank (?:${["mandiri", "bri", "bni", "btn", "bca", "bsi", "rakyat indonesia", "negara indonesia", "tabungan negara", "central asia", "syariah indonesia"].join("|")})`,
+].join("|");
+const EMAIL_GRATIS = String.raw`[a-z0-9._%+-]+@(?:gmail|googlemail|yahoo|ymail|rocketmail|hotmail|outlook|live|aol|icloud|proton(?:mail)?)(?:\.[a-z]{2,}){1,2}`;
+/** Nomor HP Indonesia, sama dengan Penyamaran: (+62|62|0)8 + 7–11 digit, boleh dipisah spasi atau tanda hubung. */
+const NOMOR_PRIBADI = String.raw`(?:\+62|62|0) ?8(?:[ -]?\d){7,11}`;
+
+export const R11: Aturan = {
+  id: "R11",
+  alasan: "Mengatasnamakan perusahaan besar, tetapi kontaknya email gratisan atau nomor pribadi.",
+  bobot: 20,
+  kritis: false,
+  modus: "lokal",
+  pakaiPenyangkal: false,
+  pola: [{ cari: `(?:${EMAIL_GRATIS}|${NOMOR_PRIBADI})${diTeks(PERUSAHAAN_BESAR)}`, bahasa: "id" }],
+};
+
+export const KATALOG: readonly Aturan[] = [R01, R02, R03, R04, R05, R06b, R07, R08, R11, R12, R16];

@@ -27,6 +27,8 @@ export type Aturan = {
   /** Penyangkal ≤ 3 kata sebelum pemicu, dalam klausa yang sama, membatalkan kecocokan (ADR-0002: hanya R01, R02, R03, R07). */
   pakaiPenyangkal: boolean;
   pola: Pola[];
+  /** Kalau pola ini ada di mana pun dalam Teks, Aturan tidak berlaku sama sekali (spec: R04 dan penanda luar negeri). */
+  kecualiJika?: Pola;
 };
 
 /** ADR-0002. Daftar dan jaraknya dibekukan; mengubahnya berarti menyetel ulang bobot. */
@@ -101,6 +103,8 @@ export function jalankanAturan(teks: string, katalog: readonly Aturan[]): TandaB
   const hasil: TandaBahaya[] = [];
 
   for (const aturan of katalog) {
+    // search() mengabaikan dan memulihkan lastIndex regex di cache (flag g).
+    if (aturan.kecualiJika && normal.teks.search(regexDari(aturan.kecualiJika)) !== -1) continue;
     const cocok = kecocokanPertama(aturan, normal);
     if (!cocok) continue;
 
