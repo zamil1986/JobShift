@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cek } from "@/cek";
-import { buatPenilaiGroq, penilaiGroqDariEnv } from "@/cek/groq";
+import { buatPenilaiGroq, penilaiGroqDariEnv, selesaikanModelGroq } from "@/cek/groq";
 
 // Adapter Groq dites tanpa jaringan: SDK menerima `fetch` palsu yang merekam
 // permintaan dan mengembalikan respons buatan.
@@ -141,6 +141,18 @@ describe("adapter Groq", () => {
     await expect(janji).rejects.toThrow();
     expect(signalFetch?.aborted).toBe(true);
   });
+
+  it("meneruskan model gpt-oss-20b ke payload Groq sebagai openai/gpt-oss-20b", async () => {
+    const { fetch, panggilan } = fetchPalsu(() => responsChat(JSON.stringify(KELUARAN_VALID)));
+
+    await cek(TEKS, { ai: buatPenilaiGroq({ apiKey: "kunci-uji", model: "gpt-oss-20b", fetch }) });
+
+    expect(panggilan[0].body.model).toBe("openai/gpt-oss-20b");
+  });
+
+  it("menolak model di luar daftar yang didukung", () => {
+    expect(() => selesaikanModelGroq("model-asing")).toThrow(/tidak didukung/i);
+  });
 });
 
 describe("penilaiGroqDariEnv", () => {
@@ -157,6 +169,17 @@ describe("penilaiGroqDariEnv", () => {
     expect(fetch).not.toHaveBeenCalled();
     expect(peringatan).toHaveBeenCalledWith(expect.stringContaining("GROQ_API_KEY"));
     expect(JSON.stringify(peringatan.mock.calls)).not.toContain("PENANDA-RAHASIA");
+    vi.unstubAllGlobals();
+  });
+
+  it("meneruskan pilihan model saat GROQ_API_KEY tersedia", async () => {
+    vi.stubEnv("GROQ_API_KEY", "kunci-env-uji");
+    const { fetch, panggilan } = fetchPalsu(() => responsChat(JSON.stringify(KELUARAN_VALID)));
+    vi.stubGlobal("fetch", fetch);
+
+    await cek(TEKS, { ai: penilaiGroqDariEnv("openai/gpt-oss-20b") });
+
+    expect(panggilan[0].body.model).toBe("openai/gpt-oss-20b");
     vi.unstubAllGlobals();
   });
 });
