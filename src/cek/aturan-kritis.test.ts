@@ -73,6 +73,42 @@ describe("cek: R01 Minta uang di awal", () => {
     expect(tanda(hasil, "R01")?.kutipan).toBe("biaya seragam");
   });
 
+  it("tidak cocok untuk biaya yang ditanggung perusahaan", async () => {
+    const hasil = await cek(
+      "Pendaftaran gratis. Biaya seragam ditanggung perusahaan, kirim CV ke HRD PT Maju Jaya sekarang juga.",
+    );
+
+    expect(tanda(hasil, "R01")).toBeUndefined();
+    expect(hasil.skor).toBe(0);
+  });
+
+  it("Penyangkal di kalimat sebelumnya tidak membatalkan", async () => {
+    const teks =
+      "Lowongan staf gudang, langsung kerja tanpa tes. Biaya seragam Rp250.000 dibayar di awal ke admin, ya!";
+    const hasil = await cek(teks);
+
+    expect(tanda(hasil, "R01")?.kutipan).toBe("Biaya seragam");
+    expect(hasil.label).toBe("bahaya");
+  });
+
+  it("dibatalkan Penyangkal untuk daftar dengan 'biaya' berulang: 'tidak dipungut biaya pendaftaran, biaya seragam'", async () => {
+    const hasil = await cek(
+      "Rekrutmen resmi PT Maju Jaya. Tidak dipungut biaya pendaftaran, biaya seragam, atau biaya pelatihan apa pun.",
+    );
+
+    expect(tanda(hasil, "R01")).toBeUndefined();
+    expect(hasil.skor).toBe(0);
+  });
+
+  it("Penyangkal sebelum koma tidak membatalkan", async () => {
+    const hasil = await cek(
+      "Lowongan staf gudang, kerja tanpa tes, biaya seragam Rp250.000 dibayar di awal ke admin sebelum mulai.",
+    );
+
+    expect(tanda(hasil, "R01")?.kutipan).toBe("biaya seragam");
+    expect(hasil.label).toBe("bahaya");
+  });
+
   it("'No.' sebelum pola Indonesia bukan Penyangkal", async () => {
     const hasil = await cek(
       "Hubungi No. HP 0812-0000-0000 untuk biaya seragam dan pelatihan sebelum mulai kerja di gudang kami.",

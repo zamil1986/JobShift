@@ -1,6 +1,6 @@
 # Panduan kerja tim JobShift (Antigravity + skill mattpocock)
 
-Untuk: Muhammad Zamil, Daniel, Ayudhya Naja, Nadine. Siapa mengerjakan apa ada di [pembagian-tim.md](pembagian-tim.md).
+Untuk: Muhammad Zamil, Daniel, Ayudhya Naja, Nadine. Siapa mengerjakan apa ada di [pembagian-tim.md](pembagian-tim.md). Prompt lengkap untuk setiap `/implement` ada di [prompt-implement.md](prompt-implement.md).
 
 Semua orang memakai Antigravity. Skill mattpocock ada di `.agents/skills/` di repo ini, dan Antigravity membacanya otomatis. Tidak ada yang perlu diinstal selain alat di Tahap 1.
 
@@ -24,7 +24,7 @@ git push origin main
 
 **0.2 Undang anggota ke repo**
 
-Buka https://github.com/zamil1986/cekLoker/settings/access → **Add people** → undang akun GitHub Daniel, Ayudhya, dan Nadine dengan akses **Write**.
+Buka https://github.com/zamil1986/JobShift/settings/access → **Add people** → undang akun GitHub Daniel, Ayudhya, dan Nadine dengan akses **Write**.
 
 **0.3 Kerjakan tiket 01 duluan** (lihat Tahap 3). Semua tiket lain menunggu tiket 01 ada di `main`. Setelah di-merge, kabari grup.
 
@@ -57,10 +57,10 @@ git config --global user.email "email-github-kamu@example.com"
 **1.3 Terima undangan repo** di email atau di https://github.com/notifications, lalu clone:
 
 ```bash
-git clone https://github.com/zamil1986/cekLoker.git
+git clone https://github.com/zamil1986/JobShift.git
 ```
 
-**1.4 Buka di Antigravity:** File → Open Folder → pilih folder `cekLoker`.
+**1.4 Buka di Antigravity:** File → Open Folder → pilih folder `JobShift`.
 
 **1.5 Cek skill terbaca:** di panel agent, ketik `/` lalu pastikan `implement`, `tdd`, dan `code-review` muncul di daftar.
 
@@ -68,7 +68,7 @@ git clone https://github.com/zamil1986/cekLoker.git
 
 ## Tahap 2 — Setiap kali mulai tiket: ambil dan klaim
 
-Jalankan di terminal Antigravity (Terminal → New Terminal), dari folder `cekLoker`.
+Jalankan di terminal Antigravity (Terminal → New Terminal), dari folder `JobShift`.
 
 **2.1 Ambil versi terbaru `main`**
 
@@ -182,7 +182,7 @@ Kalau branch ini sudah pernah di-push dan kamu baru rebase:
 git push --force-with-lease
 ```
 
-**4.3 Buka Pull Request.** Buka link yang dicetak oleh `git push`, atau https://github.com/zamil1986/cekLoker/pulls → **New pull request** → base `main`, compare `tiket-04-modus-tugas`. Judul: `04: Aturan Modus Tugas`. Tulis di deskripsi `Closes .scratch/jobshift-mvp/issues/04-modus-tugas.md`.
+**4.3 Buka Pull Request.** Buka link yang dicetak oleh `git push`, atau https://github.com/zamil1986/JobShift/pulls → **New pull request** → base `main`, compare `tiket-04-modus-tugas`. Judul: `04: Aturan Modus Tugas`. Tulis di deskripsi `Closes .scratch/jobshift-mvp/issues/04-modus-tugas.md`.
 
 **4.4 Kabari Zamil di grup.** Kalau ada komentar review, perbaiki di branch yang sama (minta agent: "perbaiki komentar review berikut: ..."), commit, lalu `git push`. PR otomatis ter-update.
 
@@ -231,26 +231,35 @@ Kembali ke Tahap 2 untuk tiket berikutnya. Jangan lanjut di branch lama.
 | 1 | 01 | `/implement .scratch/jobshift-mvp/issues/01-kerangka-dan-deploy-tracer.md` |
 | 2 | 03 | `/implement .scratch/jobshift-mvp/issues/03-aturan-kritis-dan-penyangkal.md` |
 | 3 | 10 | `/implement .scratch/jobshift-mvp/issues/10-lapisan-ai.md` |
+| 4 | 15 | `/implement .scratch/jobshift-mvp/issues/15-desain-visual.md` (desain web, di sela tiket 10) |
 
-Setelah 01 di-merge, hubungkan repo ke Vercel (https://vercel.com/new → import `cekLoker`) supaya setiap merge ke `main` ter-deploy otomatis. Sebelum tiket 10: tambahkan `GROQ_API_KEY` di Vercel → Project → Settings → Environment Variables, dan di file lokal `.env.local` (jangan di-commit).
+Setelah 01 di-merge, hubungkan repo ke Vercel (https://vercel.com/new → import `JobShift`) supaya setiap merge ke `main` ter-deploy otomatis. Sebelum tiket 10: tambahkan `GROQ_API_KEY` di Vercel → Project → Settings → Environment Variables, dan di file lokal `.env.local` (jangan di-commit).
 
 ### Daniel
 
 1. **Sekarang:** kumpulkan Set dev 60 contoh (tiket 02, manual). Simpan sebagai `data/dev.jsonl`, satu baris per contoh, sesuai format di spec. Samarkan nomor HP, nama, dan rekening. Kirim lewat branch `data-set-dev` dan PR seperti biasa.
+   - **Cara menyamarkan:** jangan pakai penanda seperti `[NOMOR]` atau `[EMAIL]`, karena R11 membaca bentuk nomor dan domain email. Ganti angka dengan angka palsu yang formatnya sama dan **memuat `0000`** (`0812-0000-1111`, rekening `0000111122`). Untuk email, ganti bagian sebelum `@` tapi pertahankan domainnya (`hrd.rekrut@gmail.com`). Nama orang diganti nama fiktif. Nama perusahaan, nominal gaji, dan nama negara dibiarkan.
+   - **Sebelum PR:** jalankan `npm run cek-dataset`. Perintah ini memeriksa format, id dan teks ganda, panjang teks, angka yang belum disamarkan, serta target (60 contoh, Palsu/Asli 40–60%, minimal 5 Palsu per Modus). PR siap kalau hasilnya `LOLOS`. Peringatan tidak menggagalkan, tapi tetap harus dicek satu per satu.
 2. **Setelah 03 di-merge:**
 
 | Urutan | Tiket | Perintah di panel agent |
 | --- | --- | --- |
 | 1 | 04 | `/implement .scratch/jobshift-mvp/issues/04-modus-tugas.md` |
-| 2 | 05 | `/implement .scratch/jobshift-mvp/issues/05-modus-lokal.md` |
-| 3 | 06 | `/implement .scratch/jobshift-mvp/issues/06-modus-luar-negeri.md` |
+| 2 | 06 | `/implement .scratch/jobshift-mvp/issues/06-modus-luar-negeri.md` |
+| 3 | 05 | `/implement .scratch/jobshift-mvp/issues/05-modus-lokal.md` |
 | 4 | 07 | `/implement .scratch/jobshift-mvp/issues/07-aturan-umum-dan-tersirat.md` |
 
 3. Setelah 11 ada: setel bobot dengan `npm run eval` (Set dev saja), lalu bekukan bobot sebelum Sabtu 28 Nov 21.00.
 
 ### Ayudhya Naja (pemegang Set test)
 
-1. **Sekarang:** kumpulkan Set test 40 contoh (tiket 02, manual). Simpan **di luar folder repo**, misalnya `~/jobshift-set-test/test.jsonl`. Jangan dibagikan ke Zamil atau Daniel sebelum bobot dibekukan.
+1. **Sekarang:** kumpulkan Set test 40 contoh (tiket 02, manual). Simpan **di luar folder repo**, misalnya `~/jobshift-set-test/test.jsonl`. Jangan dibagikan ke Zamil atau Daniel sebelum bobot dibekukan. Samarkan dengan cara yang sama seperti Set dev (lihat bagian Daniel), lalu periksa dengan:
+
+```bash
+npm run cek-dataset -- --set test ~/jobshift-set-test/test.jsonl
+```
+
+   Kalau `data/dev.jsonl` sudah ada, perintah ini juga memastikan tidak ada contoh yang sama di dua set. Pesannya tidak pernah menyalin teks contoh.
 2. **Setelah 02 (Set dev) dan 10 di-merge:**
 
 | Urutan | Tiket | Perintah di panel agent |
@@ -276,11 +285,13 @@ Commit file data dan hasil eval lewat branch dan PR seperti biasa.
 
 | Urutan | Tiket | Mulai setelah | Perintah di panel agent |
 | --- | --- | --- | --- |
-| 1 | 09 | 01 di-merge | `/implement .scratch/jobshift-mvp/issues/09-input-screenshot-ocr.md` |
-| 2 | 08 | 03 di-merge | `/implement .scratch/jobshift-mvp/issues/08-penjelasan-dan-langkah-aman.md` |
+| 1 | 08 | 03 di-merge | `/implement .scratch/jobshift-mvp/issues/08-penjelasan-dan-langkah-aman.md` |
+| 2 | 09 | 01 di-merge (sudah) | `/implement .scratch/jobshift-mvp/issues/09-input-screenshot-ocr.md` |
 | 3 | 12 | 04–07 dan 10 di-merge | `/implement .scratch/jobshift-mvp/issues/12-contoh-siap-pakai.md` |
 
-Sambil menunggu 01: siapkan copy Langkah aman (tiket 08) di dokumen biasa, dan cek manual semua URL resmi (Karirhub, aduankonten.id, IASC, KP2MI).
+Desain visual (warna, font, tata letak) dipegang Zamil di tiket 15. Di tiket 08, 09, dan 12 cukup tulis markup yang semantik dan fungsional tanpa menambah gaya baru.
+
+Tiket 08 ada di jalur kritis: tiket 10 milik Zamil menunggu 08. Selagi menunggu 03, siapkan copy Langkah aman (tiket 08) di dokumen biasa, cek manual semua URL resmi (Karirhub, aduankonten.id, IASC, KP2MI), dan boleh mulai 09. Begitu 03 di-merge, jeda 09 (commit dulu di branch-nya) lalu kerjakan 08 sampai di-merge.
 
 ---
 
@@ -296,7 +307,7 @@ Sambil menunggu 01: siapkan copy Langkah aman (tiket 08) di dokumen biasa, dan c
 
 | Masalah | Coba ini |
 | --- | --- |
-| `/implement` tidak muncul di Antigravity | Pastikan folder yang dibuka adalah `cekLoker` (bukan folder induknya), lalu `git pull origin main` |
+| `/implement` tidak muncul di Antigravity | Pastikan folder yang dibuka adalah `JobShift` (bukan folder induknya), lalu `git pull origin main` |
 | `npm test` tidak ada | Tiket 01 belum di-merge. Tunggu, lalu `git pull origin main` |
 | Push ditolak (`rejected`) | `git pull --rebase origin main` lalu push lagi |
 | Konflik saat rebase | `git rebase --abort`, lalu minta tolong Zamil |
