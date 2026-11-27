@@ -24,9 +24,11 @@ export type Aturan = {
   /** Aturan kritis (spec: selalu berbobot 60); satu saja sudah cukup untuk Label Bahaya. */
   kritis: boolean;
   modus?: Modus;
-  /** Penyangkal ≤ 3 kata sebelum pemicu membatalkan kecocokan (ADR-0002: hanya R01/R02). */
+  /** Penyangkal ≤ 3 kata sebelum pemicu, dalam klausa yang sama, membatalkan kecocokan (ADR-0002: hanya R01, R02, R03, R07). */
   pakaiPenyangkal: boolean;
   pola: Pola[];
+  /** Kalau pola ini ada di mana pun dalam Teks, Aturan tidak berlaku sama sekali (spec: R04 dan penanda luar negeri). */
+  kecualiJika?: Pola;
 };
 
 /** ADR-0002. Daftar dan jaraknya dibekukan; mengubahnya berarti menyetel ulang bobot. */
@@ -54,8 +56,17 @@ function regexDari(pola: Pola): RegExp {
   return regex;
 }
 
+/**
+ * Batas klausa: ".", "!", "?", atau "," yang diikuti spasi. "Rp200.000",
+ * "Rp1,5 juta", dan "s.id" tidak memutus.
+ */
+const BATAS_KLAUSA = /[.!?,] /gu;
+
+/** Penyangkal hanya dicari di klausa yang sama, paling jauh JARAK_PENYANGKAL kata sebelum pemicu. */
 function didahuluiPenyangkal(teksNormal: string, posisi: number, bahasa: Bahasa): boolean {
-  const kataSebelum = teksNormal.slice(0, posisi).match(KATA) ?? [];
+  const sebelum = teksNormal.slice(0, posisi);
+  const awalKlausa = Math.max(0, ...Array.from(sebelum.matchAll(BATAS_KLAUSA), (m) => m.index + m[0].length));
+  const kataSebelum = sebelum.slice(awalKlausa).match(KATA) ?? [];
   return kataSebelum.slice(-JARAK_PENYANGKAL).some((kata) => PENYANGKAL[bahasa].has(kata));
 }
 
@@ -92,6 +103,8 @@ export function jalankanAturan(teks: string, katalog: readonly Aturan[]): TandaB
   const hasil: TandaBahaya[] = [];
 
   for (const aturan of katalog) {
+    // search() mengabaikan dan memulihkan lastIndex regex di cache (flag g).
+    if (aturan.kecualiJika && normal.teks.search(regexDari(aturan.kecualiJika)) !== -1) continue;
     const cocok = kecocokanPertama(aturan, normal);
     if (!cocok) continue;
 

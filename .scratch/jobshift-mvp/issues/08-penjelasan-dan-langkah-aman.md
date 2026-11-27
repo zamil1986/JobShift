@@ -11,7 +11,7 @@
 - [x] Ada tautan Karirhub Kemnaker dan aduankonten.id; Modus Luar negeri selalu memuat cek legalitas P3MI KP2MI, 0800-1000, dan WA 0811-8080-141
 - [x] Waspada dan Bahaya memuat "Sudah telanjur transfer?" (IASC, bank/e-wallet, OJK 157) dan "Sudah telanjur kirim data?" (bank/e-wallet, OJK 157, lapor akun pelaku); Risiko rendah `langkahDarurat: null`
 - [x] Tes memindai seluruh copy statis (Penjelasan, alasan Aturan, Langkah aman): tidak memuat kata utuh "aman", "asli", "legit", atau "terpercaya", dengan pengecualian nama merek, tagline, dan domain resmi
-- [ ] Semua URL tautan sudah dicek manual membuka situs resmi
+- [x] Semua URL tautan sudah dicek manual membuka situs resmi (27 Nov 2026: keempat URL terbuka tanpa redirect, di domain pemerintah yang benar)
 
 ## Comments
 
