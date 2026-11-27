@@ -158,7 +158,7 @@ Fitur dikunci Sabtu malam, dan karya dikumpulkan Minggu, sehari sebelum batas re
 
 Dua pertanyaan pertama harus dijawab hari ini, karena menentukan siapa mengerjakan apa.
 
-- [ ] Siapa saja anggota tim, dan siapa memegang peran A–E? Rencana saat ini 3 orang (A+E, B+D, C). Set test harus dipegang C atau A+E, bukan B+D.
+- [x] Siapa saja anggota tim, dan siapa memegang peran A–E? **Jawaban:** 4 orang: Muhammad Zamil (inti, mesin Aturan, AI, integrasi), Daniel (katalog Aturan dan Set dev), Ayudhya Naja (Set test, eval, Cara kerja, audit), Nadine (UI, copy, OCR, aksesibilitas). Set test dipegang Ayudhya Naja. Rincian di `.scratch/jobshift-mvp/pembagian-tim.md`.
 - [x] API AI mana yang dipakai? Cek kuota gratisnya di dokumentasi resmi. **Jawaban:** Groq Free plan, `openai/gpt-oss-120b`, tanpa cadangan di MVP (lihat `docs/research/ai-api-and-iasc.md`).
 - [x] Apa URL resmi kanal pelaporan IASC yang akan ditautkan? Ambil dari situs OJK, jangan dari artikel berita. **Jawaban:** https://iasc.ojk.go.id/ (lihat `docs/research/ai-api-and-iasc.md`).
 - [x] Apakah nama "JobShift" sudah dipakai produk lain? Cek di Google, Play Store, dan GitHub. **Temuan (26 Nov 2026):** sudah dipakai Jobshift Ltd (tryjobshift.com, berdiri 2023), aplikasi web pencarian kerja berbasis AI yang menyusun CV dan melamar otomatis, jadi kategorinya sama dengan JobShift. Ada juga JOBSHIFT di Calgary, organisasi pendukung pekerja terdampak COVID-19. Tidak ditemukan aplikasi bernama JobShift di Play Store maupun repo GitHub. **Keputusan:** nama JobShift tetap dipakai.
