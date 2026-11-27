@@ -14,7 +14,8 @@ describe("cek: R07 Deposit untuk naik level atau mencairkan komisi", () => {
     const hasil = await cek(teks);
 
     expect(hasil.label).toBe("bahaya");
-    expect(hasil.skor).toBe(60);
+    // + R13 tersirat (10): Teks tidak menyebut nama badan usaha maupun alamat.
+    expect(hasil.skor).toBe(70);
     const r07 = tanda(hasil, "R07");
     expect(r07).toMatchObject({
       sumber: "aturan",
@@ -110,7 +111,7 @@ describe("cek: R07 Deposit untuk naik level atau mencairkan komisi", () => {
     );
 
     expect(tanda(hasil, "R07")).toBeUndefined();
-    expect(hasil.skor).toBe(0);
+    expect(hasil.tandaBahaya).toEqual([]);
   });
 
   it("dibatalkan Penyangkal: peringatan 'tidak pernah meminta deposit … untuk pencairan komisi'", async () => {
@@ -119,7 +120,7 @@ describe("cek: R07 Deposit untuk naik level atau mencairkan komisi", () => {
     );
 
     expect(tanda(hasil, "R07")).toBeUndefined();
-    expect(hasil.skor).toBe(0);
+    expect(hasil.tandaBahaya).toEqual([]);
   });
 
   it("tetap menangkap kecocokan kedua yang tidak didahului Penyangkal", async () => {
@@ -141,7 +142,8 @@ describe("cek: R08 Bayaran per like, rating, ulasan, atau follow", () => {
     const hasil = await cek(teks);
 
     expect(hasil.label).toBe("waspada");
-    expect(hasil.skor).toBe(25);
+    // + R13 tersirat (10): Teks tidak menyebut nama badan usaha maupun alamat.
+    expect(hasil.skor).toBe(35);
     const r08 = tanda(hasil, "R08");
     expect(r08).toMatchObject({ sumber: "aturan", bobot: 25, modus: "tugas", kutipan: "Dibayar Rp5.000 per like" });
     expect(teks.slice(...r08!.rentang)).toBe(r08!.kutipan);
@@ -187,14 +189,14 @@ describe("cek: R08 Bayaran per like, rating, ulasan, atau follow", () => {
     );
 
     expect(tanda(hasil, "R08")).toBeUndefined();
-    expect(hasil.skor).toBe(0);
+    expect(hasil.tandaBahaya).toEqual([]);
   });
 });
 
 describe("cek: R06b Diminta pindah ke Telegram atau aplikasi lain", () => {
   it("cocok untuk 'lanjut di Telegram' dengan Modus Tugas, tanpa menaikkan Label", async () => {
     const teks =
-      "Terima kasih sudah mendaftar kerja paruh waktu. Info tugas harian akan dilanjutkan di Telegram oleh mentor kamu.";
+      "Terima kasih sudah mendaftar kerja paruh waktu di CV Kreasi Digital. Info tugas harian akan dilanjutkan di Telegram oleh mentor kamu.";
     const hasil = await cek(teks);
 
     const r06b = tanda(hasil, "R06b");
@@ -248,7 +250,8 @@ describe("cek: Teks kerja tugas like/rating dengan deposit naik level", () => {
     const hasil = await cek(teks);
 
     expect(idAturan(hasil)).toEqual(["R07", "R08"]);
-    expect(hasil.skor).toBe(85);
+    // + R13 tersirat (10): Teks tidak menyebut nama badan usaha maupun alamat.
+    expect(hasil.skor).toBe(95);
     expect(hasil.label).toBe("bahaya");
     expect(hasil.modus).toEqual(["tugas"]);
     expect(hasil.modusTerkuat).toBe("tugas");

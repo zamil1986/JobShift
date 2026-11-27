@@ -5,7 +5,7 @@ import { evaluasiDataset, parseJsonlDataset, type ContohDataset } from "./eval";
 const TEKS_PALSU_ATURAN =
   "Selamat, kamu lolos seleksi admin gudang. Segera transfer biaya seragam Rp250.000 hari ini.";
 const TEKS_PALSU_SAMAR =
-  "Kerja paruh waktu dari rumah, tugas like produk dan gabung grup Telegram untuk bonus harian.";
+  "Kerja paruh waktu dari rumah bersama CV Kreasi Digital, tugas like produk dan gabung grup Telegram untuk bonus harian.";
 const TEKS_ASLI_NETRAL =
   "PT Maju Bersama membuka lowongan staf akuntansi di Bandung. Kirim lamaran dan CV resmi ke bagian HRD.";
 const TEKS_ASLI_FALSE_POSITIVE =

@@ -1,5 +1,5 @@
 import { KATALOG } from "./aturan/katalog";
-import { jalankanAturan, type Aturan } from "./aturan/mesin";
+import { jalankanAturan, type Aturan, type HasilAturan } from "./aturan/mesin";
 import { tandaBahayaAI } from "./gabung-ai";
 import { langkahAman, langkahDarurat } from "./langkah";
 import { panggilAI } from "./panggil-ai";
@@ -35,14 +35,14 @@ export function buatCek(katalog: readonly Aturan[]): FungsiCek {
     const jawabanAI = opsi.ai ? panggilAI(opsi.ai, teksTersamar) : null;
     // Aturan menilai Teks persis seperti diterima (tanpa trim), supaya
     // `rentang` cocok dengan Teks yang disorot UI.
-    const tandaBahayaAturan = jalankanAturan(teks, katalog);
+    const hasilAturan = jalankanAturan(teks, katalog);
 
-    if (!jawabanAI) return nilai(tandaBahayaAturan, null);
+    if (!jawabanAI) return nilai(hasilAturan, null);
     const keluaranAI = await jawabanAI;
-    if (!keluaranAI) return { ...nilai(tandaBahayaAturan, null), catatanAI: "ai_tidak_tersedia" };
-    return nilai(tandaBahayaAturan, {
+    if (!keluaranAI) return { ...nilai(hasilAturan, null), catatanAI: "ai_tidak_tersedia" };
+    return nilai(hasilAturan, {
       keluaran: keluaranAI,
-      tandaBahaya: tandaBahayaAI(teks, teksTersamar, keluaranAI, tandaBahayaAturan),
+      tandaBahaya: tandaBahayaAI(teks, teksTersamar, keluaranAI, hasilAturan.tandaBahaya),
     });
   };
 }
@@ -60,9 +60,9 @@ export const cek: FungsiCek = buatCek(KATALOG);
 /** Jawaban AI yang valid secara skema, beserta Tanda bahaya AI yang lolos penyaringan. */
 type PenilaianAI = { keluaran: KeluaranAI; tandaBahaya: HasilCek["tandaBahaya"] };
 
-function nilai(tandaBahayaAturan: HasilCek["tandaBahaya"], ai: PenilaianAI | null): HasilCek {
-  const tandaBahaya = urutkanTandaBahaya([...tandaBahayaAturan, ...(ai?.tandaBahaya ?? [])]);
-  const tandaBahayaTersirat: HasilCek["tandaBahayaTersirat"] = [];
+function nilai(hasilAturan: HasilAturan, ai: PenilaianAI | null): HasilCek {
+  const tandaBahaya = urutkanTandaBahaya([...hasilAturan.tandaBahaya, ...(ai?.tandaBahaya ?? [])]);
+  const { tandaBahayaTersirat } = hasilAturan;
   const skor = hitungSkor(tandaBahaya, tandaBahayaTersirat);
   const label = labelDariSkor(skor);
   const modus = urutkanModus(tandaBahaya);

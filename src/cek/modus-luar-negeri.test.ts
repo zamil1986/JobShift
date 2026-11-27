@@ -14,7 +14,8 @@ describe("cek: R03 Kerja luar negeri dengan visa kunjungan atau wisata", () => {
     const hasil = await cek(teks);
 
     expect(hasil.label).toBe("bahaya");
-    expect(hasil.skor).toBe(60);
+    // + R13 tersirat (10): Teks tidak menyebut nama badan usaha maupun alamat.
+    expect(hasil.skor).toBe(70);
     const r03 = tanda(hasil, "R03");
     expect(r03).toMatchObject({
       sumber: "aturan",
@@ -74,7 +75,7 @@ describe("cek: R03 Kerja luar negeri dengan visa kunjungan atau wisata", () => {
     );
 
     expect(tanda(hasil, "R03")).toBeUndefined();
-    expect(hasil.skor).toBe(0);
+    expect(hasil.tandaBahaya).toEqual([]);
   });
 
   it("Penyangkal sebelum koma tidak membatalkan: 'Gratis tiket, berangkat pakai visa turis'", async () => {
@@ -107,7 +108,8 @@ describe("cek: R05 Gaji luar negeri tinggi tanpa syarat keahlian", () => {
     const r05 = tanda(hasil, "R05");
     expect(r05).toMatchObject({ sumber: "aturan", bobot: 25, modus: "luar_negeri", kutipan: "Gaji Rp 25 juta" });
     expect(teks.slice(...r05!.rentang)).toBe(r05!.kutipan);
-    expect(hasil.skor).toBe(25);
+    // + R13 tersirat (10): Teks tidak menyebut nama badan usaha maupun alamat.
+    expect(hasil.skor).toBe(35);
     expect(hasil.label).toBe("waspada");
     expect(hasil.modusTerkuat).toBe("luar_negeri");
   });
@@ -224,7 +226,7 @@ describe("cek: R12 Proses berangkat ke luar negeri cepat di luar jalur resmi", (
     );
 
     expect(tanda(hasil, "R12")).toBeUndefined();
-    expect(hasil.skor).toBe(0);
+    expect(hasil.tandaBahaya).toEqual([]);
   });
 
   it("tidak dibatalkan kalimat penyangkalan, karena bukan Aturan kritis", async () => {
@@ -301,7 +303,7 @@ describe("cek: R16 Negara tujuan rawan TPPO untuk kerja online", () => {
     );
 
     expect(tanda(hasil, "R16")).toBeUndefined();
-    expect(hasil.skor).toBe(0);
+    expect(hasil.tandaBahaya).toEqual([]);
   });
 
   it("tidak dibatalkan kalimat penyangkalan, karena bukan Aturan kritis", async () => {
