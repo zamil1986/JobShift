@@ -64,4 +64,125 @@ export const R02: Aturan = {
   ],
 };
 
-export const KATALOG: readonly Aturan[] = [R01, R02];
+// R06b: Telegram yang hanya disebut ("mengelola akun Telegram perusahaan")
+// bukan ajakan pindah, jadi harus didahului kata kerja ajakan.
+const PINDAH = ["lanjut", "lanjutkan", "dilanjutkan", "pindah", "beralih"];
+const AJAKAN_PINDAH = [...PINDAH, "gabung", "bergabung", "join", "masuk", "hubungi", "kontak", "chat"].join("|");
+const SAPAAN = ["kami", "admin", "saya", "kak", "kakak", "hrd", "mentor", "kita"].join("|");
+const AJAKAN_PINDAH_EN = ["move", "moving", "continue", "switch", "join", "chat", "contact", "message", "text", "reach", "talk"].join("|");
+
+export const R06b: Aturan = {
+  id: "R06b",
+  alasan: "Memintamu pindah ke Telegram atau aplikasi chat lain, tempat pelaku lebih mudah menghilang.",
+  bobot: 20,
+  kritis: false,
+  modus: "tugas",
+  pakaiPenyangkal: false,
+  pola: [
+    {
+      cari: `(?:${AJAKAN_PINDAH})(?: (?:${SAPAAN}))?(?: (?:ke|di|lewat|via|melalui|dalam))?(?: (?:grup|group|channel|kanal|akun|aplikasi))? telegram`,
+      bahasa: "id",
+    },
+    { cari: `(?:${PINDAH.join("|")}) (?:ke|di) aplikasi (?:chat )?lain`, bahasa: "id" },
+    { cari: "t\\.me/[a-z0-9_]+", bahasa: "id" },
+    {
+      cari: `(?:${AJAKAN_PINDAH_EN})(?: (?:us|me|our admin|the admin|hr))?(?: (?:to|on|via|in|at|through))?(?: (?:our|the|my))?(?: (?:group|channel))? telegram`,
+      bahasa: "en",
+    },
+  ],
+};
+
+/** Nominal yang ikut dikutip, misalnya "Rp200.000" atau "$5". Pola tidak boleh berakhir di "rp" (batas kata). */
+const NOMINAL = String.raw`(?:rp|\$) ?\d(?:[\d.,]*\d)?(?: ?(?:rb|ribu|k|jt|juta))?`;
+
+/** Satu kata yang tidak menutup kalimat (tidak berakhir ".", "!", "?"). "Rp200.000" tetap satu kata. */
+const KATA_SEKALIMAT = String.raw`\S*[^\s.!?]`;
+
+/**
+ * Celah ≤ n kata dalam satu kalimat, boleh diawali tanda baca yang menempel
+ * ("komisi, lakukan top up"). Malas supaya kutipan sependek mungkin.
+ */
+const celah = (n: number) => `[,;:]?(?: ${KATA_SEKALIMAT}){0,${n}}?`;
+
+// R07 kritis tanpa Penyangkal, jadi kata tunggal ("deposit", "top up", "VIP")
+// tidak cukup: teller bank, konter pulsa, dan ruang VIP hotel bukan penipuan.
+// Uang masuk harus menjadi syarat tujuan Modus Tugas dalam satu kalimat.
+const UANG_MASUK = ["(?:men)?deposit(?:kan)?", "top ?-?up", "isi (?:ulang )?saldo", "setor (?:dana|saldo|uang)"].join("|");
+const TUJUAN_TUGAS = [
+  "(?:naik|naikkan|menaikkan|upgrade)(?: ke)? (?:level|vip|akun)(?! (?:jabatan|karier|karir))",
+  "level ?\\d",
+  "vip ?\\d",
+  "member vip",
+  "(?:men)?cairkan (?:komisi|bonus|keuntungan)",
+  "(?:pencairan|penarikan|tarik|menarik) (?:komisi|bonus|keuntungan)",
+  "(?:komisi|bonus|keuntungan)(?: (?:bisa|dapat|langsung|segera))? (?:dicairkan|ditarik)",
+  "membuka (?:level|tugas)",
+].join("|");
+const KATA_TUJUAN = ["untuk", "supaya", "agar", "biar", "sebelum", "baru"].join("|");
+const UANG_MASUK_EN = ["deposit", "top ?-?up", "recharge"].join("|");
+const TUJUAN_TUGAS_EN = [
+  "upgrade(?: to)? (?:vip|level|your account)",
+  "level up",
+  "next level",
+  "vip ?\\d",
+  "withdraw (?:your )?(?:commissions?|earnings|profits?|bonus)",
+  "unlock (?:the )?(?:next )?(?:level|tasks?)",
+].join("|");
+const KATA_TUJUAN_EN = ["to", "for", "so", "before"].join("|");
+
+/**
+ * Uang lalu tujuan ("deposit Rp200.000 untuk naik level") wajib dihubungkan
+ * kata tujuan, supaya "melayani top up saldo dan upgrade akun" tidak cocok.
+ * Tujuan lalu uang ("untuk mencairkan komisi, lakukan top up") sudah
+ * menyatakan syaratnya sendiri.
+ */
+const uangSebagaiSyarat = (uang: string, tujuan: string, kataTujuan: string) => [
+  `(?:${uang})${celah(4)} (?:${kataTujuan})${celah(3)} (?:${tujuan})`,
+  `(?:${tujuan})${celah(6)} (?:${uang})`,
+];
+
+export const R07: Aturan = {
+  id: "R07",
+  alasan: "Meminta deposit atau top-up supaya kamu bisa naik level atau mencairkan komisi.",
+  bobot: 60,
+  kritis: true,
+  modus: "tugas",
+  pakaiPenyangkal: false,
+  pola: [
+    ...uangSebagaiSyarat(UANG_MASUK, TUJUAN_TUGAS, KATA_TUJUAN).map((cari) => ({ cari, bahasa: "id" as const })),
+    ...uangSebagaiSyarat(UANG_MASUK_EN, TUJUAN_TUGAS_EN, KATA_TUJUAN_EN).map((cari) => ({
+      cari,
+      bahasa: "en" as const,
+    })),
+  ],
+};
+
+// R08: kegiatan saja ("like", "follow up", "rating driver") wajar di lowongan
+// biasa, jadi harus berpasangan dengan bayaran.
+const KEGIATAN = daftar("like|likes|subscribe|rating|ulasan|review|follow|komen|komentar|share");
+const KEGIATAN_EN = "(?:likes?|subscribes?|ratings?|reviews?|follows?|comments?|tasks?|videos?)";
+const BAYARAN = ["dibayar", "bayaran", "komisi", "upah", "imbalan", "dapat", "dapatkan", "mendapat", "mendapatkan", "dapet", "cuan"].join("|");
+const PER = "(?:per|tiap|setiap|untuk setiap|untuk tiap)";
+
+export const R08: Aturan = {
+  id: "R08",
+  alasan: "Menjanjikan bayaran untuk setiap like, rating, ulasan, atau follow.",
+  bobot: 25,
+  kritis: false,
+  modus: "tugas",
+  pakaiPenyangkal: false,
+  pola: [
+    // "dibayar Rp5.000 per like", "komisi tiap ulasan"
+    { cari: `(?:${BAYARAN})(?: ${NOMINAL})? ${PER} ${KEGIATAN}`, bahasa: "id" },
+    // "like dan subscribe dibayar", "rating dapat Rp3.000"
+    { cari: `${KEGIATAN} (?:dibayar|berbayar|dihargai|(?:dapat|dapet|=) ${NOMINAL})`, bahasa: "id" },
+    // "Rp5.000 per like", "Rp10.000/tugas"
+    { cari: `${NOMINAL} ?(?:${PER}|/) ?(?:${KEGIATAN}|tugas|task|video)`, bahasa: "id" },
+    // "per tugas Rp12.000"
+    { cari: `${PER} (?:tugas|task) ${NOMINAL}`, bahasa: "id" },
+    { cari: `(?:paid|earn|earning|make)(?: ${NOMINAL})? (?:per|for each|for every) ${KEGIATAN_EN}`, bahasa: "en" },
+    { cari: `${NOMINAL} ?(?:per|for each|for every|/) ?${KEGIATAN_EN}`, bahasa: "en" },
+  ],
+};
+
+export const KATALOG: readonly Aturan[] = [R01, R02, R06b, R07, R08];
