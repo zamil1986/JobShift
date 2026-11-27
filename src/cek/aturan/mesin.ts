@@ -24,7 +24,7 @@ export type Aturan = {
   /** Aturan kritis (spec: selalu berbobot 60); satu saja sudah cukup untuk Label Bahaya. */
   kritis: boolean;
   modus?: Modus;
-  /** Penyangkal ≤ 3 kata sebelum pemicu membatalkan kecocokan (ADR-0002: hanya R01/R02). */
+  /** Penyangkal ≤ 3 kata sebelum pemicu membatalkan kecocokan (ADR-0002: hanya R01, R02, R07). */
   pakaiPenyangkal: boolean;
   pola: Pola[];
 };
