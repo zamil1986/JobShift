@@ -8,7 +8,7 @@
 
 - [x] Pemegang Set test sudah ditetapkan dan dicatat (bukan orang yang menyetel Aturan): **Ayudhya Naja**
 - [x] Set dev 60 contoh dalam format JSONL sesuai spec (`id, teks, kebenaran, modus?, sumber, sintetis`) sudah di-commit
-- [ ] Set test 40 contoh tersimpan di luar repo sampai bobot dibekukan di M3, lalu di-commit
+- [ ] Set test 40 contoh tersimpan di luar repo sampai bobot dibekukan di M3, lalu di-commit (tersimpan di luar repo milik Ayudhya Naja sejak 28 November 2026, format tervalidasi; commit menunggu tiket 14)
 - [x] Setiap contoh sudah disamarkan dari nomor HP, nama orang, dan rekening sebelum di-commit
-- [x] Contoh sintetis ditandai `sintetis: true` dan jumlahnya dicatat (Set dev: 60 dari 60 sintetis, direkonstruksi dari kasus cek fakta dan berita; URL di `sumber`)
-- [ ] Palsu/Asli kira-kira seimbang di tiap set; Modus Tugas, Lokal, dan Luar negeri masing-masing punya minimal 5 contoh Palsu di Set dev (Set dev sudah: Palsu 30, Asli 30; Tugas 9, Lokal 12, Luar negeri 9. Set test belum ada.)
+- [x] Contoh sintetis ditandai `sintetis: true` dan jumlahnya dicatat (Set dev: 60 dari 60 sintetis, direkonstruksi dari kasus cek fakta dan berita; URL di `sumber`. Set test: 40 dari 40 sintetis, dengan sumber berbeda dari Set dev)
+- [x] Palsu/Asli kira-kira seimbang di tiap set; Modus Tugas, Lokal, dan Luar negeri masing-masing punya minimal 5 contoh Palsu di Set dev (Set dev: Palsu 30, Asli 30; Tugas 9, Lokal 12, Luar negeri 9. Set test: Palsu 20, Asli 20; Tugas 7, Lokal 7, Luar negeri 6)
