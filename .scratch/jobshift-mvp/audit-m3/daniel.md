@@ -10,6 +10,15 @@
   3. Navigasi keyboard penuh, perpindahan fokus, dan region `aria-live`
   4. Ketahanan saat `GROQ_API_KEY` dimatikan pada 5 contoh
 
+### Ringkasan
+
+| # | Kriteria tiket 14 | Status | Tiket temuan |
+| --- | --- | --- | --- |
+| 1 | README menjelaskan cara menjalankan, arsitektur, dan cara eval; `npm test` dan lint lulus | README, lint, typecheck **LULUS**; `npm test` **GAGAL di Windows saja** (lulus 513/513 di macOS/Linux) | [16](../issues/16-path-windows-cek-dataset.md) |
+| 2 | Lighthouse Accessibility ≥ 95 (halaman cek kosong, setelah Cek, Cara kerja) | **LULUS** (100 / 100 / 100) | — |
+| 3 | Alur keyboard, fokus pindah ke judul hasil, hasil di `aria-live` | **LULUS** | — |
+| 4 | API key dimatikan, 5 contoh tetap berlabel | **LULUS**, tetapi key belum dipasang lagi di production | [17](../issues/17-groq-api-key-production.md) |
+
 ---
 
 ## 1. README, `npm test`, `npm run lint`, dan `npm run typecheck`
@@ -36,6 +45,10 @@
 - Semua tes inti penilaian (`src/cek/*.test.ts`), route API (`src/app/api/cek/route.test.ts`), evaluasi (`src/eval/*.test.ts`), validasi dataset (`src/dataset/validasi.test.ts`), dan UI/OCR (`src/ui/*.test.ts`) **lulus 100% (506/506 tes)**.
 - Lima kegagalan terjadi di `src/dataset/cli.test.ts` karena `jalankanCekDataset` (`src/dataset/cli.ts` baris 39) memanggil `path.resolve(akar, ...)` sedangkan `src/dataset/cli.test.ts` memberikan `akar: "/repo"` dan memeriksa path berformat POSIX `"/repo/data/dev.jsonl"`. Di Windows, `path.resolve("/repo", "data/dev.jsonl")` menghasilkan `"D:\\repo\\data\\dev.jsonl"`, sehingga pencocokan kunci objek mock `adaFile` gagal.
 - Sesuai aturan audit, kode produksi/tes tidak diubah di sini dan temuan dicatat sebagai tiket baru: [16-path-windows-cek-dataset.md](../issues/16-path-windows-cek-dataset.md).
+
+**Verifikasi reviewer (Zamil, 28 Nov 2026, macOS, commit `7f07a81`):**
+- `npm test`: **23/23 file, 513/513 tes lulus**. `npm run lint` dan `npm run typecheck` keluar `0`. Jadi kegagalan hanya terjadi di Windows; build Vercel (Linux) tidak terdampak.
+- Kegagalan Windows direproduksi dengan menjalankan `src/dataset/cli.test.ts` memakai `path.win32` (akar drive `D:\`): **5 gagal, 2 lulus (7 tes)**, cocok dengan angka di atas.
 
 ---
 
@@ -92,7 +105,7 @@ Diuji langsung pada `https://job-shift-navy.vercel.app` melalui Chrome DevTools 
      - `outline-offset: 3px` (kontras terhadap latar `#030712` / `#111827` > 9:1, jauh di atas syarat non-teks 3:1).
 2. **Aktivasi tombol contoh dan Cek dengan keyboard:**
    - Saat fokus berada di tombol **"Kerja tugas online"**, penekanan tombol `Space` mengisi `textarea` dengan teks contoh (358 karakter) dan memperbarui penghitung menjadi `358 / 3.000 karakter`.
-   - Penekanan `Tab` membawa fokus melewati `textarea` dan `input[type="file"]` menuju tombol **"Cek"**.
+   - Fokus tetap di tombol contoh setelah `Space` (tidak melompat ke `textarea`). Dari situ butuh **6 kali `Tab`** untuk sampai ke tombol **"Cek"**: tiga tombol contoh lain, `textarea`, `input[type="file"]`, lalu **"Cek"**. (Diverifikasi ulang reviewer di URL publik: 3 kali `Tab` berhenti di tombol "Loker resmi", bukan di "Cek".)
    - Penekanan `Enter` pada tombol **"Cek"** mengirim permintaan `POST /api/cek` dan menampilkan hasil.
 3. **Perpindahan fokus ke judul hasil setelah Cek:**
    - Begitu hasil selesai dirender, `document.activeElement` otomatis berpindah ke `<h2 id="judul-hasil" tabindex="-1">Hasil cek</h2>` (`fokusPindahKeJudulHasil: true`) dan memanggil `scrollIntoView({ block: "start" })`.
@@ -117,6 +130,8 @@ Diuji langsung pada `https://job-shift-navy.vercel.app` melalui Chrome DevTools 
 - Diuji pada deployment publik `https://job-shift-navy.vercel.app` saat `GROQ_API_KEY` dalam keadaan tidak aktif/kosong di server (terbukti dari setiap permintaan non-contoh yang langsung mengembalikan `sumberPenilaian: "aturan"` dan `catatanAI: "ai_tidak_tersedia"` tanpa panggilan ke Groq).
 - Setelah pengujian selesai, pemilik project Vercel (Muhammad Zamil) diinformasikan untuk memastikan `GROQ_API_KEY` dipasang kembali pada environment production Vercel bila diperlukan untuk demo teks bebas.
 
+> **Verifikasi reviewer (Zamil, 28 Nov 2026 ±21.15 WIB):** `GROQ_API_KEY` **belum terpasang kembali**. Contoh #5 di bawah masih menjawab `catatanAI: "ai_tidak_tersedia"`, log runtime production (`dpl_2pJQqvRxc1uTZT5yCoJ1LiTTAnXZ`) mencetak `GROQ_API_KEY tidak diset: Cek dinilai Aturan saja dengan catatanAI.`, dan daftar environment variable project Vercel `job-shift` yang dibaca lewat API Vercel kosong. Laporan ini juga tidak mencatat bahwa key sempat aktif sebelum uji. Kriteria "API key dimatikan, 5 contoh tetap berlabel" tetap **LULUS**, tetapi lapisan AI belum aktif di URL publik. Dicatat sebagai [17-groq-api-key-production.md](../issues/17-groq-api-key-production.md) (`Status: needs-triage`).
+
 ### Cara Uji & Hasil 5 Contoh
 Kelima contoh (4 tombol contoh siap pakai + 1 teks lowongan bebas) dikirim ke `POST https://job-shift-navy.vercel.app/api/cek` dari halaman publik:
 
@@ -130,5 +145,6 @@ Kelima contoh (4 tombol contoh siap pakai + 1 teks lowongan bebas) dikirim ke `P
 
 **Catatan Teknis:**
 - Sesuai spesifikasi FR-08 dan implementasi di `src/app/api/cek/route.ts` (`penilaiStatis(penilaiGroqDariEnv())`), keempat tombol contoh siap pakai (#1–#4) selalu dijawab oleh **adapter AI Statis** (`src/cek/statis.ts`) dari memori server tanpa memanggil Groq, sehingga tetap menghasilkan `sumberPenilaian: "aturan+AI"` tanpa `catatanAI` walaupun `GROQ_API_KEY` dimatikan.
-- Untuk teks apa pun di luar keempat contoh statis (#5, atau jika teks contoh diedit satu karakter saja), server jatuh ke `penilaiGroqDariEnv()` yang mengembalikan `null` saat `GROQ_API_KEY` tidak ada, sehingga hasil dinilai oleh mesin Aturan saja (`sumberPenilaian: "aturan"`), tetap berlabel dengan benar (`waspada`, Skor 25 dari R06a + R13), dan menampilkan `catatanAI: "ai_tidak_tersedia"` di UI.
+- Untuk teks apa pun di luar keempat contoh statis (#5, atau jika teks contoh diubah selain spasi dan baris baru, yang diseragamkan sebelum di-hash), adapter Statis meneruskan ke adapter dari `penilaiGroqDariEnv()`. Tanpa `GROQ_API_KEY`, adapter itu selalu menjawab `null`, sehingga hasil dinilai oleh mesin Aturan saja (`sumberPenilaian: "aturan"`), tetap berlabel dengan benar (`waspada`, Skor 25 = R06a 15 + Tanda bahaya tersirat R13 10), dan menampilkan `catatanAI: "ai_tidak_tersedia"` di UI.
+- Arahan Tahap 1a meminta kelima contoh "berlabel dengan catatan AI". Contoh #1–#4 sengaja tidak punya `catatanAI` karena dijawab adapter Statis (PRD FR-08: hasil contoh selalu sama tanpa kuota). Ini perilaku yang dirancang, bukan temuan.
 
