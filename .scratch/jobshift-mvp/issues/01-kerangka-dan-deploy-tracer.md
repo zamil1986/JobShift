@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** selesai
 
 - [x] Next.js App Router, TypeScript strict, ESLint tanpa error, dan Vitest sudah terpasang; `npm test` dan `npm run lint` lulus di CI lokal
 - [x] Inti `cek(teks, { ai })` sudah ada dengan tipe `HasilCek` sesuai spec; adapter AI default mengembalikan `null` (belum ada AI)
@@ -14,7 +14,7 @@
 - [x] Teks valid menghasilkan Label Risiko rendah, Skor 0, dan peringatan tetap FR-06 yang terlihat tanpa scroll di 360 × 640
 - [x] Tagline "JobShift — cek dulu sebelum transfer." tampil di halaman cek dan hasil
 - [x] Teks pengguna dirender sebagai teks biasa, tanpa HTML
-- [ ] Ter-deploy di Vercel dan bisa dibuka dari URL publik (milestone M1)
+- [x] Ter-deploy di Vercel dan bisa dibuka dari URL publik (milestone M1)
 - [x] README memuat cara menjalankan aplikasi dan tes
 
 ## Comments
@@ -22,3 +22,4 @@
 - 2026-11-26 (Claude, branch `tiket-01-kerangka-dan-deploy-tracer`): semua kriteria selesai di lokal kecuali deploy Vercel. `npm test` (26 tes), `npm run lint`, `npm run typecheck`, dan `npm run build` lulus. Peringatan FR-06 dicek di browser 360 × 640: terlihat tanpa scroll setelah Cek.
 - Catatan untuk tiket 10/13: disclaimer privasi di `src/ui/salinan.ts` ("Teks hanya dipakai untuk satu kali cek ini.") perlu ditinjau ulang begitu Teks tersamar mulai dikirim ke Groq.
 - Respons 500 `kesalahan_server` ditambahkan untuk kesalahan tak terduga; di luar kontrak 400 di spec.
+- 2026-11-28 (Claude): ter-deploy di https://job-shift-navy.vercel.app (project Vercel `job-shift`, production dari `main`, commit `b0648f4`). Dicek dari luar tanpa login: `/` 200, `/cara-kerja` 200, `/tesseract/worker.min.js` 200, `POST /api/cek` Teks valid 200 (Risiko rendah) dan Teks < 50 karakter 400 `teks_terlalu_pendek`. Log build Vercel menunjukkan `prebuild` menyalin 6 aset OCR. `GROQ_API_KEY` belum diset di Vercel, jadi saat ini `sumberPenilaian` masih `aturan`.

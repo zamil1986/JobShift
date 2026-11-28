@@ -71,4 +71,8 @@ Fungsi internal (regex, normalisasi, penggabung) tidak dites langsung.
 
 ## Deploy
 
-Target deploy: Vercel, dari branch `main` (milestone M1). API key (mulai tiket 10) hanya disimpan sebagai environment variable di Vercel, tidak pernah di repo.
+URL publik: **https://job-shift-navy.vercel.app** (milestone M1).
+
+Project Vercel `job-shift` terhubung ke repo GitHub dan otomatis deploy production dari branch `main`; branch lain mendapat preview deployment. Vercel menjalankan `npm run build`, jadi `prebuild` ikut jalan dan menyalin aset OCR ke `public/tesseract/` di server build. Folder itu tetap di-gitignore.
+
+`GROQ_API_KEY` hanya disimpan sebagai environment variable di dashboard Vercel (Settings → Environment Variables), tidak pernah di repo. Tanpa key, Cek tetap jalan dan dinilai Aturan saja (`catatanAI: "ai_tidak_tersedia"`). Perubahan env baru berlaku setelah redeploy.
