@@ -384,6 +384,9 @@ a:hover {
   padding: var(--jarak-2) var(--jarak-4);
   color: var(--warna-sorotan-teks);
   background: var(--warna-aksen-terang);
+  display: flex;
+  align-items: center;
+  min-height: var(--target-min);
   border-radius: var(--radius-kecil);
   transform: translateY(-200%);
 }
@@ -923,13 +926,27 @@ textarea[aria-invalid="true"] {
   border-radius: var(--radius-bulat);
 }
 
-.daftar-langkah a {
+/* Tautan sebaris: padding vertikal membuat area sentuh tiap baris tautan
+   ≥ target-min tanpa mengubah tinggi baris atau lipatan kalimatnya. */
+.daftar-langkah a,
+.disclaimer a,
+.tagline-hasil a,
+.fakta-sumber a {
   padding-block: calc((var(--target-min) - 1em) / 2);
-  font-weight: var(--tebal-sedang);
 }
 
-.daftar-langkah a:focus-visible {
-  outline-offset: 0;
+/* Saat difokus keyboard, padding dilepas supaya cincin fokus membingkai teks
+   tautan saja dan tidak memotong baris di atas atau di bawahnya. Padding
+   inline tidak memengaruhi tata letak, jadi tidak ada yang bergeser. */
+.daftar-langkah a:focus-visible,
+.disclaimer a:focus-visible,
+.tagline-hasil a:focus-visible,
+.fakta-sumber a:focus-visible {
+  padding-block: 0;
+}
+
+.daftar-langkah a {
+  font-weight: var(--tebal-sedang);
 }
 
 /* Kalau sudah telanjur: bagian bersekat biasa di dalam panel, bukan kotak
