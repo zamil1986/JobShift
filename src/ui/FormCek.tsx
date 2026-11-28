@@ -1,10 +1,11 @@
 "use client";
 
 import { useId, useRef, useState, type FormEvent } from "react";
+import { CONTOH } from "@/cek/contoh";
 import { PANJANG_MAKS, panjangTeks, periksaPanjang } from "@/cek/panjang";
 import { PESAN_ERROR, PESAN_GAGAL_SERVER } from "@/cek/pesan";
 import type { ErrorCek, HasilCek } from "@/cek/tipe";
-import { DISCLAIMER_PRIVASI, PESAN_GAGAL_KONEKSI } from "./salinan";
+import { DISCLAIMER_PRIVASI, JUDUL_CONTOH, PESAN_GAGAL_KONEKSI } from "./salinan";
 import { TampilanHasil } from "./TampilanHasil";
 import { UnggahScreenshot } from "./UnggahScreenshot";
 
@@ -21,6 +22,7 @@ export function FormCek() {
   const idKotak = useId();
   const idPenghitung = useId();
   const idGalat = useId();
+  const idJudulContoh = useId();
 
   const panjang = panjangTeks(teks);
   const kelebihan = panjang > PANJANG_MAKS;
@@ -70,6 +72,29 @@ export function FormCek() {
     <div className="alat" id="kotak-cek">
       <div className="alat-isi">
         <form className="form-cek" onSubmit={jalankanCek} noValidate>
+          <div role="group" aria-labelledby={idJudulContoh} className="grup-contoh">
+            <p id={idJudulContoh} className="judul-contoh">
+              {JUDUL_CONTOH}
+            </p>
+            <ul className="daftar-contoh">
+              {CONTOH.map((c) => (
+                <li key={c.id}>
+                  <button
+                    type="button"
+                    className="tombol tombol-kedua tombol-kecil"
+                    disabled={memuat || ocrSibuk}
+                    onClick={() => {
+                      setTeks(c.teks);
+                      setGalat(null);
+                    }}
+                  >
+                    {c.nama}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           <label htmlFor={idKotak} className="label-kotak">
             Tempel teks lowongan di sini
           </label>

@@ -8,11 +8,13 @@ import {
   type KodeError,
 } from "@/cek";
 import { penilaiGroqDariEnv } from "@/cek/groq";
+import { penilaiStatis } from "@/cek/statis";
 
 // Route tipis: parse JSON → cek() → JSON. Tidak ada logika penilaian di sini,
 // dan isi Teks tidak pernah ditulis ke log (NFR-01). Adapter Groq dibuat dari
 // GROQ_API_KEY di env server; tanpa key, Cek dinilai Aturan saja dengan
-// catatanAI.
+// catatanAI. Teks contoh siap pakai dijawab adapter Statis tanpa memanggil
+// Groq, jadi hasilnya sama walau key tidak ada.
 
 const BodyCek = z.object({ teks: z.string() });
 
@@ -33,7 +35,7 @@ export async function POST(request: Request): Promise<Response> {
   if (!body.success) return tolak("format_tidak_valid");
 
   try {
-    return Response.json(await cek(body.data.teks, { ai: penilaiGroqDariEnv() }));
+    return Response.json(await cek(body.data.teks, { ai: penilaiStatis(penilaiGroqDariEnv()) }));
   } catch (galat) {
     if (galat instanceof TeksTidakValid) return tolak(galat.kode);
 

@@ -584,6 +584,29 @@ textarea[aria-invalid="true"] {
   font-weight: var(--tebal-semi);
 }
 
+/* Contoh siap pakai: tombol kedua yang membungkus ke baris baru di HP. */
+.grup-contoh {
+  margin-bottom: var(--jarak-3);
+}
+
+.judul-contoh {
+  color: var(--warna-teks-redup);
+}
+
+.daftar-contoh {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--jarak-2);
+  margin: var(--jarak-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.daftar-contoh .tombol:disabled {
+  color: var(--warna-mati-teks);
+  cursor: progress;
+}
+
 /* Unggah screenshot: jalur kedua, dipisah garis tipis dari kotak tempel.
    Tombol pilih berkas bergaya tombol kedua dengan target sentuh ≥ 44 px. */
 .label-unggah {
