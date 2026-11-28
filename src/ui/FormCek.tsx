@@ -21,7 +21,6 @@ export function FormCek() {
   const idKotak = useId();
   const idPenghitung = useId();
   const idGalat = useId();
-  const kotak = useRef<HTMLTextAreaElement>(null);
 
   const panjang = panjangTeks(teks);
   const kelebihan = panjang > PANJANG_MAKS;

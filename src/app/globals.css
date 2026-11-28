@@ -584,6 +584,77 @@ textarea[aria-invalid="true"] {
   font-weight: var(--tebal-semi);
 }
 
+/* Unggah screenshot: jalur kedua, dipisah garis tipis dari kotak tempel.
+   Tombol pilih berkas bergaya tombol kedua dengan target sentuh ≥ 44 px. */
+.label-unggah {
+  margin-top: var(--jarak-3);
+  padding-top: var(--jarak-4);
+  border-top: var(--tebal-garis-halus) solid var(--warna-garis);
+}
+
+.form-cek input[type="file"] {
+  width: 100%;
+  min-height: var(--target-min);
+  font: inherit;
+  font-size: var(--ukuran-isi);
+  color: var(--warna-teks-redup);
+  cursor: pointer;
+}
+
+.form-cek input[type="file"]::file-selector-button {
+  min-height: var(--target-min);
+  margin-right: var(--jarak-3);
+  padding: var(--jarak-2) var(--jarak-4);
+  font: inherit;
+  font-weight: var(--tebal-semi);
+  color: var(--abu-300);
+  background:
+    var(--gradien-tombol-kedua) padding-box,
+    var(--bingkai-gradien) border-box;
+  border: var(--tebal-garis-halus) solid transparent;
+  border-radius: var(--radius-kecil);
+  cursor: pointer;
+}
+
+.form-cek input[type="file"]:hover:not(:disabled)::file-selector-button {
+  color: var(--warna-teks-kuat);
+}
+
+.form-cek input[type="file"]:disabled,
+.form-cek input[type="file"]:disabled::file-selector-button {
+  color: var(--warna-mati-teks);
+  cursor: progress;
+}
+
+.status-ocr:not(:empty) {
+  color: var(--warna-teks);
+  font-weight: var(--tebal-sedang);
+}
+
+.form-cek progress {
+  width: 100%;
+  height: var(--jarak-2);
+  appearance: none;
+  background: var(--warna-permukaan-2);
+  border: 0;
+  border-radius: var(--radius-bulat);
+  overflow: hidden;
+}
+
+.form-cek progress::-webkit-progress-bar {
+  background: var(--warna-permukaan-2);
+}
+
+.form-cek progress::-webkit-progress-value {
+  background: var(--warna-aksen);
+  border-radius: var(--radius-bulat);
+}
+
+.form-cek progress::-moz-progress-bar {
+  background: var(--warna-aksen);
+  border-radius: var(--radius-bulat);
+}
+
 .galat {
   padding: var(--jarak-3) var(--jarak-4);
   color: var(--warna-galat);
