@@ -18,6 +18,9 @@ export const DISCLAIMER_PRIVASI =
 export const CATATAN_AI_TIDAK_TERSEDIA =
   "Penilaian AI sedang tidak tersedia, jadi hasil ini hanya dari pemeriksaan aturan JobShift.";
 
+/** Judul tombol contoh siap pakai (FR-08). */
+export const JUDUL_CONTOH = "Belum punya teks? Coba salah satu contoh:";
+
 export const PESAN_GAGAL_KONEKSI =
   "Cek gagal karena koneksi terputus. Periksa internet kamu, lalu coba lagi.";
 
