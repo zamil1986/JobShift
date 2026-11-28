@@ -147,6 +147,7 @@
   --lebar-halaman: 72rem;
   --lebar-alat: 40rem;
   --lebar-kepala-bagian: 44rem;
+  --lebar-daftar-modus: 60rem;
   --tinggi-kotak-teks: 6.5rem;
   --tinggi-kotak-teks-lebar: 11rem;
   --tinggi-teks-asli: 16rem;
@@ -372,17 +373,6 @@ a:hover {
   white-space: nowrap;
 }
 
-/* Di layar paling sempit hanya aksi utama yang tinggal di bilah; Cara kerja
-   tetap ada di kaki halaman dan tepat di bawah panel cek. */
-.nav-situs .nav-kedua {
-  display: none;
-}
-
-@media (min-width: 25rem) {
-  .nav-situs .nav-kedua {
-    display: list-item;
-  }
-}
 
 /* ---------- Kepala situs ---------- */
 
@@ -448,6 +438,26 @@ a:hover {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* Di layar sempit bilah dan kedua tombolnya dirapatkan supaya logo, Cara
+   kerja, dan Cek sekarang muat sebaris di 360 px. */
+@media (max-width: 24.99rem) {
+  .kepala-situs {
+    padding-inline: var(--jarak-2);
+  }
+
+  .bilah {
+    padding-left: var(--jarak-2);
+  }
+
+  .nav-situs {
+    gap: var(--jarak-1);
+  }
+
+  .nav-situs .tombol-kecil {
+    padding-inline: calc(var(--jarak-2) * 0.75);
+  }
 }
 
 @media (min-width: 48rem) {
@@ -606,11 +616,12 @@ textarea[aria-invalid="true"] {
   background-size: 100% 150%;
 }
 
+/* Hanya nonaktif selama cek berjalan. */
 .tombol-cek:disabled {
   color: var(--warna-mati-teks);
   background: var(--warna-mati-latar);
   box-shadow: none;
-  cursor: not-allowed;
+  cursor: progress;
 }
 
 .disclaimer {
@@ -666,8 +677,7 @@ textarea[aria-invalid="true"] {
   row-gap: var(--jarak-1);
   padding: var(--jarak-4);
   color: var(--warna-cap);
-  background: color-mix(in srgb, var(--warna-cap) 9%, var(--warna-permukaan));
-  border: var(--tebal-garis-halus) solid color-mix(in srgb, var(--warna-cap) 45%, transparent);
+  background: color-mix(in srgb, var(--warna-cap) 11%, var(--warna-permukaan));
   border-radius: var(--radius);
 }
 
@@ -828,11 +838,10 @@ textarea[aria-invalid="true"] {
   outline-offset: 0;
 }
 
-.bagian-darurat {
-  padding: var(--jarak-4);
-  background: var(--warna-latar-dalam);
-  border: var(--tebal-garis-halus) solid var(--warna-garis-terang);
-  border-radius: var(--radius);
+/* Kalau sudah telanjur: bagian bersekat biasa di dalam panel, bukan kotak
+   di dalam kotak; judulnya diberi warna Label Bahaya. */
+.bagian-darurat > h3 {
+  color: var(--warna-cap-bahaya);
 }
 
 .bagian-darurat section + section {
@@ -1149,10 +1158,56 @@ textarea[aria-invalid="true"] {
   }
 }
 
-.kartu-modus h3 {
-  margin-bottom: var(--jarak-3);
+/* Modus: satu daftar bersekat, nama modus besar di kiri, cirinya di kanan. */
+.daftar-modus {
+  max-width: var(--lebar-daftar-modus);
+  margin: 0 auto;
+  padding-block: 0;
+  list-style: none;
+}
+
+.modus {
+  display: grid;
+  gap: var(--jarak-2);
+  padding-block: var(--jarak-5);
+}
+
+.modus + .modus {
+  border-top: var(--tebal-garis-halus) solid var(--warna-garis);
+}
+
+/* Nama modus satu langkah jelas di bawah judul bagian. */
+.modus-nama {
   font-size: var(--ukuran-besar);
   font-weight: var(--tebal-semi);
+}
+
+@media (min-width: 48rem) {
+  .daftar-modus {
+    padding-inline: var(--jarak-7);
+  }
+
+  .modus {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    align-items: start;
+    gap: var(--jarak-6);
+    padding-block: var(--jarak-6);
+  }
+
+  .modus-nama {
+    font-size: var(--ukuran-label);
+  }
+
+  /* Baris pertama keterangan sejajar tengah dengan nama di sebelahnya. */
+  .modus p {
+    padding-top: calc(
+      (var(--ukuran-label) * var(--tinggi-baris-rapat) - var(--ukuran-isi) * var(--tinggi-baris)) / 2
+    );
+  }
+}
+
+.kalimat {
+  display: block;
 }
 
 /* Fakta: kartu seperti testimoni, nama sumber di atas, angka besar. */
@@ -1160,16 +1215,6 @@ textarea[aria-invalid="true"] {
   display: flex;
   flex-direction: column;
   gap: var(--jarak-3);
-}
-
-.kartu-fakta .fakta-sumber-atas {
-  color: var(--indigo-300);
-  font-weight: var(--tebal-semi);
-}
-
-.kartu-fakta p:nth-child(2) {
-  color: var(--warna-teks);
-  font-size: var(--ukuran-sedang);
 }
 
 .fakta-angka {
@@ -1190,6 +1235,11 @@ textarea[aria-invalid="true"] {
 }
 
 /* Kalau sudah telanjur. */
+.kartu-fakta .fakta-isi {
+  color: var(--warna-teks);
+  font-size: var(--ukuran-sedang);
+}
+
 .kartu-darurat h3 {
   font-size: var(--ukuran-besar);
   font-weight: var(--tebal-semi);

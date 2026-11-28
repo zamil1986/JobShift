@@ -21,7 +21,7 @@ STORY: Pengunjung paham dalam satu layar bahwa JobShift memeriksa pesan lowongan
 
 FIRST VIEWPORT: Bilah navigasi melayang dan membulat: logo JobShift di kiri; "Cara kerja" dan "Cek sekarang" di kanan. Di tengah ada judul gradien "Cek dulu sebelum transfer." dan subjudul satu kalimat. Di bawahnya panel alat cek bercahaya indigo berisi kotak tempel, penghitung, dan tombol Cek, yang terlihat di atas lipatan di 360 × 640.
 
-FORM: Standar kategori yang dipin pengguna. seed: none (pinned). Kata-kata pengguna: "seperti ini lohh", disertai screenshot Open React Template. Tanda tangan interaksi:
+FORM: Standar kategori yang dipin pengguna. seed: none (pinned). Kata-kata pengguna: "seperti ini lohh", dikirim bersama screenshot beranda Open React Template. Dikonfirmasi pengguna (28 Nov 2026), menjawab "Ya, benar begitu" untuk: "tampilan gelap-indigo Open React Template untuk seluruh situs, dengan susunan hero-nya (bilah melayang, judul gradien di tengah), tapi videonya diganti alat cek yang berfungsi". Tanda tangan interaksi:
 - kartu Cara kerja dengan sorotan yang mengikuti kursor;
 - judul berkilau;
 - bagian muncul naik saat digulir (hanya kalau gerak diizinkan);

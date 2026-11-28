@@ -21,6 +21,7 @@ export function FormCek() {
   const idKotak = useId();
   const idPenghitung = useId();
   const idGalat = useId();
+  const kotak = useRef<HTMLTextAreaElement>(null);
 
   const panjang = panjangTeks(teks);
   const kelebihan = panjang > PANJANG_MAKS;
@@ -31,9 +32,12 @@ export function FormCek() {
 
     // Teks di luar batas tidak dicek sama sekali; pesannya sama dengan API.
     const kode = periksaPanjang(teks);
+    // Kotak kosong atau terlalu pendek: tombol tetap bisa ditekan, lalu pesan
+    // muncul dan fokus kembali ke kotak tempel supaya jelas apa yang kurang.
     if (kode) {
       setGalat(PESAN_ERROR[kode]);
       setCekTerakhir(null);
+      kotak.current?.focus();
       return;
     }
 
@@ -106,7 +110,7 @@ export function FormCek() {
             </p>
           )}
 
-          <button type="submit" className="tombol-cek" disabled={panjang === 0 || memuat || ocrSibuk}>
+          <button type="submit" className="tombol-cek" disabled={memuat || ocrSibuk}>
             {memuat ? "Mengecek…" : "Cek"}
           </button>
           <p className="disclaimer">{DISCLAIMER_PRIVASI}</p>

@@ -41,6 +41,16 @@ const KANAL_RESMI = [
 const [MEREK, SLOGAN] = TAGLINE.split(" — ");
 const JUDUL_UTAMA = SLOGAN.charAt(0).toUpperCase() + SLOGAN.slice(1);
 
+// Judul dua kalimat: tiap kalimat di barisnya sendiri, jadi baris tidak
+// pernah patah di tengah kalimat pada layar sempit.
+function Kalimat({ teks }: { teks: string }) {
+  return teks.split(/(?<=[.?!])\s+/).map((k) => (
+    <span key={k} className="kalimat">
+      {k}{" "}
+    </span>
+  ));
+}
+
 export default function Beranda() {
   return (
     <>
@@ -58,7 +68,7 @@ export default function Beranda() {
           </Link>
           <nav aria-label="Bagian halaman">
             <ul className="nav-situs">
-              <li className="nav-kedua">
+              <li>
                 <a className="tombol tombol-kedua tombol-kecil" href="#cara-kerja">
                   {NAV_CARA_KERJA}
                 </a>
@@ -140,13 +150,15 @@ export default function Beranda() {
                 {JUDUL_MODUS}
               </h2>
             </div>
-            <Sorotan className="kisi-tiga">
-              {CIRI_MODUS.map((m) => (
-                <article key={m.nama} className="kartu kartu-sorot kartu-modus">
-                  <h3>{m.nama}</h3>
-                  <p>{m.ciri}</p>
-                </article>
-              ))}
+            <Sorotan>
+              <ul className="kartu kartu-sorot daftar-modus">
+                {CIRI_MODUS.map((m) => (
+                  <li key={m.nama} className="modus">
+                    <h3 className="modus-nama">{m.nama}</h3>
+                    <p>{m.ciri}</p>
+                  </li>
+                ))}
+              </ul>
             </Sorotan>
           </div>
         </section>
@@ -155,16 +167,13 @@ export default function Beranda() {
           <div className="sekat">
             <div className="kepala-bagian">
               <h2 id="judul-alasan" className="judul-kilau judul-bagian">
-                {JUDUL_ALASAN}
+                <Kalimat teks={JUDUL_ALASAN} />
               </h2>
             </div>
             <ul className="kisi-tiga kisi-fakta">
               {FAKTA.map((f) => (
                 <li key={f.angka} className="kartu kartu-fakta">
-                  <p className="fakta-sumber-atas" aria-hidden="true">
-                    {f.sumber.nama}
-                  </p>
-                  <p>
+                  <p className="fakta-isi">
                     <span className="fakta-angka">{f.angka}</span> {f.teks}
                   </p>
                   <p className="fakta-sumber">
@@ -206,7 +215,7 @@ export default function Beranda() {
           <div className="sekat">
             <div className="panel-ajakan">
               <h2 id="judul-ajakan" className="judul-kilau judul-bagian">
-                {JUDUL_AJAKAN}
+                <Kalimat teks={JUDUL_AJAKAN} />
               </h2>
               <a className="tombol tombol-utama" href="#kotak-cek">
                 {NAV_CEK_SEKARANG}
