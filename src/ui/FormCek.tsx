@@ -1,11 +1,15 @@
 "use client";
 
-import { useId, useState, type FormEvent } from "react";
+import Link from "next/link";
+import { useId, useRef, useState, type FormEvent } from "react";
+import { CONTOH } from "@/cek/contoh";
 import { PANJANG_MAKS, panjangTeks, periksaPanjang } from "@/cek/panjang";
 import { PESAN_ERROR, PESAN_GAGAL_SERVER } from "@/cek/pesan";
 import type { ErrorCek, HasilCek } from "@/cek/tipe";
-import { DISCLAIMER_PRIVASI, PESAN_GAGAL_KONEKSI } from "./salinan";
+import { DISCLAIMER_PRIVASI, JUDUL_CONTOH, PESAN_GAGAL_KONEKSI } from "./salinan";
+import { TAUTAN_KE_CARA_KERJA } from "./salinan-cara-kerja";
 import { TampilanHasil } from "./TampilanHasil";
+import { UnggahScreenshot } from "./UnggahScreenshot";
 
 const angka = new Intl.NumberFormat("id-ID");
 
@@ -14,10 +18,13 @@ export function FormCek() {
   const [galat, setGalat] = useState<string | null>(null);
   const [memuat, setMemuat] = useState(false);
   const [cekTerakhir, setCekTerakhir] = useState<{ hasil: HasilCek; teks: string } | null>(null);
+  const [ocrSibuk, setOcrSibuk] = useState(false);
+  const kotak = useRef<HTMLTextAreaElement>(null);
 
   const idKotak = useId();
   const idPenghitung = useId();
   const idGalat = useId();
+  const idJudulContoh = useId();
 
   const panjang = panjangTeks(teks);
   const kelebihan = panjang > PANJANG_MAKS;
@@ -28,9 +35,12 @@ export function FormCek() {
 
     // Teks di luar batas tidak dicek sama sekali; pesannya sama dengan API.
     const kode = periksaPanjang(teks);
+    // Kotak kosong atau terlalu pendek: tombol tetap bisa ditekan, lalu pesan
+    // muncul dan fokus kembali ke kotak tempel supaya jelas apa yang kurang.
     if (kode) {
       setGalat(PESAN_ERROR[kode]);
       setCekTerakhir(null);
+      kotak.current?.focus();
       return;
     }
 
@@ -58,45 +68,86 @@ export function FormCek() {
     }
   }
 
+  // Form dan hasil berada di satu panel: hasil muncul di bawah kotak tempel,
+  // di tempat yang sama dengan yang baru saja diisi.
   return (
-    <>
-      <form className="form-cek" onSubmit={jalankanCek} noValidate>
-        <label htmlFor={idKotak} className="label-kotak">
-          Tempel teks lowongan di sini
-        </label>
-        <textarea
-          id={idKotak}
-          name="teks"
-          value={teks}
-          onChange={(e) => {
-            setTeks(e.target.value);
-            setGalat(null);
-          }}
-          rows={8}
-          spellCheck={false}
-          aria-describedby={galat ? `${idPenghitung} ${idGalat}` : idPenghitung}
-          aria-invalid={galat ? true : undefined}
-          placeholder="Contoh: Dibutuhkan admin online, kerja dari rumah, gaji harian…"
-        />
-        <p id={idPenghitung} className={kelebihan ? "penghitung penghitung-lebih" : "penghitung"}>
-          {angka.format(panjang)} / {angka.format(PANJANG_MAKS)} karakter
-        </p>
+    <div className="alat" id="kotak-cek">
+      <div className="alat-isi">
+        <form className="form-cek" onSubmit={jalankanCek} noValidate>
+          <div role="group" aria-labelledby={idJudulContoh} className="grup-contoh">
+            <p id={idJudulContoh} className="judul-contoh">
+              {JUDUL_CONTOH}
+            </p>
+            <ul className="daftar-contoh">
+              {CONTOH.map((c) => (
+                <li key={c.id}>
+                  <button
+                    type="button"
+                    className="tombol tombol-kedua tombol-kecil"
+                    disabled={memuat || ocrSibuk}
+                    onClick={() => {
+                      setTeks(c.teks);
+                      setGalat(null);
+                    }}
+                  >
+                    {c.nama}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-        {galat && (
-          <p id={idGalat} className="galat" role="alert">
-            {galat}
+          <label htmlFor={idKotak} className="label-kotak">
+            Tempel teks lowongan di sini
+          </label>
+          <textarea
+            ref={kotak}
+            id={idKotak}
+            name="teks"
+            value={teks}
+            onChange={(e) => {
+              setTeks(e.target.value);
+              setGalat(null);
+            }}
+            rows={8}
+            spellCheck={false}
+            aria-describedby={galat ? `${idPenghitung} ${idGalat}` : idPenghitung}
+            aria-invalid={galat ? true : undefined}
+            placeholder="Contoh: Dibutuhkan admin online, kerja dari rumah, gaji harian…"
+          />
+          <p id={idPenghitung} className={kelebihan ? "penghitung penghitung-lebih" : "penghitung"}>
+            {angka.format(panjang)} / {angka.format(PANJANG_MAKS)} karakter
           </p>
-        )}
 
-        <button type="submit" className="tombol-cek" disabled={panjang === 0 || memuat}>
-          {memuat ? "Mengecek…" : "Cek"}
-        </button>
-        <p className="disclaimer">{DISCLAIMER_PRIVASI}</p>
-      </form>
+          <UnggahScreenshot
+            teks={teks}
+            onSibuk={setOcrSibuk}
+            onTeks={(hasilOcr) => {
+              // Hasil OCR menggantikan isi kotak dan tidak dipotong; pengguna memeriksanya dulu.
+              setTeks(hasilOcr);
+              setGalat(null);
+              kotak.current?.focus();
+            }}
+          />
 
-      <div aria-live="polite" className="wadah-hasil">
-        {cekTerakhir && <TampilanHasil hasil={cekTerakhir.hasil} teks={cekTerakhir.teks} />}
+          {galat && (
+            <p id={idGalat} className="galat" role="alert">
+              {galat}
+            </p>
+          )}
+
+          <button type="submit" className="tombol-cek" disabled={memuat || ocrSibuk}>
+            {memuat ? "Mengecek…" : "Cek"}
+          </button>
+          <p className="disclaimer">
+            {DISCLAIMER_PRIVASI} <Link href="/cara-kerja">{TAUTAN_KE_CARA_KERJA}</Link>
+          </p>
+        </form>
+
+        <div aria-live="polite" className="wadah-hasil">
+          {cekTerakhir && <TampilanHasil hasil={cekTerakhir.hasil} teks={cekTerakhir.teks} />}
+        </div>
       </div>
-    </>
+    </div>
   );
 }

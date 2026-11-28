@@ -137,7 +137,8 @@ describe("cek: R02 Minta OTP/PIN/password", () => {
     const hasil = await cek(teks);
 
     expect(hasil.label).toBe("bahaya");
-    expect(hasil.skor).toBe(60);
+    // + R13 tersirat (10): Teks tidak menyebut nama badan usaha maupun alamat.
+    expect(hasil.skor).toBe(70);
     const r02 = tanda(hasil, "R02");
     expect(r02).toMatchObject({ sumber: "aturan", bobot: 60, kutipan: "KODE   OTP" });
     expect(r02).not.toHaveProperty("modus");
@@ -169,7 +170,7 @@ describe("cek: R02 Minta OTP/PIN/password", () => {
     );
 
     expect(tanda(hasil, "R02")).toBeUndefined();
-    expect(hasil.skor).toBe(0);
+    expect(hasil.tandaBahaya).toEqual([]);
   });
 
   it("tetap menangkap kecocokan kedua yang tidak didahului Penyangkal", async () => {

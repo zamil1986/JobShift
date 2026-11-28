@@ -635,4 +635,191 @@ export const R11: Aturan = {
   pola: [{ cari: `(?:${EMAIL_GRATIS}|${NOMOR_PRIBADI})${diTeks(PERUSAHAAN_BESAR)}`, bahasa: "id" }],
 };
 
-export const KATALOG: readonly Aturan[] = [R01, R02, R03, R04, R05, R06b, R07, R08, R11, R12, R16];
+// R06a: menyebut WhatsApp saja wajar ("grup WA karyawan"), jadi harus berupa
+// ajakan menghubungi, atau nomor pribadi yang ditempelkan ke WA.
+const AJAKAN_KONTAK = ["hubungi", "hub", "chat", "japri", "kontak", "konfirmasi (?:ke|via|lewat)", "kirim(?:kan)? (?:ke|via|lewat)", "daftar (?:ke|via|lewat)"].join("|");
+const WA = "(?:wa|whatsapp|whats app)";
+
+export const R06a: Aturan = {
+  id: "R06a",
+  alasan: "Memintamu menghubungi nomor pribadi atau chat admin, bukan kontak resmi perusahaan.",
+  bobot: 15,
+  kritis: false,
+  pakaiPenyangkal: false,
+  pola: [
+    // "Hubungi WA 0812-3456-7890", "kirim ke WhatsApp admin"
+    { cari: `(?:${AJAKAN_KONTAK})(?: (?:no|nomor|nomer))? ${WA}(?: admin)?(?::? ${NOMOR_PRIBADI})?`, bahasa: "id" },
+    // "WA: 0812 3456 7890"
+    { cari: `${WA}(?: admin)?:? ${NOMOR_PRIBADI}`, bahasa: "id" },
+    // "chat admin", "hubungi admin kami"
+    { cari: "(?:hubungi|chat|japri|kontak) admin(?: (?:kami|pendaftaran|rekrutmen))?", bahasa: "id" },
+    {
+      cari: "(?:contact|chat|reach|message|text|apply)(?: (?:us|me|(?:the |our )?admin|hr))? (?:via|on|through|at|by) whatsapp",
+      bahasa: "en",
+    },
+  ],
+};
+
+export const R09: Aturan = {
+  id: "R09",
+  alasan: "Menjanjikan kamu langsung diterima kerja tanpa wawancara atau seleksi.",
+  bobot: 15,
+  kritis: false,
+  pakaiPenyangkal: false,
+  pola: [
+    { cari: `tanpa ${daftar("(?:tanpa )?(?:interview|wawancara|seleksi)")}`, bahasa: "id" },
+    { cari: "langsung (?:diterima(?: kerja)?|masuk kerja|kerja)", bahasa: "id" },
+    { cari: "(?:pasti|dijamin|auto|otomatis|100%) diterima(?: kerja)?", bahasa: "id" },
+    { cari: "no (?:interview|selection)(?: (?:needed|required))?|(?:guaranteed|instantly|directly) hired", bahasa: "en" },
+  ],
+};
+
+// R10: "dibutuhkan segera" lazim di lowongan biasa, jadi "segera" harus berupa
+// desakan kepada pelamar.
+export const R10: Aturan = {
+  id: "R10",
+  alasan: "Mendesakmu cepat memutuskan dengan kuota terbatas atau batas waktu yang sangat singkat.",
+  bobot: 10,
+  kritis: false,
+  pakaiPenyangkal: false,
+  pola: [
+    { cari: "(?:kuota|slot|tempat) (?:sangat |sangat sangat )?terbatas", bahasa: "id" },
+    { cari: "hari ini juga", bahasa: "id" },
+    {
+      cari: "(?:daftar|kirim(?:kan)?|hubungi|transfer|konfirmasi) segera|segera (?:daftar|hubungi|kirim(?:kan)?|transfer|konfirmasi|ambil slot)",
+      bahasa: "id",
+    },
+    { cari: "urgent(?:ly)?(?: (?:hiring|needed|dibutuhkan))?|dibutuhkan urgent", bahasa: "id" },
+    { cari: "limited (?:slots?|quota|seats?)", bahasa: "en" },
+  ],
+};
+
+/**
+ * Kata yang tidak bisa menjadi nama atau alamat: "PT resmi", "perusahaan
+ * besar", "alamat kantor akan diberikan". Mencegah R13 batal tanpa nama atau
+ * alamat yang sungguh disebut.
+ */
+const BUKAN_NAMA = [
+  "dan", "atau", "di", "ke", "dari", "yang", "kami", "kita", "ini", "itu", "tersebut", "untuk", "dengan",
+  "akan", "nanti", "menyusul", "dirahasiakan", "tidak", "belum", "via", "lewat", "melalui",
+  "resmi", "besar", "ternama", "terkenal", "bonafit", "bonafide", "swasta", "asing", "luar",
+  "online", "baju", "pakaian", "kue", "roti", "bangunan", "sembako", "kelontong", "elektronik", "hp", "ponsel", "kosmetik", "emas", "buku", "ritel", "retail",
+].join("|");
+/** Satu kata yang bisa menjadi nama, selain `BUKAN_NAMA` dan `ekstra`. */
+const nama = (ekstra: string[] = []) =>
+  String.raw`(?!(?:${[BUKAN_NAMA, ...ekstra].join("|")})(?![\p{L}\p{N}]))[\p{L}\p{N}]{2,}`;
+const NAMA = nama();
+
+/** "Kirim CV terbaru" adalah berkas lamaran, bukan nama CV. */
+const SEBELUM_CV_PELAMAR = ["kirim", "kirimkan", "lampirkan", "sertakan", "upload", "unggah", "bawa", "siapkan", "berupa"].join("|");
+const SESUDAH_CV_PELAMAR = [
+  "terbaru", "lengkap", "kamu", "anda", "kalian", "beserta", "lamaran", "ats", "terlampir", "sekarang", "segera",
+  "hubungi", "foto", "ijazah", "ktp", "portofolio", "pdf", "ya", "kak",
+];
+
+/** "Alamat email", "alamat lengkap kamu", "lokasi kerja fleksibel" bukan alamat kantor. */
+const BUKAN_NAMA_ALAMAT = [
+  "email", "surel", "rumah", "domisili", "tinggal", "kamu", "anda", "pelamar", "lengkap", "kantor", "toko", "pabrik",
+  "kerja", "fleksibel", "bebas", "remote", "wfh", "sesuai", "menyesuaikan", "lamaran",
+];
+
+/** Nama badan usaha atau tempat usaha (spec: PT/CV/Tbk/nama toko). */
+const PENANDA_BADAN_USAHA = [
+  String.raw`(?:pt|ud|pd|yayasan|koperasi|perum|perumda|firma)\.? ${NAMA}`,
+  String.raw`(?<!(?:${SEBELUM_CV_PELAMAR}) )cv\.? ${nama(SESUDAH_CV_PELAMAR)}`,
+  String.raw`[\p{L}\p{N}]{2,} tbk`,
+  `(?:toko|warung|kedai|restoran|resto|rumah makan|rm|cafe|kafe|klinik|apotek|bengkel|salon|laundry|hotel) ${NAMA}`,
+  String.raw`[\p{L}\p{N}]{2,} (?:corp(?:oration)?|inc|ltd|llc|gmbh|co\.? ltd)`,
+].join("|");
+
+const KOTA = [
+  "jakarta", "surabaya", "bandung", "medan", "semarang", "makassar", "palembang", "depok", "tangerang", "bekasi", "bogor",
+  "cikarang", "karawang", "batam", "yogyakarta", "jogja", "solo", "malang", "denpasar", "bali", "balikpapan", "samarinda",
+  "pekanbaru", "padang", "banjarmasin", "manado", "pontianak", "cirebon", "serang", "cilegon", "sidoarjo", "gresik",
+].join("|");
+
+/**
+ * Alamat atau lokasi kantor. Domisili (milik pelamar) dan penempatan (bisa di
+ * luar negeri) bukan alamat kantor.
+ */
+const PENANDA_ALAMAT = [
+  String.raw`(?:jl|jln|jalan)\.? ${NAMA}`,
+  `(?:alamat(?: kantor| lengkap| toko| pabrik)?|beralamat|berkantor|lokasi(?: kerja| kantor)?):?(?: di)? ${nama(BUKAN_NAMA_ALAMAT)}`,
+  String.raw`(?:gedung|ruko|kawasan industri|kompleks|komplek|blok|lantai|lt|kecamatan|kec|kelurahan|kel|kabupaten|kab)\.? ${NAMA}`,
+  String.raw`(?:rt|rw)\.? ?\d+`,
+  `(?:kantor|cabang|gudang|pabrik|toko|outlet)(?: (?:pusat|cabang))?(?: (?:di|kota))? (?:${KOTA})`,
+].join("|");
+
+export const R13: Aturan = {
+  id: "R13",
+  alasan: "Tidak disebutkan nama perusahaan maupun alamat kantor.",
+  bobot: 10,
+  kritis: false,
+  pakaiPenyangkal: false,
+  ketiadaan: true,
+  pola: [
+    { cari: PENANDA_BADAN_USAHA, bahasa: "id" },
+    { cari: PENANDA_ALAMAT, bahasa: "id" },
+  ],
+};
+
+// R14: data ini wajar disebut tanpa diminta ("gaji ditransfer ke nomor
+// rekening"), jadi harus didahului kata kerja permintaan. Selfie dengan KTP dan
+// nama ibu kandung hampir selalu permintaan, jadi cukup disebut.
+const MINTA_DATA = ["kirim", "kirimkan", "lampirkan", "sertakan", "siapkan", "isi", "isikan", "masukkan", "upload", "unggah", "berikan", "cantumkan", "sebutkan"].join("|");
+const DATA_SENSITIF = [
+  "foto (?:e-?)?ktp",
+  "(?:nomor|no\\.?|nomer) (?:rekening|rek)",
+  "(?:foto |scan )?(?:kartu keluarga|kk)",
+  "nama (?:gadis )?ibu kandung",
+  "selfie (?:dengan |bersama |pegang |memegang )?(?:e-?)?ktp",
+].join("|");
+
+export const R14: Aturan = {
+  id: "R14",
+  alasan: "Meminta data pribadi seperti foto KTP, KK, nomor rekening, atau nama ibu kandung sejak awal pendaftaran.",
+  bobot: 20,
+  kritis: false,
+  pakaiPenyangkal: false,
+  pola: [
+    { cari: `(?:${MINTA_DATA})${celah(3)} ${daftar(DATA_SENSITIF)}`, bahasa: "id" },
+    { cari: "(?:selfie|swafoto) (?:dengan |bersama |pegang |memegang )?(?:e-?)?ktp|nama (?:gadis )?ibu kandung", bahasa: "id" },
+  ],
+};
+
+// R15: pemendek tautan selalu dicurigai. Formulir Google wajar untuk usaha
+// kecil, jadi hanya dicurigai kalau mengatasnamakan perusahaan besar (spec).
+export const R15: Aturan = {
+  id: "R15",
+  alasan: "Memakai tautan pendek atau formulir gratisan untuk pendaftaran, bukan situs resmi perusahaan.",
+  bobot: 15,
+  kritis: false,
+  pakaiPenyangkal: false,
+  pola: [
+    { cari: "(?:https?://)?(?:bit\\.ly|s\\.id|tinyurl\\.com|cutt\\.ly|rb\\.gy|shorturl\\.at|t\\.ly|is\\.gd)/[a-z0-9_-]+", bahasa: "id" },
+    {
+      cari: `(?:(?:https?://)?(?:forms\\.gle/[a-z0-9_-]+|docs\\.google\\.com/forms(?:/[a-z0-9/_-]+)?)|google forms?|form google)${diTeks(PERUSAHAAN_BESAR)}`,
+      bahasa: "id",
+    },
+  ],
+};
+
+export const KATALOG: readonly Aturan[] = [
+  R01,
+  R02,
+  R03,
+  R04,
+  R05,
+  R06a,
+  R06b,
+  R07,
+  R08,
+  R09,
+  R10,
+  R11,
+  R12,
+  R13,
+  R14,
+  R15,
+  R16,
+];

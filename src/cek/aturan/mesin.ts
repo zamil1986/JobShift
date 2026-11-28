@@ -1,7 +1,7 @@
 // Mesin Aturan (spec, "Mesin Aturan"). Sinkron dan deterministik: tidak ada
 // waktu, acak, atau jaringan. Menilai Teks asli, bukan Teks tersamar.
 
-import type { Modus, TandaBahaya } from "../tipe";
+import type { Modus, TandaBahaya, TandaBahayaTersirat } from "../tipe";
 import { normalisasi, rentangAsli, type TeksNormal } from "./normalisasi";
 
 export type Bahasa = "id" | "en";
@@ -26,6 +26,11 @@ export type Aturan = {
   modus?: Modus;
   /** Penyangkal ≤ 3 kata sebelum pemicu, dalam klausa yang sama, membatalkan kecocokan (ADR-0002: hanya R01, R02, R03, R07). */
   pakaiPenyangkal: boolean;
+  /**
+   * Kalau true, aturan cocok saat TIDAK ada pola yang cocok di Teks, dan
+   * menghasilkan satu TandaBahayaTersirat tanpa kutipan (spec: R13).
+   */
+  ketiadaan?: boolean;
   pola: Pola[];
   /** Kalau pola ini ada di mana pun dalam Teks, Aturan tidak berlaku sama sekali (spec: R04 dan penanda luar negeri). */
   kecualiJika?: Pola;
@@ -93,23 +98,35 @@ function kecocokanPertama(aturan: Aturan, normal: TeksNormal): [number, number] 
   return terbaik;
 }
 
+export type HasilAturan = {
+  tandaBahaya: TandaBahaya[];
+  tandaBahayaTersirat: TandaBahayaTersirat[];
+};
+
 /**
  * Menjalankan katalog atas Teks persis seperti diterima. Satu Aturan
- * menghasilkan paling banyak satu Tanda bahaya, dengan `kutipan` yang selalu
- * diambil dari Teks asli lewat `rentang`.
+ * menghasilkan paling banyak satu Tanda bahaya (dengan `kutipan` dari Teks asli
+ * lewat `rentang`) atau satu Tanda bahaya tersirat (untuk aturan `ketiadaan`).
  */
-export function jalankanAturan(teks: string, katalog: readonly Aturan[]): TandaBahaya[] {
+export function jalankanAturan(teks: string, katalog: readonly Aturan[]): HasilAturan {
   const normal = normalisasi(teks);
-  const hasil: TandaBahaya[] = [];
+  const tandaBahaya: TandaBahaya[] = [];
+  const tandaBahayaTersirat: TandaBahayaTersirat[] = [];
 
   for (const aturan of katalog) {
     // search() mengabaikan dan memulihkan lastIndex regex di cache (flag g).
     if (aturan.kecualiJika && normal.teks.search(regexDari(aturan.kecualiJika)) !== -1) continue;
     const cocok = kecocokanPertama(aturan, normal);
+    if (aturan.ketiadaan) {
+      if (!cocok) {
+        tandaBahayaTersirat.push({ alasan: aturan.alasan, bobot: aturan.bobot });
+      }
+      continue;
+    }
     if (!cocok) continue;
 
     const rentang = rentangAsli(normal, cocok[0], cocok[1]);
-    hasil.push({
+    tandaBahaya.push({
       sumber: "aturan",
       aturanId: aturan.id,
       alasan: aturan.alasan,
@@ -120,5 +137,5 @@ export function jalankanAturan(teks: string, katalog: readonly Aturan[]): TandaB
     });
   }
 
-  return hasil;
+  return { tandaBahaya, tandaBahayaTersirat };
 }
