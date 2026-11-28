@@ -1,0 +1,660 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-27T20:55:59.190052+00:00",
+  "title": "Design System: JobShift",
+  "extensions": {
+    "colorMeta": {
+      "warna-latar": {
+        "role": "neutral",
+        "displayName": "Langit Tengah Malam",
+        "canonical": "var(--abu-950)",
+        "tonalRamp": [
+          "#030712",
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "warna-latar-dalam": {
+        "role": "neutral",
+        "displayName": "Sumur",
+        "canonical": "#0a0f1d",
+        "tonalRamp": [
+          "#030712",
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "kartu-latar": {
+        "role": "neutral",
+        "displayName": "Kartu Arang",
+        "canonical": "color-mix(in srgb, var(--abu-900) 55%, var(--abu-950))",
+        "tonalRamp": [
+          "#030712",
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "warna-permukaan": {
+        "role": "neutral",
+        "displayName": "Permukaan Panel",
+        "canonical": "var(--abu-900)",
+        "tonalRamp": [
+          "#030712",
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "warna-garis": {
+        "role": "neutral",
+        "displayName": "Garis Senyap",
+        "canonical": "var(--abu-800)",
+        "tonalRamp": [
+          "#030712",
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "warna-garis-terang": {
+        "role": "neutral",
+        "displayName": "Garis Terang",
+        "canonical": "var(--abu-700)",
+        "tonalRamp": [
+          "#030712",
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "warna-garis-kontrol": {
+        "role": "neutral",
+        "displayName": "Garis Kontrol",
+        "canonical": "var(--abu-500)",
+        "tonalRamp": [
+          "#030712",
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "warna-teks": {
+        "role": "neutral",
+        "displayName": "Teks",
+        "canonical": "var(--abu-200)",
+        "tonalRamp": [
+          "#030712",
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "warna-teks-kuat": {
+        "role": "neutral",
+        "displayName": "Teks Kuat",
+        "canonical": "var(--abu-50)",
+        "tonalRamp": [
+          "#030712",
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "warna-teks-redup": {
+        "role": "neutral",
+        "displayName": "Teks Redup",
+        "canonical": "#8f98b8",
+        "tonalRamp": [
+          "#24262e",
+          "#404453",
+          "#5d6378",
+          "#7a819c",
+          "#8f98b8",
+          "#b1b7cd",
+          "#cdd1df",
+          "#e9eaf1"
+        ]
+      },
+      "abu-300": {
+        "role": "neutral",
+        "displayName": "Teks Tombol Kedua",
+        "canonical": "#d1d5db",
+        "tonalRamp": [
+          "#030712",
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "indigo-200": {
+        "role": "primary",
+        "displayName": "Indigo Embun",
+        "canonical": "#c7d2fe",
+        "tonalRamp": [
+          "#1e1b4b",
+          "#312e81",
+          "#4f46e5",
+          "#5a54ea",
+          "#6366f1",
+          "#818cf8",
+          "#a5b4fc",
+          "#c7d2fe"
+        ]
+      },
+      "indigo-300": {
+        "role": "primary",
+        "displayName": "Indigo Pucat",
+        "canonical": "#a5b4fc",
+        "tonalRamp": [
+          "#1e1b4b",
+          "#312e81",
+          "#4f46e5",
+          "#5a54ea",
+          "#6366f1",
+          "#818cf8",
+          "#a5b4fc",
+          "#c7d2fe"
+        ]
+      },
+      "indigo-400": {
+        "role": "primary",
+        "displayName": "Indigo Garis",
+        "canonical": "#818cf8",
+        "tonalRamp": [
+          "#1e1b4b",
+          "#312e81",
+          "#4f46e5",
+          "#5a54ea",
+          "#6366f1",
+          "#818cf8",
+          "#a5b4fc",
+          "#c7d2fe"
+        ]
+      },
+      "indigo-500": {
+        "role": "primary",
+        "displayName": "Indigo Malam",
+        "canonical": "#6366f1",
+        "tonalRamp": [
+          "#1e1b4b",
+          "#312e81",
+          "#4f46e5",
+          "#5a54ea",
+          "#6366f1",
+          "#818cf8",
+          "#a5b4fc",
+          "#c7d2fe"
+        ]
+      },
+      "indigo-600": {
+        "role": "primary",
+        "displayName": "Indigo Tombol Bawah",
+        "canonical": "#4f46e5",
+        "tonalRamp": [
+          "#1e1b4b",
+          "#312e81",
+          "#4f46e5",
+          "#5a54ea",
+          "#6366f1",
+          "#818cf8",
+          "#a5b4fc",
+          "#c7d2fe"
+        ]
+      },
+      "indigo-tombol": {
+        "role": "primary",
+        "displayName": "Indigo Tombol",
+        "canonical": "#5a54ea",
+        "tonalRamp": [
+          "#1e1b4b",
+          "#312e81",
+          "#4f46e5",
+          "#5a54ea",
+          "#6366f1",
+          "#818cf8",
+          "#a5b4fc",
+          "#c7d2fe"
+        ]
+      },
+      "warna-aksen-teks": {
+        "role": "neutral",
+        "displayName": "Putih Tombol",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#030712",
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "warna-mati-latar": {
+        "role": "neutral",
+        "displayName": "Latar Nonaktif",
+        "canonical": "var(--abu-800)",
+        "tonalRamp": [
+          "#030712",
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "warna-mati-teks": {
+        "role": "neutral",
+        "displayName": "Teks Nonaktif",
+        "canonical": "var(--abu-400)",
+        "tonalRamp": [
+          "#030712",
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "warna-cap-rendah": {
+        "role": "tertiary",
+        "displayName": "Biru Pastel",
+        "canonical": "#93c5fd",
+        "tonalRamp": [
+          "#25313f",
+          "#425972",
+          "#6080a4",
+          "#7da7d7",
+          "#93c5fd",
+          "#b3d6fe",
+          "#cee5fe",
+          "#e9f3ff"
+        ]
+      },
+      "warna-cap-waspada": {
+        "role": "tertiary",
+        "displayName": "Kuning Pastel",
+        "canonical": "#fcd34d",
+        "tonalRamp": [
+          "#3f3513",
+          "#715f23",
+          "#a48932",
+          "#d6b341",
+          "#fcd34d",
+          "#fde082",
+          "#feebaf",
+          "#fef6db"
+        ]
+      },
+      "warna-cap-bahaya": {
+        "role": "tertiary",
+        "displayName": "Merah Pastel",
+        "canonical": "#fca5a5",
+        "tonalRamp": [
+          "#3f2929",
+          "#714a4a",
+          "#a46b6b",
+          "#d68c8c",
+          "#fca5a5",
+          "#fdc0c0",
+          "#fed6d6",
+          "#feeded"
+        ]
+      },
+      "warna-sorotan-latar": {
+        "role": "tertiary",
+        "displayName": "Kuning Sorotan",
+        "canonical": "#fcd34d",
+        "tonalRamp": [
+          "#3f3513",
+          "#715f23",
+          "#a48932",
+          "#d6b341",
+          "#fcd34d",
+          "#fde082",
+          "#feebaf",
+          "#fef6db"
+        ]
+      },
+      "warna-galat": {
+        "role": "tertiary",
+        "displayName": "Merah Galat",
+        "canonical": "#fca5a5",
+        "tonalRamp": [
+          "#3f2929",
+          "#714a4a",
+          "#a46b6b",
+          "#d68c8c",
+          "#fca5a5",
+          "#fdc0c0",
+          "#fed6d6",
+          "#feeded"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Judul pembuka bergradien dan berkilau."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Judul bagian bergradien."
+      },
+      "label-kata": {
+        "displayName": "Label Kata",
+        "purpose": "Kata Label di kotak hasil."
+      },
+      "angka": {
+        "displayName": "Angka",
+        "purpose": "Angka fakta, sebaris di awal kalimatnya."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Judul hasil cek dan kartu darurat."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "Subjudul pembuka dan pengantar bagian."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Semua teks isi; minimal 1rem."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Tombol dan cip."
+      }
+    },
+    "shadows": [
+      {
+        "name": "bayangan-panel",
+        "value": "0 24px 80px -24px var(--cahaya-indigo), 0 2px 8px var(--bayangan-hitam)",
+        "purpose": "Hanya panel alat cek: melayang dan bercahaya indigo."
+      },
+      {
+        "name": "kilap-dalam",
+        "value": "inset 0 1px 0 var(--kilap-dalam)",
+        "purpose": "Kilap tepi atas tombol utama dan tombol Cek."
+      },
+      {
+        "name": "cahaya-latar",
+        "value": "radial-gradient(closest-side, var(--cahaya-indigo), var(--cahaya-indigo-lemah) 55%, transparent) 50% 50% / var(--lebar-cahaya) 100% no-repeat",
+        "purpose": "Cahaya indigo kabur di belakang pembuka dan kaki halaman; elemen selebar layar."
+      },
+      {
+        "name": "bingkai-gradien",
+        "value": "linear-gradient(to right, var(--abu-800), var(--abu-700), var(--abu-800))",
+        "purpose": "Bingkai 1 px kartu, bilah, dan tombol kedua (border-box di bawah padding-box)."
+      },
+      {
+        "name": "bingkai-gradien-aksen",
+        "value": "linear-gradient(to right, var(--abu-800), var(--indigo-500), var(--abu-800))",
+        "purpose": "Bingkai panel alat cek dan panel ajakan."
+      },
+      {
+        "name": "gradien-judul",
+        "value": "linear-gradient(to right, var(--abu-200), var(--indigo-200), var(--abu-50), var(--indigo-300), var(--abu-200)) 0 0 / 200% auto",
+        "purpose": "Judul yang dipotong ke huruf (background-clip: text); forced-colors kembali ke CanvasText."
+      }
+    ],
+    "motion": [
+      {
+        "name": "kurva",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Kurva semua transisi dan animasi masuk."
+      },
+      {
+        "name": "durasi-cepat",
+        "value": "150ms",
+        "purpose": "Hover tombol dan tautan kaki."
+      },
+      {
+        "name": "durasi",
+        "value": "360ms",
+        "purpose": "Sorotan kartu memudar, baris hasil muncul, sel meter terisi."
+      },
+      {
+        "name": "durasi-kilau",
+        "value": "6s",
+        "purpose": "Kilau judul, linear, berulang."
+      },
+      {
+        "name": "jeda-baris",
+        "value": "60ms",
+        "purpose": "Jeda antarbaris hasil (maks. 5 langkah)."
+      },
+      {
+        "name": "jeda-sel",
+        "value": "24ms",
+        "purpose": "Jeda antarsel meter Skor."
+      },
+      {
+        "name": "naik",
+        "value": "translateY(1.5rem) dengan animation-timeline: view(), entry 0%–60%",
+        "purpose": "Bagian naik saat masuk layar; hanya di browser yang mendukung."
+      },
+      {
+        "name": "gerbang",
+        "value": "@media (prefers-reduced-motion: no-preference)",
+        "purpose": "Semua gerak di atas hanya ada di dalam media query ini."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "bilah-rapat",
+        "value": "max-width: 24.99rem"
+      },
+      {
+        "name": "fitur-2",
+        "value": "40rem"
+      },
+      {
+        "name": "md",
+        "value": "48rem"
+      },
+      {
+        "name": "lg",
+        "value": "60rem"
+      },
+      {
+        "name": "proyektor",
+        "value": "64rem (root font-size 112.5%)"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Tombol Utama",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Aksi utama: Cek sekarang di bilah dan panel ajakan.",
+      "html": "<a class=\"ds-tombol ds-tombol-utama\" href=\"#\">Cek sekarang</a>",
+      "css": ".ds-tombol{display:inline-flex;align-items:center;justify-content:center;gap:var(--jarak-2);min-height:var(--target-min);padding:var(--jarak-2) var(--jarak-5);font-family:var(--font-sans);font-size:var(--ukuran-isi);font-weight:var(--tebal-semi);line-height:1.2;text-decoration:none;border-radius:var(--radius-kecil);cursor:pointer}.ds-tombol-utama{color:var(--warna-aksen-teks);background:var(--gradien-tombol) 0 100%/100% 100%;box-shadow:inset 0 1px 0 var(--kilap-dalam)}.ds-tombol-utama:hover{background-size:100% 150%}.ds-tombol:focus-visible{outline:var(--tebal-fokus) solid var(--warna-fokus);outline-offset:var(--offset-fokus)}@media (prefers-reduced-motion: no-preference){.ds-tombol{transition:background-size var(--durasi-cepat) var(--kurva),color var(--durasi-cepat) var(--kurva)}}"
+    },
+    {
+      "name": "Tombol Kedua",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Aksi kedua berbingkai gradien: Cara kerja.",
+      "html": "<a class=\"ds-tombol-kedua\" href=\"#\">Cara kerja</a>",
+      "css": ".ds-tombol-kedua{display:inline-flex;align-items:center;justify-content:center;min-height:var(--target-min);padding:var(--jarak-2) var(--jarak-5);font-family:var(--font-sans);font-size:var(--ukuran-isi);font-weight:var(--tebal-semi);line-height:1.2;text-decoration:none;color:var(--abu-300);border:var(--tebal-garis-halus) solid transparent;border-radius:var(--radius-kecil);background:var(--gradien-tombol-kedua) padding-box,var(--bingkai-gradien) border-box}.ds-tombol-kedua:hover{color:var(--warna-teks-kuat)}.ds-tombol-kedua:focus-visible{outline:var(--tebal-fokus) solid var(--warna-fokus);outline-offset:var(--offset-fokus)}@media (prefers-reduced-motion: no-preference){.ds-tombol-kedua{transition:color var(--durasi-cepat) var(--kurva)}}"
+    },
+    {
+      "name": "Kotak Tempel",
+      "kind": "input",
+      "refersTo": "input-teks",
+      "description": "Kotak cekung untuk menempel teks lowongan.",
+      "html": "<label class=\"ds-label-kotak\" for=\"ds-kotak\">Tempel teks lowongan di sini</label><textarea id=\"ds-kotak\" class=\"ds-kotak\" placeholder=\"Contoh: Dibutuhkan admin online, kerja dari rumah, gaji harian…\"></textarea>",
+      "css": ".ds-label-kotak{display:block;margin-bottom:var(--jarak-2);color:var(--warna-teks-kuat);font-weight:var(--tebal-semi);font-family:var(--font-sans)}.ds-kotak{display:block;width:100%;height:var(--tinggi-kotak-teks);padding:var(--jarak-3);font-family:var(--font-sans);font-size:var(--ukuran-isi);line-height:var(--tinggi-baris);color:var(--warna-teks-kuat);caret-color:var(--warna-aksen-terang);background:var(--warna-latar-dalam);border:var(--tebal-garis-halus) solid var(--warna-garis-kontrol);border-radius:var(--radius-kecil);resize:vertical}.ds-kotak::placeholder{color:var(--warna-teks-redup);opacity:1}.ds-kotak:focus-visible{border-color:var(--warna-aksen-terang);outline:var(--tebal-fokus) solid var(--warna-fokus);outline-offset:var(--offset-fokus)}.ds-kotak[aria-invalid=true]{border-color:var(--warna-galat)}"
+    },
+    {
+      "name": "Bilah Navigasi",
+      "kind": "nav",
+      "refersTo": "",
+      "description": "Bilah melayang membulat dengan logo dan dua tombol.",
+      "html": "<header class=\"ds-bilah\"><a class=\"ds-logo\" href=\"#\"><svg viewBox=\"0 0 32 32\" width=\"28\" height=\"28\" aria-hidden=\"true\"><path d=\"M6 5h20a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H14l-6 5v-5H6a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3Z\" fill=\"var(--warna-aksen)\"/><path d=\"m10.5 14.5 3.5 3.5 7.5-8\" fill=\"none\" stroke=\"var(--warna-teks-kuat)\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg><span>JobShift</span></a><nav class=\"ds-nav\"><a class=\"ds-nav-kedua\" href=\"#\">Cara kerja</a><a class=\"ds-nav-utama\" href=\"#\">Cek sekarang</a></nav></header>",
+      "css": ".ds-bilah{display:flex;align-items:center;justify-content:space-between;gap:var(--jarak-3);min-height:var(--tinggi-bilah);padding:var(--jarak-1) var(--jarak-2) var(--jarak-1) var(--jarak-3);border:var(--tebal-garis-halus) solid transparent;border-radius:var(--radius-besar);background:linear-gradient(var(--bilah-latar),var(--bilah-latar)) padding-box,var(--bingkai-gradien) border-box;backdrop-filter:blur(var(--kabur-bilah));font-family:var(--font-sans)}.ds-logo{display:inline-flex;align-items:center;gap:var(--jarak-2);min-height:var(--target-min);color:var(--warna-teks-kuat);font-weight:var(--tebal-tebal);letter-spacing:var(--spasi-huruf-judul);text-decoration:none}.ds-nav{display:flex;gap:var(--jarak-2)}.ds-nav a{display:inline-flex;align-items:center;min-height:var(--target-min);padding:var(--jarak-2) var(--jarak-3);font-weight:var(--tebal-semi);text-decoration:none;white-space:nowrap;border-radius:var(--radius-kecil)}.ds-nav-kedua{color:var(--abu-300);border:var(--tebal-garis-halus) solid transparent;background:var(--gradien-tombol-kedua) padding-box,var(--bingkai-gradien) border-box}.ds-nav-kedua:hover{color:var(--warna-teks-kuat)}.ds-nav-utama{color:var(--warna-aksen-teks);background:var(--gradien-tombol) 0 100%/100% 100%;box-shadow:inset 0 1px 0 var(--kilap-dalam)}.ds-nav-utama:hover{background-size:100% 150%}.ds-bilah a:focus-visible{outline:var(--tebal-fokus) solid var(--warna-fokus);outline-offset:var(--offset-fokus)}"
+    },
+    {
+      "name": "Cip Langkah",
+      "kind": "chip",
+      "refersTo": "cip",
+      "description": "Judul kartu Cara kerja: nomor bulat plus nama langkah.",
+      "html": "<h3 class=\"ds-cip\"><span class=\"ds-cip-nomor\" aria-hidden=\"true\">1</span>Tempel</h3>",
+      "css": ".ds-cip{display:inline-flex;align-items:center;gap:var(--jarak-2);margin:0;padding:var(--jarak-1) var(--jarak-3) var(--jarak-1) var(--jarak-1);color:var(--indigo-200);font-family:var(--font-sans);font-size:var(--ukuran-isi);font-weight:var(--tebal-semi);background:color-mix(in srgb,var(--indigo-500) 14%,transparent);border-radius:var(--radius-bulat)}.ds-cip-nomor{display:grid;place-items:center;width:var(--ukuran-cip-nomor);height:var(--ukuran-cip-nomor);color:var(--warna-aksen-teks);background:var(--indigo-600);border-radius:var(--radius-bulat);font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Kartu Sorot",
+      "kind": "card",
+      "refersTo": "kartu",
+      "description": "Kartu gelap berbingkai gradien dengan sorotan kursor opt-in.",
+      "html": "<article class=\"ds-kartu\" onpointermove=\"const r=this.getBoundingClientRect();this.style.setProperty('--sorot-x',(event.clientX-r.left)+'px');this.style.setProperty('--sorot-y',(event.clientY-r.top)+'px')\"><h3>Baca alasannya</h3><p>Tanda bahaya ditunjuk langsung di kalimat yang kamu tempel.</p></article>",
+      "css": ".ds-kartu{position:relative;overflow:hidden;padding:var(--jarak-5);font-family:var(--font-sans);border:var(--tebal-garis-halus) solid transparent;border-radius:var(--radius-besar);background:linear-gradient(var(--kartu-latar),var(--kartu-latar)) padding-box,var(--bingkai-gradien) border-box}.ds-kartu h3{position:relative;z-index:1;margin:0 0 var(--jarak-2);color:var(--warna-teks-kuat);font-size:var(--ukuran-sedang);font-weight:var(--tebal-semi)}.ds-kartu p{position:relative;z-index:1;margin:0;color:var(--warna-teks-redup)}.ds-kartu::before{content:\"\";position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(circle var(--jari-sorot) at var(--sorot-x,50%) var(--sorot-y,0%),var(--cahaya-indigo-lemah),transparent)}.ds-kartu:hover::before{opacity:1}@media (prefers-reduced-motion: no-preference){.ds-kartu::before{transition:opacity var(--durasi) var(--kurva)}}"
+    },
+    {
+      "name": "Panel Alat Cek",
+      "kind": "custom",
+      "refersTo": "panel-alat",
+      "description": "Satu-satunya permukaan berbayangan: kotak tempel, penghitung, tombol Cek, lalu hasil di panel yang sama.",
+      "html": "<div class=\"ds-alat\"><label class=\"ds-alat-label\" for=\"ds-alat-kotak\">Tempel teks lowongan di sini</label><textarea id=\"ds-alat-kotak\" class=\"ds-alat-kotak\"></textarea><p class=\"ds-alat-hitung\">0 / 3.000 karakter</p><button class=\"ds-tombol-cek\" type=\"button\">Cek</button></div>",
+      "css": ".ds-alat{display:flex;flex-direction:column;gap:var(--jarak-2);max-width:var(--lebar-alat);padding:var(--jarak-4);font-family:var(--font-sans);color:var(--warna-teks);border:var(--tebal-garis-halus) solid transparent;border-radius:var(--radius-panel);background:linear-gradient(var(--warna-permukaan),var(--warna-permukaan)) padding-box,var(--bingkai-gradien-aksen) border-box;box-shadow:var(--bayangan-panel)}.ds-alat-label{color:var(--warna-teks-kuat);font-weight:var(--tebal-semi)}.ds-alat-kotak{height:var(--tinggi-kotak-teks);padding:var(--jarak-3);font:inherit;color:var(--warna-teks-kuat);background:var(--warna-latar-dalam);border:var(--tebal-garis-halus) solid var(--warna-garis-kontrol);border-radius:var(--radius-kecil)}.ds-alat-kotak:focus-visible{border-color:var(--warna-aksen-terang);outline:var(--tebal-fokus) solid var(--warna-fokus);outline-offset:var(--offset-fokus)}.ds-alat-hitung{margin:0;text-align:right;color:var(--warna-teks-redup);font-variant-numeric:tabular-nums}.ds-tombol-cek{width:100%;min-height:calc(var(--target-min) + var(--jarak-1));margin-top:var(--jarak-2);font:inherit;font-size:var(--ukuran-sedang);font-weight:var(--tebal-semi);color:var(--warna-aksen-teks);background:var(--gradien-tombol) 0 100%/100% 100%;border:0;border-radius:var(--radius-kecil);box-shadow:inset 0 1px 0 var(--kilap-dalam);cursor:pointer}.ds-tombol-cek:hover:not(:disabled){background-size:100% 150%}.ds-tombol-cek:focus-visible{outline:var(--tebal-fokus) solid var(--warna-fokus);outline-offset:var(--offset-fokus)}.ds-tombol-cek:disabled{color:var(--warna-mati-teks);background:var(--warna-mati-latar);box-shadow:none;cursor:progress}"
+    },
+    {
+      "name": "Kotak Label",
+      "kind": "custom",
+      "refersTo": "label-bahaya",
+      "description": "Label hasil: ikon bentuk, kata, Skor, meter 20 sel; tint tanpa bingkai.",
+      "html": "<p class=\"ds-label ds-label-bahaya\"><span class=\"ds-label-ikon\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M8 2h8l6 6v8l-6 6H8l-6-6V8l6-6Z\" fill=\"currentColor\" stroke=\"currentColor\" stroke-width=\"1\" stroke-linejoin=\"round\"/><path d=\"M7.5 12h9\" stroke=\"var(--warna-latar)\" stroke-width=\"2.75\" stroke-linecap=\"round\"/></svg></span><span class=\"ds-label-kata\">Bahaya</span><span class=\"ds-label-skor\">Skor 85 dari 100</span><span class=\"ds-label-meter\" aria-hidden=\"true\"><span class=\"ds-sel ds-sel-isi\"></span><span class=\"ds-sel ds-sel-isi\"></span><span class=\"ds-sel ds-sel-isi\"></span><span class=\"ds-sel ds-sel-isi\"></span><span class=\"ds-sel ds-sel-isi\"></span><span class=\"ds-sel ds-sel-isi\"></span><span class=\"ds-sel ds-sel-isi\"></span><span class=\"ds-sel ds-sel-isi\"></span><span class=\"ds-sel ds-sel-isi\"></span><span class=\"ds-sel ds-sel-isi\"></span><span class=\"ds-sel ds-sel-isi\"></span><span class=\"ds-sel ds-sel-isi\"></span><span class=\"ds-sel ds-sel-isi\"></span><span class=\"ds-sel ds-sel-isi\"></span><span class=\"ds-sel ds-sel-isi\"></span><span class=\"ds-sel ds-sel-isi\"></span><span class=\"ds-sel ds-sel-isi\"></span><span class=\"ds-sel\"></span><span class=\"ds-sel\"></span><span class=\"ds-sel\"></span></span></p>",
+      "css": ".ds-label{--warna-cap:var(--warna-cap-rendah);display:grid;grid-template-columns:var(--ikon-label) 1fr;align-items:center;column-gap:var(--jarak-3);row-gap:var(--jarak-1);margin:0;padding:var(--jarak-4);font-family:var(--font-sans);color:var(--warna-cap);background:color-mix(in srgb,var(--warna-cap) 11%,var(--warna-permukaan));border-radius:var(--radius)}.ds-label-waspada{--warna-cap:var(--warna-cap-waspada)}.ds-label-bahaya{--warna-cap:var(--warna-cap-bahaya)}.ds-label-ikon{grid-row:span 2;width:var(--ikon-label);height:var(--ikon-label)}.ds-label-ikon svg{display:block;width:100%;height:100%}.ds-label-kata{font-size:var(--ukuran-label);font-weight:var(--tebal-tebal);line-height:var(--tinggi-baris-rapat);letter-spacing:var(--spasi-huruf-judul)}.ds-label-skor{color:var(--warna-teks);font-weight:var(--tebal-sedang);font-variant-numeric:tabular-nums}.ds-label-meter{grid-column:1/-1;display:grid;grid-template-columns:repeat(20,1fr);gap:var(--celah-sel);margin-top:var(--jarak-2)}.ds-sel{height:var(--tinggi-sel);background:color-mix(in srgb,var(--warna-cap) 18%,transparent);border-radius:var(--radius-mini)}.ds-sel-isi{background:var(--warna-cap)}"
+    },
+    {
+      "name": "Sorotan Pemicu",
+      "kind": "custom",
+      "refersTo": "sorotan-teks",
+      "description": "Kalimat pemicu di Teks yang dicek: kuning terang bergaris bawah.",
+      "html": "<p class=\"ds-teks-asli\">Kerja dari rumah, <mark class=\"ds-sorotan\">bayar biaya pendaftaran Rp150.000</mark> dulu.</p>",
+      "css": ".ds-teks-asli{margin:0;padding:var(--jarak-3);font-family:var(--font-sans);color:var(--warna-teks);white-space:pre-wrap;background:var(--warna-latar-dalam);border:var(--tebal-garis-halus) solid var(--warna-garis-terang);border-radius:var(--radius-kecil)}.ds-sorotan{color:var(--warna-sorotan-teks);background:var(--warna-sorotan-latar);text-decoration:underline;text-decoration-thickness:var(--tebal-garis);text-underline-offset:var(--offset-garis-bawah);border-radius:var(--radius-mini);box-decoration-break:clone;-webkit-box-decoration-break:clone}"
+    },
+    {
+      "name": "Legenda Label",
+      "kind": "chip",
+      "refersTo": "",
+      "description": "Skala Label: aktif terisi penuh, lainnya putus-putus.",
+      "html": "<ul class=\"ds-legenda\"><li class=\"ds-leg-rendah\">Risiko rendah 0–24</li><li class=\"ds-leg-waspada\">Waspada 25–59</li><li class=\"ds-leg-bahaya\" aria-current=\"true\">Bahaya 60–100</li></ul>",
+      "css": ".ds-legenda{display:flex;flex-wrap:wrap;gap:var(--jarak-2);margin:0;padding:0;list-style:none;font-family:var(--font-sans)}.ds-legenda li{padding:var(--jarak-1) var(--jarak-3);color:var(--warna-cap);border:var(--tebal-garis-halus) dashed currentColor;border-radius:var(--radius-bulat)}.ds-leg-rendah{--warna-cap:var(--warna-cap-rendah)}.ds-leg-waspada{--warna-cap:var(--warna-cap-waspada)}.ds-leg-bahaya{--warna-cap:var(--warna-cap-bahaya)}.ds-legenda li[aria-current=true]{color:var(--warna-latar);font-weight:var(--tebal-semi);background:var(--warna-cap);border-style:solid;border-color:var(--warna-cap)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Lampu Meja di Ruang Gelap",
+    "overview": "JobShift memakai bahasa landing SaaS gelap yang dipatok pengguna (rujukan Open React Template): latar hampir hitam kebiruan, cahaya indigo kabur yang menggenang di atas pembuka dan di bawah kaki halaman, judul bergradien abu-indigo yang berkilau pelan, dan kartu gelap berbingkai gradien tipis. Di tengah kegelapan itu satu benda paling terang dan paling dekat: panel alat cek yang benar-benar berfungsi, bukan video atau foto produk. Seluruh halaman diatur supaya mata jatuh ke panel itu lebih dulu.\n\nKepadatannya lapang. Bagian halaman berjarak jauh (4rem di HP, 7rem di layar lebar), kepala bagian rata tengah, dan isi tiap bagian berupa kisi kartu, kisi butir tanpa kartu, atau satu daftar bersekat. Warna terang dipakai hemat: indigo untuk aksi dan aksen, tiga warna Label pastel hanya untuk hasil cek, dan kuning sorotan hanya untuk kalimat pemicu di teks pengguna.\n\nNadanya tenang dan jelas, bukan menakut-nakuti. Bahaya tidak diteriakkan dengan merah menyala; Label Bahaya memakai merah pastel di atas tint gelap, dibedakan juga oleh bentuk ikon dan kata. Aksesibilitas adalah bagian dari dunia ini, bukan tambahan: kontras teks di atas 4,5:1, bingkai kontrol dan cincin fokus di atas 3:1, huruf isi minimal 16 px, target sentuh minimal 44 px, dan gerak hanya kalau pengguna mengizinkannya.",
+    "keyCharacteristics": [
+      "Latar hampir hitam kebiruan (#030712) dengan cahaya indigo radial yang kabur.",
+      "Judul bergradien abu-indigo yang dipotong ke bentuk huruf dan berkilau pelan.",
+      "Permukaan gelap berbingkai gradien 1 px, bukan bayangan, sebagai pemisah utama.",
+      "Satu panel alat bercahaya indigo sebagai pusat halaman; hasil cek muncul di panel yang sama.",
+      "Label hasil dibedakan tiga kali: warna pastel, bentuk ikon, dan kata.",
+      "Huruf sans sistem yang rapat (spasi huruf judul -0,025em)."
+    ],
+    "rules": [
+      {
+        "name": "The Pastel Hanya untuk Label Rule",
+        "body": "Biru, kuning, dan merah pastel hanya muncul untuk Label, legendanya, dan sorotan pemicu di hasil cek. Di luar hasil, satu-satunya aksen adalah indigo.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tiga Penanda Rule",
+        "body": "Setiap Label dibedakan oleh warna, bentuk ikon (lingkaran, segitiga, segi delapan), dan kata. Warna tidak pernah menjadi satu-satunya pembeda.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tint Bukan Isi Rule",
+        "body": "Warna Label tampil sebagai teks pastel di atas tint 11% warna itu di atas Permukaan Panel, bukan sebagai blok warna penuh. Isi penuh hanya untuk sel meter yang terisi dan chip legenda yang aktif.",
+        "section": "colors"
+      },
+      {
+        "name": "The Kalimat Utuh Rule",
+        "body": "Judul dua kalimat dipecah per kalimat, satu kalimat per baris (`display: block` per kalimat), dan semua judul memakai `text-wrap: balance`. Baris tidak pernah patah di tengah kalimat pada layar sempit.",
+        "section": "typography"
+      },
+      {
+        "name": "The Enam Belas Piksel Rule",
+        "body": "Tidak ada teks isi, termasuk teks kotak tempel, yang lebih kecil dari 1rem.",
+        "section": "typography"
+      },
+      {
+        "name": "The Satu Benda Melayang Rule",
+        "body": "Panel alat cek adalah satu-satunya permukaan berbayangan. Kartu, bilah, dan panel ajakan hanya memakai bingkai gradien. Panel ajakan juga mendapat cahaya radial di dalamnya.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Cahaya Selebar Layar Rule",
+        "body": "Elemen cahaya latar selalu selebar layar (`inset-inline: 0`), dan hanya gradiennya yang berukuran tetap (64rem × 36rem). Cahaya tidak boleh membuat halaman lebih lebar dari layar HP.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** pakai bingkai gradien 1 px (`bingkai-gradien`, atau `bingkai-gradien-aksen` untuk permukaan utama) untuk memisahkan permukaan gelap dari latar.",
+      "**Do** beri setiap Label tiga penanda: warna pastel, bentuk ikon SVG, dan kata.",
+      "**Do** taruh semua gerak (kilau judul, transisi, muncul saat digulir, meter) di dalam `@media (prefers-reduced-motion: no-preference)`.",
+      "**Do** jaga target sentuh minimal 2.75rem (`target-min`), termasuk tautan sebaris di daftar Langkah lewat padding vertikal.",
+      "**Do** tampilkan domain resmi sebagai teks biasa di samping setiap tautan Langkah.",
+      "**Do** definisikan nilai baru sebagai token di `:root`, lalu pakai lewat `var(--…)` di aturan."
+    ],
+    "donts": [
+      "**Don't** pakai warna Label pastel di luar hasil cek dan legendanya.",
+      "**Don't** beri kartu atau bilah bayangan; bayangan hanya milik panel alat cek.",
+      "**Don't** biarkan elemen cahaya lebih lebar dari layar; hanya gradiennya yang berukuran tetap.",
+      "**Don't** pakai emoji sebagai ikon Label; ikon digambar sebagai SVG `currentColor`.",
+      "**Don't** taruh label kecil berhuruf kapital di atas judul atau angka."
+    ]
+  }
+}

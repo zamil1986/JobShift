@@ -92,7 +92,7 @@ export function UnggahScreenshot({ teks, onTeks, onSibuk }: Props) {
 
   return (
     <>
-      <label htmlFor={idBerkas} className="label-kotak">
+      <label htmlFor={idBerkas} className="label-kotak label-unggah">
         Atau unggah screenshot lowongan
       </label>
       <input
@@ -109,7 +109,7 @@ export function UnggahScreenshot({ teks, onTeks, onSibuk }: Props) {
       </p>
 
       {/* Wadah status selalu ada di DOM supaya perubahannya dibacakan screen reader. */}
-      <div role="status" aria-live="polite" aria-atomic="true">
+      <div role="status" aria-live="polite" aria-atomic="true" className="status-ocr">
         {teksStatus && <p id={idStatus}>{teksStatus}</p>}
       </div>
       {progres && (
