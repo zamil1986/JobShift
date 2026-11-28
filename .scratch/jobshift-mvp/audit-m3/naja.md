@@ -1,9 +1,10 @@
 # Audit Rilis M3 — Tahap 1c: Waktu Respons Cek dari HP (Data Seluler)
 
 - **Auditor:** Ayudhya Naja
-- **Tiket rujukan:** [`.scratch/jobshift-mvp/issues/14-audit-rilis-m3.md`](../issues/14-audit-rilis-m3.md) (kriteria: *20 percobaan dari HP lewat data seluler: p95 < 5 detik*)
+- **Tiket rujukan:** [`.scratch/jobshift-mvp/issues/14-audit-rilis-m3.md`](../issues/14-audit-rilis-m3.md) (kriteria: _20 percobaan dari HP lewat data seluler: p95 < 5 detik_)
 - **Acuan metrik:** `PRD.md` (p95 < 5 detik), `.scratch/jobshift-mvp/spec.md` (batas waktu AI 3,5 detik lewat `AbortSignal` agar p95 total tetap < 5 detik)
-- **Status:** Menunggu 20 hasil pengukuran dari HP
+- **URL yang diuji:** https://job-shift-navy.vercel.app (production, deploy dari `main`). **Jangan** memakai URL preview PR (`job-shift-git-...vercel.app`), karena isinya bukan `main`.
+- **Status:** Menunggu 20 hasil pengukuran dari HP. Pengukuran baru bisa dimulai setelah `GROQ_API_KEY` terpasang lagi di production (lihat bagian 1, langkah 4).
 
 ---
 
@@ -13,6 +14,7 @@
 **Cadangan:** Stopwatch (hanya jika tidak memungkinkan menyambungkan HP ke laptop dengan kabel USB).
 
 Alasan memilih `chrome://inspect`:
+
 - Kriteria mengukur **dari menekan tombol Cek sampai judul hasil (`#judul-hasil`, "Hasil cek") muncul di layar**, bukan hanya waktu respons API di tab Network.
 - Dengan DevTools Remote, kita bisa menjalankan snippet pengukur presisi milidetik (`performance.now()`) langsung di browser HP sambil tetap memantau tab **Network** (`POST /api/cek`) untuk membaca `sumberPenilaian` dan `catatanAI`.
 
@@ -20,105 +22,178 @@ Alasan memilih `chrome://inspect`:
 
 1. **Siapkan HP Android & laptop:**
    - Matikan Wi-Fi di HP, pastikan hanya memakai **data seluler** (4G/5G).
-   - Aktifkan **USB Debugging** di *Developer options* HP, lalu sambungkan HP ke laptop dengan kabel USB (izinkan *Allow USB debugging* di layar HP).
-   - Buka Chrome di HP dan buka **URL publik Vercel** aplikasi JobShift.
+   - Aktifkan **USB Debugging** di _Developer options_ HP, lalu sambungkan HP ke laptop dengan kabel USB (izinkan _Allow USB debugging_ di layar HP).
+   - Buka Chrome di HP dan buka https://job-shift-navy.vercel.app.
+   - Supaya teks uji mudah disalin di HP, buka juga file ini di GitHub lewat Chrome HP (tab kedua). Setiap blok teks di bagian 5 punya tombol salin di pojok kanan atas.
 2. **Buka DevTools Remote di laptop:**
    - Buka Chrome di laptop, masuk ke `chrome://inspect/#devices`.
    - Pada perangkat HP yang muncul, klik **inspect** pada tab halaman JobShift.
-3. **Siapkan pengukur otomatis di tab Console (sekali per sesi halaman):**
-   - Tempel dan tekan Enter pada snippet berikut di tab **Console** DevTools Remote:
+   - Di tab **Network** DevTools, pastikan throttling **No throttling** dan _Disable cache_ tidak dicentang. Jaringan yang diukur harus jaringan seluler HP apa adanya.
+3. **Pasang pengukur di tab Console (sekali per pemuatan halaman):**
+   - Tempel snippet berikut di tab **Console** DevTools Remote, lalu tekan Enter. Kalau halaman dimuat ulang, snippet hilang dan harus ditempel lagi. Kalau tidak sengaja ditempel dua kali, muncul peringatan dan pengukur tidak terpasang dobel.
 
 ```js
 (() => {
-  let t0 = 0;
-  let aktif = false;
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest('button[type="submit"]');
-    if (!btn) return;
-    t0 = performance.now();
-    aktif = true;
-  }, true);
+  if (window.__auditM3)
+    return console.warn("[AUDIT-M3] Pengukur sudah terpasang.");
+  const catatan = (window.__auditM3 = []);
+  let t0 = 0,
+    sedangCek = false,
+    respons = null;
 
-  const obs = new MutationObserver(() => {
-    if (!aktif) return;
-    const h2 = document.getElementById("judul-hasil");
-    if (h2 && h2.textContent.includes("Hasil cek")) {
-      const ms = Math.round(performance.now() - t0);
-      aktif = false;
-      console.log("[AUDIT-M3] Waktu sampai judul hasil muncul:", ms, "ms");
+  // Baca sumberPenilaian dan catatanAI dari respons POST /api/cek.
+  const fetchAsli = window.fetch;
+  window.fetch = async (...args) => {
+    const res = await fetchAsli(...args);
+    if (String(args[0]).includes("/api/cek")) {
+      respons = res
+        .clone()
+        .json()
+        .then(
+          (b) => ({
+            http: res.status,
+            sumber: b?.sumberPenilaian ?? "-",
+            catatanAI: b?.catatanAI ?? "-",
+          }),
+          () => ({ http: res.status, sumber: "-", catatanAI: "-" }),
+        );
     }
+    return res;
+  };
+
+  // Mulai: form dikirim (tombol Cek diketuk).
+  document.addEventListener(
+    "submit",
+    () => {
+      t0 = performance.now();
+      respons = null;
+    },
+    true,
+  );
+
+  // Selesai: tombol Cek aktif lagi. Hasil baru di-render pada saat yang sama.
+  new MutationObserver(async () => {
+    const tombol = document.querySelector("button.tombol-cek");
+    if (!tombol) return;
+    if (tombol.disabled) {
+      sedangCek = true;
+      return;
+    }
+    if (!sedangCek) return;
+    sedangCek = false;
+    const ms = Math.round(performance.now() - t0);
+    const adaHasil = !!document.getElementById("judul-hasil");
+    const r = (await respons) ?? { http: "-", sumber: "-", catatanAI: "-" };
+    catatan.push({ no: catatan.length + 1, ms: adaHasil ? ms : null, ...r });
+    console.log(
+      "[AUDIT-M3] #" +
+        catatan.length +
+        ": " +
+        (adaHasil ? ms + " ms" : "tanpa hasil (galat)") +
+        " | HTTP " +
+        r.http +
+        " | " +
+        r.sumber +
+        " | catatanAI: " +
+        r.catatanAI,
+    );
+  }).observe(document.body, {
+    attributes: true,
+    attributeFilter: ["disabled"],
+    subtree: true,
   });
-  obs.observe(document.body, { childList: true, subtree: true });
 })();
 ```
 
-   *(Catatan: Jika melakukan cek ulang untuk teks berikutnya, tombol **Cek** tetap memicu pengukuran baru selama `#judul-hasil` di-render ulang atau diperbarui; untuk hasil paling bersih antar percobaan, muat ulang halaman atau pantau juga durasi `POST /api/cek` di tab **Network** -> klik request `cek` -> tab **Response** untuk melihat `sumberPenilaian` dan `catatanAI`.)*
-4. **Jalankan 20 percobaan berurutan di layar HP:**
-   - Untuk nomor **1–4**: ketuk masing-masing **4 tombol contoh**, lalu ketuk **Cek**. *(Catatan: sesuai `spec.md`, tombol contoh memakai keluaran AI statis di server sehingga mengukur latensi penuh endpoint tanpa menunggu Groq.)*
-   - Untuk nomor **5–20**: salin teks uji dari bagian **Daftar 20 Teks Uji** di bawah, tempel ke kotak teks di HP, lalu ketuk **Cek**.
-   - Catat angka `ms` dari Console serta nilai `sumberPenilaian` (`"aturan"` atau `"aturan+AI"`) dan ada/tidaknya `catatanAI: "ai_tidak_tersedia"` (di UI juga muncul catatan kecil di bawah penjelasan bila AI gagal/timeout).
+_Cara kerjanya:_ waktu dihitung dari form dikirim sampai tombol **Cek** aktif lagi. `FormCek` mematikan tombol selama menunggu `/api/cek`, lalu menyalakannya kembali di render yang sama dengan hasil baru, jadi saat itu judul **"Hasil cek"** (`#judul-hasil`) sudah ada di layar. Setiap baris Console sudah memuat waktu (ms), `sumberPenilaian`, dan `catatanAI`, jadi tab Network tidak perlu dibuka satu per satu. Setelah 20 percobaan, jalankan `console.table(window.__auditM3)` dan salin tabelnya ke bagian 3.
+
+_Kenapa tidak memakai snippet versi pertama:_ versi pertama menunggu perubahan `childList` di DOM. `FormCek` tidak menghapus hasil lama saat Cek berikutnya berjalan, jadi kalau teks yang sama dicek ulang (misalnya saat mengulang percobaan), DOM hanya berubah isi teksnya dan snippet tidak mencatat apa pun. Ini terbukti saat snippet diuji di `npm run dev` lokal. Saran "muat ulang halaman" juga tidak bisa dipakai, karena snippet Console ikut hilang saat halaman dimuat ulang. Snippet di atas sudah diuji di lokal untuk lima keadaan: tombol contoh, dua teks berbeda, teks yang sama dicek ulang, teks terlalu pendek (tidak dicatat karena tidak dikirim ke server), dan tempel dua kali. Angka dari laptop **tidak** dipakai di tabel.
+
+4. **Pemeriksaan awal sebelum percobaan 1 (wajib):**
+   - Di Tahap 1a, `GROQ_API_KEY` sempat dihapus dari production untuk uji "API key dimatikan" ([daniel.md bagian 4](daniel.md)). Per 28 Nov 2026 sekitar 21.15 WIB key **belum** dipasang lagi (tiket `17-groq-api-key-production.md` di PR Daniel, branch `tiket-14-audit-daniel`). Uji ini baru dijalankan setelah tiket itu selesai. Kalau dijalankan sebelumnya, p95 yang diukur hanya p95 Aturan saja dan kriteria ini belum teruji.
+   - Tempel satu teks bebas yang **bukan** tombol contoh dan **bukan** salah satu dari 20 teks uji (misalnya `dev-004` dari `data/dev.jsonl`), lalu ketuk **Cek**. Hasil yang benar: `aturan+AI` dan `catatanAI: -`. Kalau muncul `aturan | catatanAI: ai_tidak_tersedia`, berhenti dan minta Zamil memeriksa `GROQ_API_KEY` di Vercel.
+   - Percobaan pemeriksaan ini **tidak** dihitung di 20 percobaan. Jalankan `window.__auditM3.length = 0` sesudahnya supaya nomor percobaan mulai dari 1.
+5. **Jalankan 20 percobaan berurutan di layar HP:**
+   - Untuk nomor **1–4**: ketuk masing-masing **4 tombol contoh**, lalu ketuk **Cek**. _(Catatan: tombol contoh dijawab adapter Statis di server (`src/cek/statis.ts`) tanpa memanggil Groq. Percobaan 1–4 mengukur jaringan HP dan server, tapi bukan waktu tunggu Groq.)_
+   - Untuk nomor **5–20**: salin teks uji dari bagian **Daftar 20 Teks Uji** di bawah, tempel ke kotak teks di HP, lalu ketuk **Cek**. Pastikan penghitung karakter di bawah kotak cocok dengan kolom "Panjang" di tabel.
+   - Beri jeda beberapa detik antarpercobaan, terutama untuk teks panjang, supaya tidak terkena batas laju Groq.
+   - Percobaan yang gagal (`tanpa hasil (galat)`, HTTP 429/5xx, atau `ai_tidak_tersedia`) **tetap dicatat apa adanya** dan tidak diulang diam-diam. Kalau perlu diulang, catat keduanya dan tandai di kolom catatan.
+   - Percobaan pertama setelah aplikasi lama tidak dibuka bisa lebih lambat karena _cold start_ fungsi Vercel. Ini tetap dihitung, karena pengguna sungguhan juga mengalaminya.
 
 ### Prosedur Cadangan (Stopwatch)
-Jika tidak memakai laptop: buka aplikasi stopwatch di perangkat kedua (atau split-screen), tekan **Start** bersamaan dengan mengetuk tombol **Cek** di HP, tekan **Stop** begitu judul **"Hasil cek"** muncul dan layar menggulir ke hasil, lalu konversi ke milidetik (`detik × 1000`). Catat di kolom catatan jika ada pesan AI tidak tersedia di bawah penjelasan.
+
+Jika tidak memakai laptop: buka aplikasi stopwatch di perangkat kedua (atau split-screen), tekan **Start** bersamaan dengan mengetuk tombol **Cek** di HP, tekan **Stop** begitu judul **"Hasil cek"** muncul dan layar menggulir ke hasil, lalu konversi ke milidetik (`detik × 1000`). Catat di kolom catatan jika ada pesan "Penilaian AI sedang tidak tersedia…" di bawah penjelasan (artinya `catatanAI: ai_tidak_tersedia`). Pemeriksaan awal di langkah 4 tetap wajib: tanpa laptop, lihat ada tidaknya pesan itu pada teks bebas tadi.
+
+Stopwatch tangan punya galat reaksi kira-kira ±0,3 detik per percobaan. Kalau p95 hasil stopwatch jatuh di antara 4.700 dan 5.300 ms, kesimpulannya ditulis "belum pasti" dan pengukuran diulang dengan `chrome://inspect`.
 
 ---
 
 ## 2. Identitas Perangkat, Jaringan, dan Lingkungan Uji
 
-*(Isi sebelum/saat pengujian)*
+_(Isi sebelum/saat pengujian)_
 
-- **URL publik Vercel:** `...`
+- **URL publik Vercel:** https://job-shift-navy.vercel.app
+- **Commit `main` yang ter-deploy saat uji:** `...` _(lihat deployment production terbaru di dashboard Vercel, atau `git log -1 origin/main`)_
+- **`GROQ_API_KEY` aktif di production (pemeriksaan awal langkah 4):** `ya / tidak`
+- **Metode:** `chrome://inspect` / stopwatch
 - **Model HP:** `...`
 - **Browser & versi (HP):** `...`
 - **Operator seluler:** `...`
-- **Jenis jaringan & kekuatan sinyal:** `...` *(mis. 4G LTE, 3/4 bar)*
+- **Jenis jaringan & kekuatan sinyal:** `...` _(mis. 4G LTE, 3/4 bar)_
 - **Tanggal & jam uji (WIB):** `...`
 
 ---
 
 ## 3. Tabel Hasil 20 Percobaan
 
-> Semua teks berasal dari 4 tombol contoh (`src/cek/contoh.ts`) dan `data/dev.jsonl` (tidak memakai Set test). Teks sedang (~1.150–1.450 karakter) dan panjang (~2.650–2.900 karakter) diperpanjang dari entri `data/dev.jsonl` dengan rincian deskripsi pekerjaan yang sejalan untuk menguji variasi panjang hingga mendekati batas 3.000 karakter.
+> Semua teks berasal dari 4 tombol contoh (`src/cek/contoh.ts`) dan `data/dev.jsonl` (tidak memakai Set test). Contoh terpanjang di `data/dev.jsonl` hanya 371 karakter, jadi teks sedang (1.156–1.228 karakter) dan panjang (2.708–2.900 karakter) dibuat dari entri `data/dev.jsonl` yang diberi paragraf rincian pekerjaan tambahan. Kalimat pembukanya tetap persis sama dengan entri aslinya. Teks yang diperpanjang dipakai untuk uji waktu saja, bukan untuk eval, dan Palsu/Asli di tabel adalah `kebenaran` entri aslinya. Panjang dihitung setelah _trim_, sama seperti penghitung di bawah kotak teks.
 
-| No | Teks uji | Panjang (kar) | Waktu (ms) | sumberPenilaian / catatan AI |
-| --- | --- | --- | --- | --- |
-| 1 | `contoh-tugas` — Palsu (tugas) (Tombol contoh) | 358 | | |
-| 2 | `contoh-lokal` — Palsu (lokal) (Tombol contoh) | 312 | | |
-| 3 | `contoh-luar_negeri` — Palsu (luar_negeri) (Tombol contoh) | 294 | | |
-| 4 | `contoh-resmi` — Asli (Tombol contoh) | 347 | | |
-| 5 | `dev-001` — Palsu (tugas) (dev.jsonl — pendek) | 243 | | |
-| 6 | `dev-003` — Palsu (lokal) (dev.jsonl — pendek) | 298 | | |
-| 7 | `dev-006` — Palsu (luar_negeri) (dev.jsonl — pendek) | 256 | | |
-| 8 | `dev-008` — Asli (dev.jsonl — pendek) | 260 | | |
-| 9 | `dev-010` — Asli (dev.jsonl — pendek) | 287 | | |
-| 10 | `dev-059` — Asli (dev.jsonl — pendek) | 247 | | |
-| 11 | `dev-002` — Palsu (tugas) (dev.jsonl — sedang (diperpanjang)) | 1179 | | |
-| 12 | `dev-005` — Palsu (luar_negeri) (dev.jsonl — sedang (diperpanjang)) | 1156 | | |
-| 13 | `dev-014` — Palsu (lokal) (dev.jsonl — sedang (diperpanjang)) | 1189 | | |
-| 14 | `dev-007` — Asli (dev.jsonl — sedang (diperpanjang)) | 1227 | | |
-| 15 | `dev-009` — Asli (dev.jsonl — sedang (diperpanjang)) | 1228 | | |
-| 16 | `dev-011` — Palsu (tugas) (dev.jsonl — mendekati 3.000 (diperpanjang)) | 2840 | | |
-| 17 | `dev-013` — Palsu (tugas) (dev.jsonl — mendekati 3.000 (diperpanjang)) | 2797 | | |
-| 18 | `dev-019` — Palsu (luar_negeri) (dev.jsonl — mendekati 3.000 (diperpanjang)) | 2708 | | |
-| 19 | `dev-020` — Asli (dev.jsonl — mendekati 3.000 (diperpanjang)) | 2894 | | |
-| 20 | `dev-026` — Asli (dev.jsonl — mendekati 3.000 (diperpanjang)) | 2900 | | |
+| No  | Teks uji                                                                     | Panjang (kar) | Waktu (ms) | sumberPenilaian / catatanAI | Catatan |
+| --- | ---------------------------------------------------------------------------- | ------------- | ---------- | --------------------------- | ------- |
+| 1   | `contoh-tugas` — Palsu (tugas) (Tombol contoh)                               | 358           |            |                             |         |
+| 2   | `contoh-lokal` — Palsu (lokal) (Tombol contoh)                               | 312           |            |                             |         |
+| 3   | `contoh-luar_negeri` — Palsu (luar_negeri) (Tombol contoh)                   | 294           |            |                             |         |
+| 4   | `contoh-resmi` — Asli (Tombol contoh)                                        | 347           |            |                             |         |
+| 5   | `dev-001` — Palsu (tugas) (dev.jsonl — pendek)                               | 243           |            |                             |         |
+| 6   | `dev-003` — Palsu (lokal) (dev.jsonl — pendek)                               | 298           |            |                             |         |
+| 7   | `dev-006` — Palsu (luar_negeri) (dev.jsonl — pendek)                         | 256           |            |                             |         |
+| 8   | `dev-008` — Asli (dev.jsonl — pendek)                                        | 260           |            |                             |         |
+| 9   | `dev-010` — Asli (dev.jsonl — pendek)                                        | 287           |            |                             |         |
+| 10  | `dev-059` — Asli (dev.jsonl — pendek)                                        | 247           |            |                             |         |
+| 11  | `dev-002` — Palsu (tugas) (dev.jsonl — sedang (diperpanjang))                | 1179          |            |                             |         |
+| 12  | `dev-005` — Palsu (luar_negeri) (dev.jsonl — sedang (diperpanjang))          | 1156          |            |                             |         |
+| 13  | `dev-014` — Palsu (lokal) (dev.jsonl — sedang (diperpanjang))                | 1189          |            |                             |         |
+| 14  | `dev-007` — Asli (dev.jsonl — sedang (diperpanjang))                         | 1227          |            |                             |         |
+| 15  | `dev-009` — Asli (dev.jsonl — sedang (diperpanjang))                         | 1228          |            |                             |         |
+| 16  | `dev-011` — Palsu (tugas) (dev.jsonl — mendekati 3.000 (diperpanjang))       | 2840          |            |                             |         |
+| 17  | `dev-013` — Palsu (tugas) (dev.jsonl — mendekati 3.000 (diperpanjang))       | 2797          |            |                             |         |
+| 18  | `dev-019` — Palsu (luar_negeri) (dev.jsonl — mendekati 3.000 (diperpanjang)) | 2708          |            |                             |         |
+| 19  | `dev-020` — Asli (dev.jsonl — mendekati 3.000 (diperpanjang))                | 2894          |            |                             |         |
+| 20  | `dev-026` — Asli (dev.jsonl — mendekati 3.000 (diperpanjang))                | 2900          |            |                             |         |
 
 ---
 
 ## 4. Ringkasan Statistik & Kesimpulan
 
-*(Akan dihitung setelah 20 angka pengukuran dikirimkan)*
+_(Akan dihitung setelah 20 angka pengukuran dikirimkan)_
 
 - **Rumus p50 (median):** Untuk $n = 20$ data terurut $x_1 \le x_2 \le \dots \le x_{20}$,
   $$p_{50} = \frac{x_{10} + x_{11}}{2}$$
-- **Rumus p95 (persentil ke-95):** Menggunakan metode *nearest-rank*, indeks $k = \lceil 0{,}95 \times n \rceil = \lceil 0{,}95 \times 20 \rceil = 19$, sehingga:
+- **Rumus p95 (persentil ke-95):** Menggunakan metode _nearest-rank_, indeks $k = \lceil 0{,}95 \times n \rceil = \lceil 0{,}95 \times 20 \rceil = 19$, sehingga:
   $$p_{95} = x_{19}$$
-  *(Jika memakai interpolasi linear tipe R-7: posisi $h = 1 + 0{,}95 \times (20 - 1) = 19{,}05$, yakni $x_{19} + 0{,}05(x_{20} - x_{19})$; kedua angka akan dicantumkan jika ada perbedaan signifikan di sekitar ambang 5.000 ms.)*
+  _(Jika memakai interpolasi linear tipe R-7: posisi $h = 1 + 0{,}95 \times (20 - 1) = 19{,}05$, yakni $x\_{19} + 0{,}05(x\_{20} - x\_{19})$; kedua angka akan dicantumkan jika ada perbedaan signifikan di sekitar ambang 5.000 ms.)_<br>
+  _Metode nearest-rank ini sama dengan `hitungP95` di `src/eval/eval.ts` (p95 latensi AI di `npm run eval`), jadi kedua angka p95 di proyek memakai cara yang sama. Dengan $n = 20$, p95 adalah nilai terbesar kedua: satu percobaan paling lambat boleh melewati 5 detik, dua tidak._
 - **p50:** `... ms`
-- **p95:** `... ms`
+- **p95 (20 percobaan, angka resmi kriteria):** `... ms`
 - **Maksimum:** `... ms`
-- **Jumlah percobaan dengan AI timeout / `ai_tidak_tersedia`:** `...`
+- **p95 16 percobaan teks bebas saja (no. 5–20, tanpa tombol contoh; informasi tambahan):** `... ms` _(nearest-rank, $\lceil 0{,}95 \times 16 \rceil = 16$, jadi nilai maksimum dari 16 percobaan itu)_
+- **Jumlah percobaan dengan `catatanAI: ai_tidak_tersedia`:** `...` dari 16 percobaan teks bebas
+- **Dugaan AI timeout:** `...` _(percobaan dengan `ai_tidak_tersedia` dan waktu ≥ 3.500 ms. Klien tidak bisa membedakan timeout dari 429, 5xx, atau keluaran tidak valid, karena semuanya menjadi `ai_tidak_tersedia`. Percobaan yang cepat tapi tetap `ai_tidak_tersedia` dicatat sebagai "AI gagal, bukan timeout".)_
 - **Kesimpulan (Target p95 < 5.000 ms):** `MENUNGGU DATA`
+
+**Syarat hasil sah.** Kesimpulan LULUS hanya sah kalau pemeriksaan awal (bagian 1, langkah 4) menunjukkan `aturan+AI` dan sebagian besar percobaan 5–20 juga `aturan+AI`. Kalau lebih dari separuh percobaan 5–20 berakhir `ai_tidak_tersedia`, yang terukur hanyalah jalur Aturan saja. Kesimpulannya ditulis "belum teruji", lalu pengukuran diulang setelah penyebabnya diperbaiki.
+
+**Kalau GAGAL.** Buat tiket baru di `.scratch/jobshift-mvp/issues/` dengan `Status: needs-triage`, berisi p95, percobaan yang melewati 5 detik, dan dugaan penyebab (jaringan, cold start, atau Groq). Nomor 16 dan 17 sudah dipakai di branch audit yang belum masuk `main` (`16-path-windows-cek-dataset.md` dan `17-groq-api-key-production.md` di branch Daniel, `17-target-sentuh-tautan-teks.md` di branch Nadine), jadi tiket baru dari tahap ini memakai nomor **18** atau nomor kosong berikutnya saat itu.
 
 ---
 
