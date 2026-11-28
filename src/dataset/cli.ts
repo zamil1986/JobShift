@@ -15,6 +15,8 @@ import { parseArgs } from "node:util";
 import { lolos, validasiDataset, type NamaSet, type Temuan } from "./validasi";
 
 export type DependensiCli = {
+  /** Aturan path platform (`path.posix` atau `path.win32`). Default: platform yang menjalankan. */
+  path?: Pick<typeof path, "resolve">;
   /** Direktori acuan path relatif. Default: direktori kerja. */
   akar?: string;
   /** Pengganti `~`. Default: direktori rumah pengguna. */
@@ -36,7 +38,8 @@ export async function jalankanCekDataset(argv: readonly string[], dep: Dependens
   const adaFile = dep.adaFile ?? existsSync;
   const bacaFile = dep.bacaFile ?? ((p: string) => readFile(p, "utf8"));
   const cetak = dep.cetak ?? console.log;
-  const lokasi = (p: string) => path.resolve(akar, p.replace(/^~(?=$|\/)/, rumah));
+  const aturanPath = dep.path ?? path;
+  const lokasi = (p: string) => aturanPath.resolve(akar, p.replace(/^~(?=$|\/)/, rumah));
 
   let argumen: ReturnType<typeof bacaArgumen>;
   try {

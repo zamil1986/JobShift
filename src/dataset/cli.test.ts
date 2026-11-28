@@ -1,3 +1,4 @@
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { jalankanCekDataset } from "./cli";
 
@@ -6,28 +7,54 @@ const baris = (id: string, teks: string, kebenaran = "asli") =>
 const TEKS_A = "Lowongan staf administrasi PT Contoh Sejahtera di Jakarta, kirim CV lewat situs resmi.";
 const TEKS_B = "Lowongan operator gudang PT Contoh Logistik di Bekasi, lamaran lewat portal karier resmi.";
 
-/** Menjalankan CLI dengan sistem file palsu; mengembalikan kode keluar, keluaran, dan file yang dibaca. */
-async function jalankan(argv: string[], file: Record<string, string>) {
-  const dibaca: string[] = [];
-  const keluaran: string[] = [];
-  const kode = await jalankanCekDataset(argv, {
+// Aturan path setiap platform diberikan eksplisit, jadi tes ini sama hasilnya
+// di macOS, Linux, dan Windows (tiket 16). Path harapan ditulis dalam bentuk
+// POSIX, lalu `lokal` menerjemahkannya ke bentuk asli platform tanpa memakai
+// modul `path`.
+const PLATFORM = [
+  {
+    nama: "POSIX",
+    path: path.posix,
     akar: "/repo",
     rumah: "/home/naja",
-    adaFile: (p) => p in file,
-    bacaFile: async (p) => {
-      dibaca.push(p);
-      return file[p];
-    },
-    cetak: (t) => keluaran.push(t),
-  });
-  return { kode, teks: keluaran.join("\n"), dibaca };
-}
+    lokal: (p: string) => p,
+  },
+  {
+    nama: "Windows",
+    path: path.win32,
+    akar: "D:\\repo",
+    rumah: "C:\\Users\\naja",
+    lokal: (p: string) =>
+      p.replace(/^\/repo/, "D:\\repo").replace(/^\/home\/naja/, "C:\\Users\\naja").replaceAll("/", "\\"),
+  },
+] as const;
 
-describe("jalankanCekDataset", () => {
+describe.each(PLATFORM)("jalankanCekDataset ($nama)", (platform) => {
+  const { lokal } = platform;
+
+  /** Menjalankan CLI dengan sistem file palsu; mengembalikan kode keluar, keluaran, dan file yang dibaca. */
+  async function jalankan(argv: string[], fileMentah: Record<string, string>) {
+    const file = Object.fromEntries(Object.entries(fileMentah).map(([p, isi]) => [lokal(p), isi]));
+    const dibaca: string[] = [];
+    const keluaran: string[] = [];
+    const kode = await jalankanCekDataset(argv, {
+      path: platform.path,
+      akar: platform.akar,
+      rumah: platform.rumah,
+      adaFile: (p) => p in file,
+      bacaFile: async (p) => {
+        dibaca.push(p);
+        return file[p];
+      },
+      cetak: (t) => keluaran.push(t),
+    });
+    return { kode, teks: keluaran.join("\n"), dibaca };
+  }
+
   it("tanpa argumen memeriksa data/dev.jsonl dan keluar 1 kalau target belum terpenuhi", async () => {
     const { kode, teks, dibaca } = await jalankan([], { "/repo/data/dev.jsonl": baris("dev-001", TEKS_A) });
     expect(kode).toBe(1);
-    expect(dibaca).toEqual(["/repo/data/dev.jsonl"]);
+    expect(dibaca).toEqual([lokal("/repo/data/dev.jsonl")]);
     expect(teks).toMatch(/✗ Jumlah contoh Set dev: 1\/60/);
     expect(teks).toMatch(/BELUM LOLOS/);
   });
@@ -38,7 +65,7 @@ describe("jalankanCekDataset", () => {
       "/repo/data/dev.jsonl": baris("dev-001", TEKS_A),
     });
     expect(kode).toBe(1);
-    expect(dibaca).toEqual(["/home/naja/set/test.jsonl", "/repo/data/dev.jsonl"]);
+    expect(dibaca).toEqual([lokal("/home/naja/set/test.jsonl"), lokal("/repo/data/dev.jsonl")]);
     expect(teks).toMatch(/baris 1 \[test-001\]: .*dev-001/);
     expect(teks).not.toContain("Contoh Sejahtera");
   });
@@ -48,7 +75,7 @@ describe("jalankanCekDataset", () => {
       "/repo/data/dev.jsonl": baris("dev-001", TEKS_A),
       "/repo/data/test.jsonl": baris("test-001", TEKS_B),
     });
-    expect(dibaca).toEqual(["/repo/data/dev.jsonl"]);
+    expect(dibaca).toEqual([lokal("/repo/data/dev.jsonl")]);
   });
 
   it("--banding memakai file pembanding yang diberikan", async () => {
@@ -56,16 +83,16 @@ describe("jalankanCekDataset", () => {
       "/repo/data/dev.jsonl": baris("dev-001", TEKS_A),
       "/repo/lain.jsonl": baris("x-001", TEKS_B),
     });
-    expect(dibaca).toEqual(["/repo/data/dev.jsonl", "/repo/lain.jsonl"]);
+    expect(dibaca).toEqual([lokal("/repo/data/dev.jsonl"), lokal("/repo/lain.jsonl")]);
   });
 
   it.each([
-    [["--set", "salah"], /--set harus "dev" atau "test"/],
-    [["--ngawur"], /Pemakaian/],
-    [["tidak-ada.jsonl"], /File tidak ditemukan: \/repo\/tidak-ada.jsonl/],
+    [["--set", "salah"], '--set harus "dev" atau "test"'],
+    [["--ngawur"], "Pemakaian"],
+    [["tidak-ada.jsonl"], `File tidak ditemukan: ${lokal("/repo/tidak-ada.jsonl")}`],
   ])("argumen %j keluar dengan kode 2", async (argv, pesan) => {
     const { kode, teks } = await jalankan(argv, {});
     expect(kode).toBe(2);
-    expect(teks).toMatch(pesan);
+    expect(teks).toContain(pesan);
   });
 });
