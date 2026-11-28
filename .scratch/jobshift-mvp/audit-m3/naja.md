@@ -116,7 +116,8 @@ _Kenapa tidak memakai snippet versi pertama:_ versi pertama menunggu perubahan `
 5. **Jalankan 20 percobaan berurutan di layar HP:**
    - Untuk nomor **1–4**: ketuk masing-masing **4 tombol contoh**, lalu ketuk **Cek**. _(Catatan: tombol contoh dijawab adapter Statis di server (`src/cek/statis.ts`) tanpa memanggil Groq. Percobaan 1–4 mengukur jaringan HP dan server, tapi bukan waktu tunggu Groq.)_
    - Untuk nomor **5–20**: salin teks uji dari bagian **Daftar 20 Teks Uji** di bawah, tempel ke kotak teks di HP, lalu ketuk **Cek**. Pastikan penghitung karakter di bawah kotak cocok dengan kolom "Panjang" di tabel.
-   - Beri jeda beberapa detik antarpercobaan, terutama untuk teks panjang, supaya tidak terkena batas laju Groq.
+   - Beri jeda **sekitar 20 detik** antarpercobaan (hitung dari hasil muncul sampai mengetuk Cek berikutnya). Batas Groq Free yang paling cepat habis adalah 8K token per menit, dan satu cek teks panjang bisa memakai sekitar 2.300 token ([riset AI API](../../../docs/research/ai-api-and-iasc.md)), jadi hanya sekitar 3 cek per menit. Tanpa jeda, percobaan 16–20 bisa kena 429 dan tercatat `ai_tidak_tersedia`.
+   - Selama uji berlangsung, jangan ada anggota tim yang menjalankan `npm run eval` dengan key production yang sama, karena batas token dihitung per organisasi Groq.
    - Percobaan yang gagal (`tanpa hasil (galat)`, HTTP 429/5xx, atau `ai_tidak_tersedia`) **tetap dicatat apa adanya** dan tidak diulang diam-diam. Kalau perlu diulang, catat keduanya dan tandai di kolom catatan.
    - Percobaan pertama setelah aplikasi lama tidak dibuka bisa lebih lambat karena _cold start_ fungsi Vercel. Ini tetap dihitung, karena pengguna sungguhan juga mengalaminya.
 
