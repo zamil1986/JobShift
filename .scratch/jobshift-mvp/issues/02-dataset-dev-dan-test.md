@@ -6,7 +6,7 @@
 
 **Status:** ready-for-human
 
-- [ ] Pemegang Set test sudah ditetapkan dan dicatat (bukan orang yang menyetel Aturan)
+- [x] Pemegang Set test sudah ditetapkan dan dicatat (bukan orang yang menyetel Aturan): **Ayudhya Naja**
 - [x] Set dev 60 contoh dalam format JSONL sesuai spec (`id, teks, kebenaran, modus?, sumber, sintetis`) sudah di-commit
 - [ ] Set test 40 contoh tersimpan di luar repo sampai bobot dibekukan di M3, lalu di-commit
 - [x] Setiap contoh sudah disamarkan dari nomor HP, nama orang, dan rekening sebelum di-commit
