@@ -4,7 +4,7 @@
 
 **Blocked by:** None
 
-**Status:** needs-triage
+**Status:** ready-for-human
 
 **Ditemukan di:** Chrome 158.0.8127.37 dan Firefox 145.0.1 (Windows, headless), lebar 360, 768, dan 1366 px, `prefers-reduced-motion: reduce` dan `no-preference`. Ukuran diambil dari `getBoundingClientRect()` di URL publik pada 28 November 2026, dan untuk tautan yang terlipat dari `getClientRects()` per baris. Kotak gabungan `getBoundingClientRect()` saja tidak cukup: tautan disclaimer yang terlipat dua baris di 360 px punya kotak gabungan setinggi 44,6 px, padahal tiap barisnya hanya 21 px.
 
@@ -37,7 +37,7 @@ Arah perbaikan: pakai pola yang sudah ada di `.daftar-langkah a`, yaitu padding 
 
 - [x] Kelima tautan teks di tabel (no 1–5) punya area sentuh ≥ 44 px per baris tautan, dari lebar 360 px sampai desktop, tanpa mengubah lipatan teks di sekitarnya
 - [x] Skip link "Langsung ke kotak cek" setinggi ≥ 44 px di semua lebar
-- [ ] Diukur ulang dengan `getClientRects()` di Chrome dan Firefox di 360 px, dan hasilnya dicatat di bawah (Chromium sudah; Firefox belum)
+- [ ] Diukur ulang dengan `getClientRects()` di Chrome dan Firefox di 360 px, dan hasilnya dicatat di bawah (Chromium sudah, juga di production; Firefox belum)
 
 ## Comments
 
@@ -57,3 +57,15 @@ Cara ukur: aturan CSS yang sama persis disuntikkan ke https://job-shift-navy.ver
 - Fokus keyboard (Tab dari tombol Cek ke tautan disclaimer, 360 px): `:focus-visible` aktif, tiap baris kembali 19 px, cincin fokus hanya membingkai teks, dan posisi disclaimer serta tinggi halaman tidak berubah.
 - `npm test` (513 tes), `npm run lint`, `npm run typecheck`, dan `npm run build` lulus.
 - Belum diukur: Firefox (tidak terpasang di mesin ini) dan HP sungguhan. Setelah deploy, ukur ulang di Firefox 360 px dan catat di sini sebelum tiket ditutup.
+
+**Verifikasi production (Zamil, 28 November 2026):** setelah PR #13 dan #15 di-merge ke `main` (`55cd500`), production https://job-shift-navy.vercel.app menyajikan aturan baru di CSS `/_next/static/immutable/chunks/0ddr15z26iix0.css`. Diukur ulang tanpa suntikan CSS di browser bawaan Claude desktop (Chromium, macOS), 360 × 640, di keadaan `/` setelah Cek contoh "Kerja tugas online" (hasil Bahaya tampil):
+
+| Yang diukur | Hasil |
+| --- | --- |
+| Target terlihat (tautan, tombol, input) | 32, tidak ada yang < 44 px per baris |
+| Tautan disclaimer (2 baris) | 47 dan 47 px |
+| Tautan di bawah legenda, "Katadata" (2), "Kontan, 17 Nov 2026" | 47 px |
+| Skip link saat difokus | 44 px |
+| Gulir mendatar | tidak ada |
+
+Kriteria 1 dan 2 terpenuhi di production. Yang tersisa untuk menutup tiket: ukur ulang di Firefox 360 px (bisa bersamaan dengan uji HP Tahap 1b di `audit-m3/nadine.md`), lalu catat di sini. Status diubah ke `ready-for-human` karena sisa pekerjaannya pengukuran manual.
