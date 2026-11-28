@@ -8,6 +8,26 @@ const tanda = (hasil: HasilCek, aturanId: string) =>
 const idAturan = (hasil: HasilCek) => hasil.tandaBahaya.map((t) => t.aturanId).sort();
 
 describe("cek: R04 Gaji tidak wajar untuk kerja dalam negeri", () => {
+  it("tidak cocok kalau posisi mensyaratkan pengalaman bertahun-tahun", async () => {
+    const id = await cek(
+      "Dicari Senior Data Engineer di Jakarta, minimal 6 tahun pengalaman dengan Spark. Gaji Rp30.000.000 per bulan plus asuransi.",
+    );
+    const urutanLain = await cek(
+      "Lowongan Plant Manager pabrik semen di Tuban. Pengalaman kerja minimal 10 tahun di bidang produksi. Gaji hingga 45 juta.",
+    );
+
+    expect(tanda(id, "R04")).toBeUndefined();
+    expect(tanda(urutanLain, "R04")).toBeUndefined();
+  });
+
+  it("tetap cocok kalau syarat pengalamannya hanya 1–2 tahun", async () => {
+    const hasil = await cek(
+      "Dibutuhkan admin toko online di Bekasi, pengalaman minimal 1 tahun. Gaji Rp18 juta per bulan, langsung kerja.",
+    );
+
+    expect(tanda(hasil, "R04")?.kutipan).toBe("Gaji Rp18 juta");
+  });
+
   it("memberi Label Waspada dengan Modus Lokal untuk gaji Rp15 juta sebulan", async () => {
     const teks =
       "Dibutuhkan staf gudang di Cikarang, lulusan SMA. Gaji  Rp15 juta per bulan, langsung kerja minggu depan.";
@@ -272,5 +292,59 @@ describe("cek: Lowongan pabrik atas nama PT besar dengan email gratisan", () => 
     expect(hasil.label).toBe("bahaya");
     expect(hasil.modus).toEqual(["lokal"]);
     expect(hasil.modusTerkuat).toBe("lokal");
+  });
+});
+
+describe("cek: R17 Formulir pendaftaran meminta nomor Telegram", () => {
+  it("memberi Label Waspada dengan Modus Lokal untuk formulir yang meminta nomor Telegram", async () => {
+    const teks =
+      "PT Sentosa Retail membuka lowongan kasir. Daftar lewat tautan di bio, lalu lengkapi nama lengkap, usia, dan nomor Telegram aktif.";
+    const hasil = await cek(teks);
+
+    const r17 = tanda(hasil, "R17");
+    expect(r17).toMatchObject({
+      sumber: "aturan",
+      bobot: 25,
+      modus: "lokal",
+      kutipan: "lengkapi nama lengkap, usia, dan nomor Telegram",
+    });
+    expect(teks.slice(...r17!.rentang)).toBe(r17!.kutipan);
+    expect(hasil.label).toBe("waspada");
+    expect(hasil.modusTerkuat).toBe("lokal");
+  });
+
+  it("cocok juga kalau nomor Telegram disebut lebih dulu", async () => {
+    const hasil = await cek(
+      "Rekrutmen staf gudang PT Jaya Makmur. Nomor Telegram aktif wajib dicantumkan pada formulir pendaftaran online.",
+    );
+
+    expect(tanda(hasil, "R17")?.kutipan).toBe("Nomor Telegram aktif wajib dicantumkan");
+  });
+
+  it("tidak cocok untuk nomor WhatsApp atau Telegram yang bukan isian formulir", async () => {
+    const wa = await cek(
+      "PT Sentosa Retail membuka lowongan kasir. Isi formulir dengan nama, alamat, dan nomor WhatsApp aktif.",
+    );
+    const admin = await cek(
+      "Dicari admin media sosial untuk mengelola akun Telegram perusahaan dan membalas pesan pelanggan di Bandung.",
+    );
+    const kanal = await cek(
+      "PT Data Prima membuka lowongan analis. Info lowongan juga kami bagikan di kanal Telegram resmi perusahaan.",
+    );
+
+    for (const hasil of [wa, admin, kanal]) {
+      expect(tanda(hasil, "R17")).toBeUndefined();
+    }
+  });
+
+  it("bersama ajakan ke grup Telegram, keduanya tercatat dan Skor dijumlahkan", async () => {
+    const hasil = await cek(
+      "Kerja dari rumah tanpa ribet. Kirim nama dan nomor Telegram kamu, nanti saya undang ke grup Telegram tim kerja.",
+    );
+
+    expect(idAturan(hasil)).toEqual(["R06b", "R17"]);
+    // R17 (25) + R06b (20) + R13 tersirat (10): tidak ada nama badan usaha maupun alamat.
+    expect(hasil.skor).toBe(55);
+    expect(hasil.label).toBe("waspada");
   });
 });

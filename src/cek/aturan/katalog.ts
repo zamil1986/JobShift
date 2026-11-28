@@ -8,7 +8,7 @@
 import type { Aturan, Pola } from "./mesin";
 
 /** Pemisah dalam daftar: "seragam, medical, atau pelatihan". */
-const PEMISAH = String.raw`(?: ?[,/&] ?| (?:atau|dan|serta|or|and) | ?, (?:atau|dan|or|and) )`;
+const PEMISAH = String.raw`(?: ?[,/&] ?| (?:atau|dan|serta|maupun|or|and) | ?, (?:atau|dan|maupun|or|and) )`;
 
 /** "a, b, atau c" sebagai satu kecocokan, supaya Penyangkal di depan daftar berlaku untuk seluruh daftar. */
 const daftar = (kata: string) => `(?:${kata})(?:${PEMISAH}(?:${kata}))*`;
@@ -36,6 +36,15 @@ const DATA_RAHASIA_EN = ["otp code", "verification code", "security code"].join(
 
 const DITANGGUNG_PERUSAHAAN = String.raw`(?! (?:ditanggung|disediakan|digratiskan|gratis)| dibayar(?:kan)? (?:oleh )?(?:perusahaan|kantor|pt))`;
 
+/** Satu kata sekalimat (R01 didefinisikan sebelum `KATA_SEKALIMAT`). */
+const KATA_R01 = String.raw`\S*[^\s.!?]`;
+const AGEN_PERJALANAN = "(?:pihak )?(?:travel|agen (?:perjalanan|travel)|biro (?:perjalanan|travel))";
+/** Biaya yang memang ditanggung perusahaan, di mana pun dalam Teks. */
+const DITANGGUNG_DI_TEKS = (() => {
+  const kata = String.raw`(?<![\p{L}\p{N}])(?:ditanggung|dibayar|dibiayai) (?:oleh |sepenuhnya oleh )?(?:perusahaan|kantor|pt)(?![\p{L}\p{N}])`;
+  return `(?<!${kata}.*)(?!.*${kata})`;
+})();
+
 export const R01: Aturan = {
   id: "R01",
   alasan: "Meminta uang sebelum kamu resmi diterima kerja.",
@@ -49,6 +58,18 @@ export const R01: Aturan = {
     // "Biaya seragam ditanggung perusahaan" bukan permintaan uang.
     { cari: `(?:biaya|uang) ${daftar(`(?:(?:biaya|uang) )?(?:${JENIS_BIAYA})`)}${DITANGGUNG_PERUSAHAAN}`, bahasa: "id" },
     { cari: "(?:transfer|bayar|membayar) (?:dulu|terlebih dahulu|di awal|di muka)", bahasa: "id" },
+    // Undangan tes palsu: uang lewat travel pilihan pelaku.
+    // "bayar uang akomodasi Rp1.200.000 ke biro perjalanan", "transfer biaya ke travel rekanan"
+    {
+      cari: `(?:transfer|bayar|membayar|melunasi|lunasi)(?: (?:biaya|uang|dana))?(?: ${KATA_R01}){0,3}? (?:ke|kepada|melalui|lewat|via) ${AGEN_PERJALANAN}`,
+      bahasa: "id",
+    },
+    // "wajib menggunakan hotel dan transportasi yang telah disediakan panitia",
+    // "harus memesan tiket melalui agen perjalanan rekanan panitia"
+    {
+      cari: `(?:wajib|harus|diwajibkan)(?: ${KATA_R01}){0,2}? (?:memesan|pesan|booking|menggunakan|memakai) (?:tiket|hotel|penginapan|transportasi|transport|travel)(?: ${KATA_R01}){0,6}? (?:rekanan(?: panitia)?|(?:yang )?(?:telah |sudah )?(?:disediakan|ditunjuk) (?:oleh )?panitia)${DITANGGUNG_DI_TEKS}`,
+      bahasa: "id",
+    },
     {
       cari: `${daftar("registration|training|uniform|administration|admin|processing|medical")} fees?`,
       bahasa: "en",
@@ -72,7 +93,23 @@ export const R02: Aturan = {
 // R06b: Telegram yang hanya disebut ("mengelola akun Telegram perusahaan")
 // bukan ajakan pindah, jadi harus didahului kata kerja ajakan.
 const PINDAH = ["lanjut", "lanjutkan", "dilanjutkan", "pindah", "beralih"];
-const AJAKAN_PINDAH = [...PINDAH, "gabung", "bergabung", "join", "masuk", "hubungi", "kontak", "chat"].join("|");
+const AJAKAN_PINDAH = [
+  ...PINDAH,
+  "gabung",
+  "bergabung",
+  "join",
+  "masuk",
+  "hubungi",
+  "kontak",
+  "chat",
+  // "saya undang ke grup Telegram", "dimasukkan ke channel Telegram"
+  "undang",
+  "diundang",
+  "mengundang",
+  "masukkan",
+  "dimasukkan",
+  "memasukkan",
+].join("|");
 const SAPAAN = ["kami", "admin", "saya", "kak", "kakak", "hrd", "mentor", "kita"].join("|");
 const AJAKAN_PINDAH_EN = ["move", "moving", "continue", "switch", "join", "chat", "contact", "message", "text", "reach", "talk"].join("|");
 
@@ -125,9 +162,10 @@ const TUJUAN_TUGAS = [
   "vip ?\\d",
   "member vip",
   "(?:men)?cairkan (?:komisi|bonus|keuntungan)",
-  "(?:pencairan|penarikan|tarik|menarik) (?:komisi|bonus|keuntungan)",
-  "(?:komisi|bonus|keuntungan)(?: (?:bisa|dapat|langsung|segera))? (?:dicairkan|ditarik)",
-  "membuka (?:level|tugas)",
+  "(?:pencairan|penarikan|tarik|menarik) (?:komisi|bonus|keuntungan|saldo)",
+  "(?:komisi|bonus|keuntungan|saldo)(?: (?:komisi|kamu|kakak|anda))?(?: (?:bisa|dapat|langsung|segera))? (?:dicairkan|ditarik)",
+  // "membuka hadiah misi berikutnya", "buka reward"
+  "(?:membuka|buka) (?:level|tugas|misi|hadiah|reward|bonus)",
 ].join("|");
 const KATA_TUJUAN = ["untuk", "supaya", "agar", "biar", "sebelum", "baru"].join("|");
 const KATA_SYARAT = ["setelah", "sesudah", "kalau", "jika", "asalkan", "wajib", "harus", "perlu", "syaratnya"].join("|");
@@ -173,12 +211,54 @@ export const R07: Aturan = {
   ],
 };
 
+/** Kata utuh dari `sumber` muncul di mana pun dalam Teks, sebelum atau sesudah posisi ini. */
+const diTeks = (sumber: string) => {
+  const kata = String.raw`(?<![\p{L}\p{N}])(?:${sumber})(?![\p{L}\p{N}])`;
+  // Teks normal tidak memuat baris baru, jadi "." menjangkau seluruh Teks.
+  return `(?:(?<=${kata}.*)|(?=.*${kata}))`;
+};
+
 // R08: kegiatan saja ("like", "follow up", "rating driver") wajar di lowongan
 // biasa, jadi harus berpasangan dengan bayaran.
 const KEGIATAN = daftar("like|likes|subscribe|rating|ulasan|review|follow|komen|komentar|share");
 const KEGIATAN_EN = "(?:likes?|subscribes?|ratings?|reviews?|follows?|comments?|tasks?|videos?)";
 const BAYARAN = ["dibayar", "bayaran", "komisi", "upah", "imbalan", "dapat", "dapatkan", "mendapat", "mendapatkan", "dapet", "cuan"].join("|");
 const PER = "(?:per|tiap|setiap|untuk setiap|untuk tiap)";
+/** Kegiatan yang hampir tidak pernah menjadi pekerjaan utama lowongan biasa. "Follow up" bukan follow. */
+const KEGIATAN_TUGAS = daftar("like|subscribe|follow(?! up)|rating");
+const PEKERJAANNYA = ["tugas(?:nya|mu)?", "kerja(?:nya|annya)?", "pekerjaan(?:nya)?"].join("|");
+const PENGISI = ["kamu", "anda", "kakak", "cuma", "hanya", "cukup", "yaitu", "adalah", "sekadar"].join("|");
+const ORANG_TUGAS = ["orang", "freelancer", "member", "anggota", "mitra", "pekerja"].join("|");
+/** Tanpa "dapat": kata itu terlalu umum ("dapat dilihat") untuk dicari di seluruh Teks. */
+const BAYARAN_TUGAS = ["dibayar", "bayaran", "komisi", "upah", "imbalan", "cuan", "bonus", "reward"].join("|");
+
+/** Pola R08 untuk bayaran per satuan: kutipannya paling jelas, jadi didahulukan. */
+const R08_PER_SATUAN = [
+  // "dibayar Rp5.000 per like", "komisi tiap ulasan"
+  `(?:${BAYARAN})(?: ${NOMINAL})? ${PER} ${KEGIATAN}`,
+  // "like dan subscribe dibayar", "rating dapat Rp3.000"
+  `${KEGIATAN} (?:dibayar|berbayar|dihargai|(?:dapat|dapet|=) ${NOMINAL})`,
+  // "Rp5.000 per like", "Rp10.000/tugas"
+  `${NOMINAL} ?(?:${PER}|/) ?(?:${KEGIATAN}|tugas|task|video)`,
+  // "per tugas Rp12.000"
+  `${PER} (?:tugas|task) ${NOMINAL}`,
+];
+
+/**
+ * Pekerjaannya sendiri adalah like/follow/subscribe/rating, dan bayaran disebut
+ * di Teks: "Tugasnya cuma follow dan like akun", "butuh orang untuk like dan
+ * subscribe". Hanya berlaku kalau tidak ada bayaran per satuan, supaya
+ * kutipannya tetap yang paling jelas.
+ */
+const TANPA_PER_SATUAN = (() => {
+  const satuan = R08_PER_SATUAN.map((p) => `(?:${p})`).join("|");
+  const kata = String.raw`(?<![\p{L}\p{N}])(?:${satuan})(?![\p{L}\p{N}])`;
+  return `(?<!${kata}.*)(?!.*${kata})`;
+})();
+const R08_PEKERJAAN_TUGAS = [
+  `(?:${PEKERJAANNYA})(?: (?:${PENGISI}))* ${KEGIATAN_TUGAS}`,
+  `(?:cari|mencari|butuh|membutuhkan|dibutuhkan) (?:${ORANG_TUGAS})(?: ${KATA_SEKALIMAT}){0,2}? (?:untuk|buat) ${KEGIATAN_TUGAS}`,
+].map((cari) => `(?:${cari})${diTeks(BAYARAN_TUGAS)}${TANPA_PER_SATUAN}`);
 
 export const R08: Aturan = {
   id: "R08",
@@ -188,14 +268,7 @@ export const R08: Aturan = {
   modus: "tugas",
   pakaiPenyangkal: false,
   pola: [
-    // "dibayar Rp5.000 per like", "komisi tiap ulasan"
-    { cari: `(?:${BAYARAN})(?: ${NOMINAL})? ${PER} ${KEGIATAN}`, bahasa: "id" },
-    // "like dan subscribe dibayar", "rating dapat Rp3.000"
-    { cari: `${KEGIATAN} (?:dibayar|berbayar|dihargai|(?:dapat|dapet|=) ${NOMINAL})`, bahasa: "id" },
-    // "Rp5.000 per like", "Rp10.000/tugas"
-    { cari: `${NOMINAL} ?(?:${PER}|/) ?(?:${KEGIATAN}|tugas|task|video)`, bahasa: "id" },
-    // "per tugas Rp12.000"
-    { cari: `${PER} (?:tugas|task) ${NOMINAL}`, bahasa: "id" },
+    ...[...R08_PER_SATUAN, ...R08_PEKERJAAN_TUGAS].map((cari) => ({ cari, bahasa: "id" as const })),
     { cari: `(?:paid|earn|earning|make)(?: ${NOMINAL})? (?:per|for each|for every) ${KEGIATAN_EN}`, bahasa: "en" },
     { cari: `${NOMINAL} ?(?:per|for each|for every|/) ?${KEGIATAN_EN}`, bahasa: "en" },
   ],
@@ -323,13 +396,6 @@ export const PENANDA_LUAR_NEGERI = `(?<!(?:${NEGARA_SEBAGAI_SIFAT}) )(?:${[
   "kanada",
   "canada",
 ].join("|")})`;
-
-/** Kata utuh dari `sumber` muncul di mana pun dalam Teks, sebelum atau sesudah posisi ini. */
-const diTeks = (sumber: string) => {
-  const kata = String.raw`(?<![\p{L}\p{N}])(?:${sumber})(?![\p{L}\p{N}])`;
-  // Teks normal tidak memuat baris baru, jadi "." menjangkau seluruh Teks.
-  return `(?:(?<=${kata}.*)|(?=.*${kata}))`;
-};
 
 /** Pola hanya cocok kalau Teks memuat penanda luar negeri. */
 const diLuarNegeri = (pola: Pola[]): Pola[] =>
@@ -469,6 +535,15 @@ const BUKAN_BAYARAN_KATA = [
  */
 const AWAL_NOMINAL = String.raw`(?<!(?:${BUKAN_BAYARAN_KATA}) (?:rp\.? ?)?)(?<!\d ?(?:-|–|s/d|sampai|hingga|to) ?(?:rp\.? ?)?)`;
 
+/** ≥ 3 tahun: "3", "5+", "10". */
+const TAHUN_PANJANG = String.raw`(?:[3-9]|[1-9]\d)\+?`;
+const SYARAT_PENGALAMAN_PANJANG = [
+  `(?:minimal|min\\.?|minimum|setidaknya|paling sedikit) ${TAHUN_PANJANG} tahun`,
+  `pengalaman(?: kerja)?(?: (?:minimal|min\\.?|minimum|setidaknya|paling sedikit))? ${TAHUN_PANJANG} tahun`,
+  `${TAHUN_PANJANG} tahun pengalaman`,
+  `(?:at least|minimum|min\\.?) ${TAHUN_PANJANG} years?|${TAHUN_PANJANG} years?(?: of)? experience`,
+].join("|");
+
 export const R04: Aturan = {
   id: "R04",
   alasan: "Menjanjikan gaji yang jauh di atas wajar untuk pekerjaan di dalam negeri.",
@@ -486,7 +561,9 @@ export const R04: Aturan = {
     { cari: `(?:gaji|upah) harian:? ${NOMINAL_HARIAN_TINGGI}`, bahasa: "id" },
     { cari: "high(?:ly)? (?:salary|income|pay(?:ing)?)", bahasa: "en" },
   ],
-  kecualiJika: { cari: PENANDA_LUAR_NEGERI, bahasa: "id" },
+  // Spec: gaji tinggi hanya janggal "untuk posisi tanpa syarat". Syarat pengalaman ≥ 3 tahun
+  // ("minimal 6 tahun pengalaman", "pengalaman kerja minimal 10 tahun") membuat gaji itu wajar.
+  kecualiJika: { cari: `(?:${PENANDA_LUAR_NEGERI})|(?:${SYARAT_PENGALAMAN_PANJANG})`, bahasa: "id" },
 };
 
 // R12: "berangkat cepat" atau "tiket ditanggung" juga muncul di lowongan dalam
@@ -804,6 +881,29 @@ export const R15: Aturan = {
   ],
 };
 
+// R17: lowongan palsu penjaring data (cek fakta 2026: PLN, Hermina, FIFGROUP
+// palsu) meminta nomor Telegram lewat formulir. Hanya Telegram: formulir resmi
+// sering meminta nomor WhatsApp. Ajakan pindah ke Telegram ditangani R06b.
+const MINTA_ISIAN = ["isi", "isikan", "lengkapi", "masukkan", "cantumkan", "sertakan", "kirim", "kirimkan", "tulis", "tuliskan"].join("|");
+const NOMOR_TELEGRAM = "(?:nomor|no\\.?|nomer|nmr) (?:telegram|tele|tg)";
+const DIISI = ["dicantumkan", "diisi", "disertakan", "dimasukkan", "dikirim", "dilampirkan", "ditulis"].join("|");
+
+export const R17: Aturan = {
+  id: "R17",
+  alasan: "Formulir pendaftaran meminta nomor Telegram, padahal rekrutmen resmi tidak memakai Telegram.",
+  bobot: 25,
+  kritis: false,
+  modus: "lokal",
+  pakaiPenyangkal: false,
+  pola: [
+    // "lengkapi nama, alamat, dan nomor Telegram"
+    { cari: `(?:${MINTA_ISIAN})(?: ${KATA_SEKALIMAT}){0,8}? ${NOMOR_TELEGRAM}`, bahasa: "id" },
+    // "Nomor Telegram aktif wajib dicantumkan"
+    { cari: `${NOMOR_TELEGRAM}(?: (?:yang )?aktif)?(?: (?:wajib|harus|perlu|mohon))? (?:${DIISI})`, bahasa: "id" },
+    { cari: `(?:enter|provide|fill in|submit|send)(?: ${KATA_SEKALIMAT}){0,8}? telegram (?:number|no)`, bahasa: "en" },
+  ],
+};
+
 export const KATALOG: readonly Aturan[] = [
   R01,
   R02,
@@ -822,4 +922,5 @@ export const KATALOG: readonly Aturan[] = [
   R14,
   R15,
   R16,
+  R17,
 ];

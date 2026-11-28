@@ -8,6 +8,39 @@ const tanda = (hasil: HasilCek, aturanId: string) =>
 const idAturan = (hasil: HasilCek) => hasil.tandaBahaya.map((t) => t.aturanId).sort();
 
 describe("cek: R07 Deposit untuk naik level atau mencairkan komisi", () => {
+  it("menangkap deposit supaya hadiah atau misi terbuka", async () => {
+    const hasil = await cek(
+      "Misi hari ini sudah selesai kak. Top up Rp150.000 dulu supaya bisa membuka hadiah misi berikutnya, nanti modal kembali.",
+    );
+
+    expect(hasil.label).toBe("bahaya");
+    expect(tanda(hasil, "R07")?.kutipan).toBe("Top up Rp150.000 dulu supaya bisa membuka hadiah");
+  });
+
+  it("menangkap setoran supaya saldo bisa ditarik", async () => {
+    const hasil = await cek(
+      "Saldo komisi kakak sudah Rp2.400.000. Silakan setor dana Rp500.000 agar saldo bisa ditarik ke rekening hari ini.",
+    );
+
+    expect(tanda(hasil, "R07")?.kutipan).toBe("setor dana Rp500.000 agar saldo bisa ditarik");
+  });
+
+  it("tidak cocok untuk CS dompet digital yang membantu top up dan tarik saldo", async () => {
+    const hasil = await cek(
+      "Dicari customer service aplikasi dompet digital di Jakarta. Tugas: membantu pengguna top up, menarik saldo, dan membuka akun baru.",
+    );
+
+    expect(tanda(hasil, "R07")).toBeUndefined();
+  });
+
+  it("dibatalkan Penyangkal: 'tidak pernah meminta deposit untuk membuka misi'", async () => {
+    const hasil = await cek(
+      "Program afiliasi resmi kami membayar komisi bulanan. Kami tidak pernah meminta deposit untuk membuka misi atau menarik saldo.",
+    );
+
+    expect(tanda(hasil, "R07")).toBeUndefined();
+  });
+
   it("memberi Label Bahaya dengan Modus Tugas untuk deposit supaya naik level", async () => {
     const teks =
       "Selamat bergabung di tim kami. Setelah tugas ketiga, kamu wajib Deposit Rp200.000 untuk naik  level dan lanjut bekerja.";
@@ -136,6 +169,30 @@ describe("cek: R07 Deposit untuk naik level atau mencairkan komisi", () => {
 });
 
 describe("cek: R08 Bayaran per like, rating, ulasan, atau follow", () => {
+  it("cocok kalau pekerjaannya sendiri adalah like, follow, subscribe, atau rating yang dibayar", async () => {
+    const tugasnya = await cek(
+      "Lowongan kerja dari rumah. Pekerjaannya hanya like dan rating produk di marketplace, komisi cair setiap hari.",
+    );
+    const cariOrang = await cek(
+      "Kami mencari member untuk subscribe channel YouTube klien. Bayaran langsung masuk rekening tiap malam.",
+    );
+
+    expect(tanda(tugasnya, "R08")?.kutipan).toBe("Pekerjaannya hanya like dan rating");
+    expect(tanda(cariOrang, "R08")?.kutipan).toBe("mencari member untuk subscribe");
+  });
+
+  it("tidak cocok untuk ajakan follow akun perusahaan atau tugas admin yang menaikkan like", async () => {
+    const ajakan = await cek(
+      "Lowongan sales PT Niaga Sentosa, gaji pokok plus bonus. Follow akun Instagram kami untuk info lowongan lain.",
+    );
+    const admin = await cek(
+      "Tugas admin: menaikkan like dan follower akun brand. Gaji Rp4.000.000 dan bonus pencapaian target.",
+    );
+
+    expect(tanda(ajakan, "R08")).toBeUndefined();
+    expect(tanda(admin, "R08")).toBeUndefined();
+  });
+
   it("memberi Label Waspada dengan Modus Tugas untuk bayaran per like", async () => {
     const teks =
       "Kerja sampingan dari HP, cukup like dan follow akun toko online. Dibayar Rp5.000 per like, cair setiap hari.";
@@ -194,6 +251,26 @@ describe("cek: R08 Bayaran per like, rating, ulasan, atau follow", () => {
 });
 
 describe("cek: R06b Diminta pindah ke Telegram atau aplikasi lain", () => {
+  it("cocok untuk ajakan diundang atau dimasukkan ke grup Telegram", async () => {
+    const undang = await cek(
+      "Kerja santai dari rumah, cukup pakai HP. Kalau minat, nanti kakak saya undang ke grup Telegram tim kami ya.",
+    );
+    const masukkan = await cek(
+      "Pendaftaran sudah kami terima. Anda akan dimasukkan ke channel Telegram untuk pembagian tugas harian.",
+    );
+
+    expect(tanda(undang, "R06b")?.kutipan).toBe("undang ke grup Telegram");
+    expect(tanda(masukkan, "R06b")?.kutipan).toBe("dimasukkan ke channel Telegram");
+  });
+
+  it("tidak cocok untuk undangan wawancara yang hanya menyebut Telegram resmi perusahaan", async () => {
+    const hasil = await cek(
+      "PT Data Prima mengundang pelamar wawancara di kantor Bandung. Pengumuman juga kami bagikan di kanal Telegram resmi perusahaan.",
+    );
+
+    expect(tanda(hasil, "R06b")).toBeUndefined();
+  });
+
   it("cocok untuk 'lanjut di Telegram' dengan Modus Tugas, tanpa menaikkan Label", async () => {
     const teks =
       "Terima kasih sudah mendaftar kerja paruh waktu di CV Kreasi Digital. Info tugas harian akan dilanjutkan di Telegram oleh mentor kamu.";
