@@ -881,6 +881,29 @@ export const R15: Aturan = {
   ],
 };
 
+// R17: lowongan palsu penjaring data (cek fakta 2026: PLN, Hermina, FIFGROUP
+// palsu) meminta nomor Telegram lewat formulir. Hanya Telegram: formulir resmi
+// sering meminta nomor WhatsApp. Ajakan pindah ke Telegram ditangani R06b.
+const MINTA_ISIAN = ["isi", "isikan", "lengkapi", "masukkan", "cantumkan", "sertakan", "kirim", "kirimkan", "tulis", "tuliskan"].join("|");
+const NOMOR_TELEGRAM = "(?:nomor|no\\.?|nomer|nmr) (?:telegram|tele|tg)";
+const DIISI = ["dicantumkan", "diisi", "disertakan", "dimasukkan", "dikirim", "dilampirkan", "ditulis"].join("|");
+
+export const R17: Aturan = {
+  id: "R17",
+  alasan: "Formulir pendaftaran meminta nomor Telegram, padahal rekrutmen resmi tidak memakai Telegram.",
+  bobot: 25,
+  kritis: false,
+  modus: "lokal",
+  pakaiPenyangkal: false,
+  pola: [
+    // "lengkapi nama, alamat, dan nomor Telegram"
+    { cari: `(?:${MINTA_ISIAN})(?: ${KATA_SEKALIMAT}){0,8}? ${NOMOR_TELEGRAM}`, bahasa: "id" },
+    // "Nomor Telegram aktif wajib dicantumkan"
+    { cari: `${NOMOR_TELEGRAM}(?: (?:yang )?aktif)?(?: (?:wajib|harus|perlu|mohon))? (?:${DIISI})`, bahasa: "id" },
+    { cari: `(?:enter|provide|fill in|submit|send)(?: ${KATA_SEKALIMAT}){0,8}? telegram (?:number|no)`, bahasa: "en" },
+  ],
+};
+
 export const KATALOG: readonly Aturan[] = [
   R01,
   R02,
@@ -899,4 +922,5 @@ export const KATALOG: readonly Aturan[] = [
   R14,
   R15,
   R16,
+  R17,
 ];

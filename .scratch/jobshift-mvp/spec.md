@@ -183,7 +183,9 @@ Error 400: `{ error: { kode: "teks_kosong" | "teks_terlalu_pendek" | "teks_terla
 | R14 | Meminta data pribadi sensitif di awal | kirim foto KTP, selfie dengan KTP, nomor rekening, KK, ibu kandung | 20 | tidak | — |
 | R15 | Tautan pendaftaran tidak resmi | bit.ly, s.id, tinyurl, form Google untuk perusahaan besar | 15 | tidak | — |
 | R16 | Negara tujuan rawan TPPO untuk kerja online | Kamboja, Myanmar, Laos, Thailand perbatasan + admin/operator/customer service online | 25 | tidak | Luar negeri |
+| R17 | Formulir pendaftaran meminta nomor Telegram | kata kerja permintaan (isi, lengkapi, masukkan, cantumkan, sertakan, kirim) + nomor Telegram dalam satu kalimat, misalnya "isi nama, alamat, dan nomor Telegram aktif"; bukan ajakan pindah ke Telegram (R06b) | 25 | tidak | Lokal |
 
+- R17 (ditambahkan 28 November 2026, setelah penyetelan Set dev) menangkap lowongan palsu penjaring data yang banyak muncul di cek fakta 2026: daftar lewat link di bio atau barcode, lalu formulir meminta nomor Telegram. Bobot 25 supaya satu kecocokan sudah memberi Waspada. Yang dihitung hanya Telegram; nomor WhatsApp dan Messenger tidak, karena formulir resmi sering meminta nomor WhatsApp.
 - R13 adalah satu Aturan yang menghasilkan paling banyak satu Tanda bahaya tersirat (bobot 10). Alasannya menyebut apa yang tidak ada, misalnya "Tidak disebutkan nama perusahaan maupun alamat kantor." R13 hanya cocok kalau keduanya tidak ada.
 
 ### Skor, Label, Modus

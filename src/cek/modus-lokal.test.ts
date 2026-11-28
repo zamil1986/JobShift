@@ -294,3 +294,57 @@ describe("cek: Lowongan pabrik atas nama PT besar dengan email gratisan", () => 
     expect(hasil.modusTerkuat).toBe("lokal");
   });
 });
+
+describe("cek: R17 Formulir pendaftaran meminta nomor Telegram", () => {
+  it("memberi Label Waspada dengan Modus Lokal untuk formulir yang meminta nomor Telegram", async () => {
+    const teks =
+      "PT Sentosa Retail membuka lowongan kasir. Daftar lewat tautan di bio, lalu lengkapi nama lengkap, usia, dan nomor Telegram aktif.";
+    const hasil = await cek(teks);
+
+    const r17 = tanda(hasil, "R17");
+    expect(r17).toMatchObject({
+      sumber: "aturan",
+      bobot: 25,
+      modus: "lokal",
+      kutipan: "lengkapi nama lengkap, usia, dan nomor Telegram",
+    });
+    expect(teks.slice(...r17!.rentang)).toBe(r17!.kutipan);
+    expect(hasil.label).toBe("waspada");
+    expect(hasil.modusTerkuat).toBe("lokal");
+  });
+
+  it("cocok juga kalau nomor Telegram disebut lebih dulu", async () => {
+    const hasil = await cek(
+      "Rekrutmen staf gudang PT Jaya Makmur. Nomor Telegram aktif wajib dicantumkan pada formulir pendaftaran online.",
+    );
+
+    expect(tanda(hasil, "R17")?.kutipan).toBe("Nomor Telegram aktif wajib dicantumkan");
+  });
+
+  it("tidak cocok untuk nomor WhatsApp atau Telegram yang bukan isian formulir", async () => {
+    const wa = await cek(
+      "PT Sentosa Retail membuka lowongan kasir. Isi formulir dengan nama, alamat, dan nomor WhatsApp aktif.",
+    );
+    const admin = await cek(
+      "Dicari admin media sosial untuk mengelola akun Telegram perusahaan dan membalas pesan pelanggan di Bandung.",
+    );
+    const kanal = await cek(
+      "PT Data Prima membuka lowongan analis. Info lowongan juga kami bagikan di kanal Telegram resmi perusahaan.",
+    );
+
+    for (const hasil of [wa, admin, kanal]) {
+      expect(tanda(hasil, "R17")).toBeUndefined();
+    }
+  });
+
+  it("bersama ajakan ke grup Telegram, keduanya tercatat dan Skor dijumlahkan", async () => {
+    const hasil = await cek(
+      "Kerja dari rumah tanpa ribet. Kirim nama dan nomor Telegram kamu, nanti saya undang ke grup Telegram tim kerja.",
+    );
+
+    expect(idAturan(hasil)).toEqual(["R06b", "R17"]);
+    // R17 (25) + R06b (20) + R13 tersirat (10): tidak ada nama badan usaha maupun alamat.
+    expect(hasil.skor).toBe(55);
+    expect(hasil.label).toBe("waspada");
+  });
+});
