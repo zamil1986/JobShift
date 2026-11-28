@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useId, useRef, useState, type FormEvent } from "react";
 import { CONTOH } from "@/cek/contoh";
 import { PANJANG_MAKS, panjangTeks, periksaPanjang } from "@/cek/panjang";
 import { PESAN_ERROR, PESAN_GAGAL_SERVER } from "@/cek/pesan";
 import type { ErrorCek, HasilCek } from "@/cek/tipe";
 import { DISCLAIMER_PRIVASI, JUDUL_CONTOH, PESAN_GAGAL_KONEKSI } from "./salinan";
+import { TAUTAN_KE_CARA_KERJA } from "./salinan-cara-kerja";
 import { TampilanHasil } from "./TampilanHasil";
 import { UnggahScreenshot } from "./UnggahScreenshot";
 
@@ -137,7 +139,9 @@ export function FormCek() {
           <button type="submit" className="tombol-cek" disabled={memuat || ocrSibuk}>
             {memuat ? "Mengecek…" : "Cek"}
           </button>
-          <p className="disclaimer">{DISCLAIMER_PRIVASI}</p>
+          <p className="disclaimer">
+            {DISCLAIMER_PRIVASI} <Link href="/cara-kerja">{TAUTAN_KE_CARA_KERJA}</Link>
+          </p>
         </form>
 
         <div aria-live="polite" className="wadah-hasil">

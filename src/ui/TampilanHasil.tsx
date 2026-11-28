@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, type CSSProperties } from "react";
 import type { HasilCek, Label } from "@/cek/tipe";
 import { DaftarLangkah } from "./DaftarLangkah";
@@ -16,6 +17,7 @@ import {
 } from "./salinan";
 import { IkonLabel } from "./IkonLabel";
 import { RENTANG_LABEL } from "./salinan-beranda";
+import { TAUTAN_KE_CARA_KERJA } from "./salinan-cara-kerja";
 import { TeksBersorotan } from "./TeksBersorotan";
 
 type Props = { hasil: HasilCek; teks: string };
@@ -148,6 +150,9 @@ export function TampilanHasil({ hasil, teks }: Props) {
       </ul>
 
       <p className="tagline-hasil">{TAGLINE}</p>
+      <p className="tagline-hasil">
+        <Link href="/cara-kerja">{TAUTAN_KE_CARA_KERJA}</Link>
+      </p>
     </article>
   );
 }
