@@ -5,7 +5,7 @@ import { evaluasiDataset, parseJsonlDataset, type ContohDataset } from "./eval";
 const TEKS_PALSU_ATURAN =
   "Selamat, kamu lolos seleksi admin gudang. Segera transfer biaya seragam Rp250.000 hari ini.";
 const TEKS_PALSU_SAMAR =
-  "Kerja paruh waktu dari rumah bersama CV Kreasi Digital, tugas like produk dan gabung grup Telegram untuk bonus harian.";
+  "Kerja paruh waktu dari rumah bersama CV Kreasi Digital, cukup pakai HP dan gabung grup Telegram untuk info harian.";
 const TEKS_ASLI_NETRAL =
   "PT Maju Bersama membuka lowongan staf akuntansi di Bandung. Kirim lamaran dan CV resmi ke bagian HRD.";
 const TEKS_ASLI_FALSE_POSITIVE =
@@ -126,9 +126,9 @@ describe("evaluasiDataset", () => {
           return {
             label: "bahaya",
             tanda_bahaya: [
-              { kutipan: "tugas like produk", alasan: "Pola tugas like berbayar." },
+              { kutipan: "cukup pakai HP", alasan: "Pekerjaan tidak dijelaskan." },
               { kutipan: "grup Telegram", alasan: "Mengalihkan komunikasi ke Telegram." },
-              { kutipan: "bonus harian", alasan: "Janji bonus tidak jelas." },
+              { kutipan: "info harian", alasan: "Info kerja hanya lewat grup." },
             ],
             penjelasan: "Terindikasi modus tugas.",
           };

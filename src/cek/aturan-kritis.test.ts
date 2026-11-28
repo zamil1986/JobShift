@@ -100,6 +100,55 @@ describe("cek: R01 Minta uang di awal", () => {
     expect(hasil.skor).toBe(0);
   });
 
+  it("dibatalkan Penyangkal untuk daftar dengan 'maupun': 'tidak ada biaya pendaftaran maupun biaya seragam'", async () => {
+    const hasil = await cek(
+      "Lowongan kurir paket area Depok. Datang ke gudang membawa KTP dan CV. Tidak ada biaya pendaftaran maupun biaya seragam.",
+    );
+
+    expect(tanda(hasil, "R01")).toBeUndefined();
+  });
+
+  it("tetap menangkap 'maupun' yang tidak didahului Penyangkal", async () => {
+    const hasil = await cek(
+      "Lowongan kasir minimarket di Bekasi. Peserta wajib membayar biaya pelatihan maupun biaya seragam sebelum mulai kerja.",
+    );
+
+    expect(tanda(hasil, "R01")?.kutipan).toBe("biaya pelatihan maupun biaya seragam");
+  });
+
+  it("menangkap kewajiban memesan tiket atau hotel lewat travel rekanan panitia", async () => {
+    const hasil = await cek(
+      "Selamat, Anda diundang tes tahap akhir di Jakarta. Peserta tes harus memesan tiket dan hotel melalui agen perjalanan rekanan panitia.",
+    );
+
+    expect(hasil.label).toBe("bahaya");
+    expect(tanda(hasil, "R01")?.kutipan).toBe("harus memesan tiket dan hotel melalui agen perjalanan rekanan panitia");
+  });
+
+  it("menangkap permintaan bayar uang akomodasi ke biro perjalanan", async () => {
+    const hasil = await cek(
+      "Jadwal wawancara Senin pukul 09.00. Silakan bayar uang akomodasi Rp1.200.000 ke biro perjalanan yang ditunjuk.",
+    );
+
+    expect(tanda(hasil, "R01")?.kutipan).toBe("bayar uang akomodasi Rp1.200.000 ke biro perjalanan");
+  });
+
+  it("tidak cocok untuk hotel wajib yang biayanya ditanggung perusahaan", async () => {
+    const hasil = await cek(
+      "Kandidat dari luar kota wajib menggunakan hotel yang disediakan perusahaan. Seluruh biaya ditanggung perusahaan.",
+    );
+
+    expect(tanda(hasil, "R01")).toBeUndefined();
+  });
+
+  it("dibatalkan Penyangkal: 'tidak meminta pelamar transfer ke travel'", async () => {
+    const hasil = await cek(
+      "PT Kereta Nusantara membuka seleksi masinis. Kami tidak meminta pelamar transfer ke travel atau agen mana pun.",
+    );
+
+    expect(tanda(hasil, "R01")).toBeUndefined();
+  });
+
   it("Penyangkal sebelum koma tidak membatalkan", async () => {
     const hasil = await cek(
       "Lowongan staf gudang, kerja tanpa tes, biaya seragam Rp250.000 dibayar di awal ke admin sebelum mulai.",

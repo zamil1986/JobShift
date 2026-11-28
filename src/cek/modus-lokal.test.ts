@@ -8,6 +8,26 @@ const tanda = (hasil: HasilCek, aturanId: string) =>
 const idAturan = (hasil: HasilCek) => hasil.tandaBahaya.map((t) => t.aturanId).sort();
 
 describe("cek: R04 Gaji tidak wajar untuk kerja dalam negeri", () => {
+  it("tidak cocok kalau posisi mensyaratkan pengalaman bertahun-tahun", async () => {
+    const id = await cek(
+      "Dicari Senior Data Engineer di Jakarta, minimal 6 tahun pengalaman dengan Spark. Gaji Rp30.000.000 per bulan plus asuransi.",
+    );
+    const urutanLain = await cek(
+      "Lowongan Plant Manager pabrik semen di Tuban. Pengalaman kerja minimal 10 tahun di bidang produksi. Gaji hingga 45 juta.",
+    );
+
+    expect(tanda(id, "R04")).toBeUndefined();
+    expect(tanda(urutanLain, "R04")).toBeUndefined();
+  });
+
+  it("tetap cocok kalau syarat pengalamannya hanya 1–2 tahun", async () => {
+    const hasil = await cek(
+      "Dibutuhkan admin toko online di Bekasi, pengalaman minimal 1 tahun. Gaji Rp18 juta per bulan, langsung kerja.",
+    );
+
+    expect(tanda(hasil, "R04")?.kutipan).toBe("Gaji Rp18 juta");
+  });
+
   it("memberi Label Waspada dengan Modus Lokal untuk gaji Rp15 juta sebulan", async () => {
     const teks =
       "Dibutuhkan staf gudang di Cikarang, lulusan SMA. Gaji  Rp15 juta per bulan, langsung kerja minggu depan.";
