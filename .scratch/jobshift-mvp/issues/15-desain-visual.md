@@ -4,7 +4,7 @@
 
 **Blocked by:** None (bisa mulai sekarang; gaya untuk bagian dari 08, 09, 12, 13 dirapikan setelah tiket itu di-merge)
 
-**Status:** ready-for-agent
+**Status:** selesai
 
 **Assignee:** Muhammad Zamil
 
@@ -17,7 +17,7 @@
 - [x] Fokus keyboard terlihat jelas di semua elemen interaktif; fokus pindah ke judul hasil setelah Cek
 - [x] Tagline "JobShift — cek dulu sebelum transfer." tampil di halaman cek dan hasil
 - [x] Tidak mengubah `src/cek`, route API, atau kontrak `HasilCek`
-- [ ] Lighthouse Accessibility ≥ 95 di halaman cek (dengan hasil tampil) sebelum audit tiket 14
+- [x] Lighthouse Accessibility ≥ 95 di halaman cek (dengan hasil tampil) sebelum audit tiket 14
 
 ## Catatan verifikasi (28 November 2026)
 
@@ -44,5 +44,20 @@ Kontras (WCAG, teks ≥ 4,5:1):
 - Peringatan Risiko rendah berakhir di 329 px dari 640 px setelah Cek.
 - Fokus pindah ke `#judul-hasil` setelah Cek.
 - Input screenshot: tinggi 44 px, huruf 16 px.
-- Lighthouse belum diukur; dilakukan sebelum audit tiket 14.
+- Lighthouse diukur pada 28 November 2026; lihat bagian di bawah.
+
+## Lighthouse Accessibility (28 November 2026)
+
+Lighthouse 13.6.0, preset mobile bawaan (412 × 823, `--only-categories=accessibility`), dijalankan dengan Brave (Chromium) headless lewat Lighthouse user flow (`startFlow` dari paket `lighthouse` + `puppeteer-core`). Skrip ukur ada di luar repo.
+
+Cara mengukur keadaan "setelah Cek": Lighthouse CLI tidak bisa mengklik, jadi langkah ini memakai mode snapshot. Puppeteer membuka `/`, mengklik tombol contoh "Kerja tugas online", mengklik Cek, menunggu `#judul-hasil` muncul, lalu `flow.snapshot()` mengaudit halaman dengan kartu hasil tampil. Hasil yang tampil: Label Bahaya, Skor 100 dari 100.
+
+| Keadaan | Mode | Build produksi lokal (`npm run build && npm start`) | Vercel (`job-shift-navy.vercel.app`) |
+| --- | --- | --- | --- |
+| `/` kosong | navigation | 100 | 100 |
+| `/` setelah Cek, hasil Bahaya | snapshot | 100 | 100 |
+| `/cara-kerja` | navigation | 100 | 100 |
+
+- Skor sebelum dan sesudah sama: semua 100 sejak pengukuran pertama, tidak ada audit berbobot yang gagal. Karena itu tidak ada perubahan di `src/app` atau `src/ui`.
+- Lighthouse tidak memeriksa target sentuh 44 px (auditnya memakai batas 24 px) dan tidak memeriksa `prefers-reduced-motion`. Kedua hal itu sudah diukur manual di catatan di atas.
 
