@@ -10,9 +10,18 @@ Akibatnya, angka p95 dari HP (tiket 14, Tahap 1c) dan demo teks bebas tidak mewa
 
 **Blocked by:** None
 
-**Status:** needs-triage
+**Status:** ready-for-human
 
-- [ ] `GROQ_API_KEY` ada di environment Production project Vercel `job-shift` (tidak di-commit ke repo)
-- [ ] Production di-redeploy setelah key dipasang
-- [ ] Teks bebas di URL publik menjawab `sumberPenilaian: "aturan+AI"` tanpa `catatanAI`, dan log runtime tidak lagi mencetak `GROQ_API_KEY tidak diset`
+- [x] `GROQ_API_KEY` ada di environment Production project Vercel `job-shift` (tidak di-commit ke repo)
+- [x] Production di-redeploy setelah key dipasang
+- [x] Teks bebas di URL publik menjawab `sumberPenilaian: "aturan+AI"` tanpa `catatanAI`, dan log runtime tidak lagi mencetak `GROQ_API_KEY tidak diset`
 - [ ] Uji p95 dari HP (Tahap 1c) dijalankan, atau diulang, setelah key aktif
+
+## Comments
+
+**Verifikasi (Zamil, 28 November 2026, sekitar 22.10 WIB):** `GROQ_API_KEY` dipasang di environment Production project Vercel `job-shift`, lalu production di-redeploy (`dpl_NopAwCHNDbEQfyPg4T4AdyboVHKC`, commit `main` `33dc20a`).
+
+- Teks bebas `dev-004` dikirim ke `POST https://job-shift-navy.vercel.app/api/cek` dan dijawab HTTP 200, `sumberPenilaian: "aturan+AI"`, tanpa `catatanAI` (2,6 detik dari laptop).
+- Log runtime deployment itu (45 menit terakhir, batas retensi paket Hobby) tidak memuat `GROQ_API_KEY tidak diset`.
+
+Kriteria terakhir (uji p95 dari HP) dikerjakan Naja di Tahap 1c, lihat [audit-m3/naja.md](../audit-m3/naja.md) setelah PR #12 di-merge. Status diubah ke `ready-for-human` karena sisanya pengukuran manual di HP.
