@@ -8,7 +8,10 @@ Arah perbaikan yang mungkin: tes membangun path harapan dengan `path.resolve` ju
 
 **Blocked by:** None
 
-**Status:** needs-triage
+**Status:** selesai
 
-- [ ] `src/dataset/cli.ts` atau `src/dataset/cli.test.ts` kompatibel lintas platform (Windows dan POSIX) sehingga `npm test` lulus 100% di Windows maupun Linux/macOS
+**Assignee:** Muhammad Zamil
 
+- [x] `src/dataset/cli.ts` atau `src/dataset/cli.test.ts` kompatibel lintas platform (Windows dan POSIX) sehingga `npm test` lulus 100% di Windows maupun Linux/macOS
+
+Diperbaiki di [PR #14](https://github.com/zamil1986/JobShift/pull/14) (merge `dd81ba6`). `jalankanCekDataset` menerima aturan path platform lewat `DependensiCli.path`; default-nya tetap modul `path` platform yang menjalankan, jadi perilaku CLI tidak berubah. `src/dataset/cli.test.ts` menjalankan semua kasus dua kali, dengan `path.posix` dan `path.win32`, sehingga hasilnya sama di macOS, Linux, dan Windows. Sebelum perbaikan, kasus Windows menghasilkan 5 gagal dari 14 di macOS. Sesudahnya 14/14, dan seluruh suite 520/520. Belum dijalankan di mesin Windows sungguhan.
