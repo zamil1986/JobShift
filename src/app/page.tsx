@@ -25,6 +25,7 @@ import {
   PENGANTAR_CARA_KERJA,
   PENGANTAR_TELANJUR,
 } from "@/ui/salinan-beranda";
+import { TAUTAN_KE_CARA_KERJA } from "@/ui/salinan-cara-kerja";
 import { Sorotan } from "@/ui/Sorotan";
 
 // Langkah darurat untuk Label Bahaya: sama persis dengan yang tampil di hasil.
@@ -250,6 +251,9 @@ export default function Beranda() {
               </li>
               <li>
                 <a href="#sudah-telanjur">{NAV_SUDAH_TELANJUR}</a>
+              </li>
+              <li>
+                <Link href="/cara-kerja">{TAUTAN_KE_CARA_KERJA}</Link>
               </li>
             </ul>
           </nav>

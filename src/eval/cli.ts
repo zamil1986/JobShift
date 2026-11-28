@@ -10,6 +10,7 @@ import {
   type Rasio,
   type RingkasanMode,
 } from "./eval";
+import { PATH_HASIL_TEST_DEFAULT } from "./hasil-tersimpan";
 
 export type JenisSet = "dev" | "test";
 
@@ -35,7 +36,7 @@ export type DependensiCli = {
   env?: NodeJS.ProcessEnv;
 };
 
-export const PATH_HASIL_TEST_DEFAULT = "src/data/hasil-eval.json";
+export { PATH_HASIL_TEST_DEFAULT };
 
 const PATH_DATASET: Record<JenisSet, string> = {
   dev: "data/dev.jsonl",
