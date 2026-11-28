@@ -4,7 +4,7 @@
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** selesai
 
 - [x] R01 (Minta uang di awal, Modus Lokal) dan R02 (Minta OTP/PIN/password) sudah ada, keduanya kritis berbobot 60, dengan kata kunci Indonesia dan Inggris
 - [x] Pencocokan tidak membedakan huruf besar/kecil dan spasi berlebih; `kutipan` diambil dari Teks asli lewat `rentang`

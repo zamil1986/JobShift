@@ -4,7 +4,7 @@
 
 **Blocked by:** 03
 
-**Status:** ready-for-agent
+**Status:** selesai
 
 - [x] R06a, R09, R10, R13, R14, R15 ada di katalog sesuai spec; R06a dan R10 memuat kata kunci Inggris
 - [x] R13 menghasilkan paling banyak satu Tanda bahaya tersirat (bobot 10, tidak kritis, tanpa kutipan), dan hanya kalau nama badan usaha **dan** alamat sama-sama tidak ada

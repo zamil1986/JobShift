@@ -4,7 +4,7 @@
 
 **Blocked by:** 03
 
-**Status:** ready-for-agent
+**Status:** selesai
 
 - [x] Templat Penjelasan per Label ditambah satu kalimat per Modus terkuat, total ≤ 3 kalimat
 - [x] Copy Langkah aman disimpan sebagai data statis per Label dan per Modus; semua tautan menyimpan dan menampilkan `domain`

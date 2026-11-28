@@ -4,7 +4,7 @@
 
 **Blocked by:** 03, 08
 
-**Status:** ready-for-agent
+**Status:** selesai
 
 - [x] Penyamaran mengganti email, NIK (16 digit), nomor HP Indonesia, dan rekening (10–15 digit) dengan penanda; "Rp 8.000.000" tidak tersentuh; dites dengan adapter perekam
 - [x] Adapter Groq `openai/gpt-oss-120b` memakai strict `json_schema`, `maxRetries: 0`, dan log level tidak di bawah `warn`; API key hanya di env server

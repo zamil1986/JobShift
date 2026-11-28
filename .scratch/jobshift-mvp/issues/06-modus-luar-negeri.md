@@ -4,7 +4,7 @@
 
 **Blocked by:** 03
 
-**Status:** ready-for-agent
+**Status:** selesai
 
 - [x] Aturan R03 (kritis), R05, R12, R16 ada di katalog dengan alasan bahasa awam, bobot, status kritis, dan Modus sesuai spec
 - [x] Setiap aturan punya minimal 1 tes positif dan 1 tes negatif lewat `cek()`

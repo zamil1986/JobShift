@@ -7,8 +7,8 @@
 **Status:** ready-for-human
 
 - [ ] Pemegang Set test sudah ditetapkan dan dicatat (bukan orang yang menyetel Aturan)
-- [ ] Set dev 60 contoh dalam format JSONL sesuai spec (`id, teks, kebenaran, modus?, sumber, sintetis`) sudah di-commit
+- [x] Set dev 60 contoh dalam format JSONL sesuai spec (`id, teks, kebenaran, modus?, sumber, sintetis`) sudah di-commit
 - [ ] Set test 40 contoh tersimpan di luar repo sampai bobot dibekukan di M3, lalu di-commit
-- [ ] Setiap contoh sudah disamarkan dari nomor HP, nama orang, dan rekening sebelum di-commit
-- [ ] Contoh sintetis ditandai `sintetis: true` dan jumlahnya dicatat
-- [ ] Palsu/Asli kira-kira seimbang di tiap set; Modus Tugas, Lokal, dan Luar negeri masing-masing punya minimal 5 contoh Palsu di Set dev
+- [x] Setiap contoh sudah disamarkan dari nomor HP, nama orang, dan rekening sebelum di-commit
+- [x] Contoh sintetis ditandai `sintetis: true` dan jumlahnya dicatat (Set dev: 60 dari 60 sintetis, direkonstruksi dari kasus cek fakta dan berita; URL di `sumber`)
+- [ ] Palsu/Asli kira-kira seimbang di tiap set; Modus Tugas, Lokal, dan Luar negeri masing-masing punya minimal 5 contoh Palsu di Set dev (Set dev sudah: Palsu 30, Asli 30; Tugas 9, Lokal 12, Luar negeri 9. Set test belum ada.)

@@ -4,7 +4,7 @@
 
 **Blocked by:** 04, 05, 06, 07, 11
 
-**Status:** ready-for-agent
+**Status:** selesai
 
 - [x] Ringkasan Aturan dalam bahasa awam, tanpa ID aturan
 - [x] Angka akurasi dibaca dari file hasil eval saat build, tidak diketik tangan, dengan pembilang/penyebut (misalnya 17/20)

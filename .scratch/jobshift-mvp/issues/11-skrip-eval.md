@@ -4,7 +4,7 @@
 
 **Blocked by:** 02, 10
 
-**Status:** ready-for-agent
+**Status:** selesai
 
 - [x] `npm run eval` (default Set dev) dan `--set test` membaca JSONL dan memanggil `cek()`
 - [x] Satu panggilan AI per contoh, direkam, lalu dipakai ulang untuk mode AI saja dan gabungan
