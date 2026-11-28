@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { KATALOG } from "@/cek/aturan/katalog";
-import { SUMBANGAN_AI_MAKS } from "@/cek/skor";
+import { RINGKASAN_ATURAN, SUMBANGAN_AI_MAKS } from "@/cek/ringkasan-aturan";
 import type { Label } from "@/cek/tipe";
 import type { HasilEvalTest } from "@/eval/hasil-tersimpan";
 import type { Rasio } from "@/eval/eval";
@@ -20,8 +19,8 @@ import {
   JUDUL_POLA_LAIN,
   JUDUL_PRIVASI,
   JUDUL_SKALA,
-  judulAI,
   PENGANTAR_HALAMAN,
+  penjelasanAI,
   pengantarAkurasi,
   PENILAIAN,
   presisi,
@@ -35,11 +34,9 @@ import {
 const [MEREK] = TAGLINE.split(" — ");
 const URUTAN_LABEL = Object.keys(RENTANG_LABEL) as Label[];
 
-// Ringkasan Aturan diambil dari alasan di katalog, jadi selalu sama dengan
-// yang tampil di hasil dan tidak pernah memuat ID aturan (NFR-08).
-const unik = (daftar: string[]) => [...new Set(daftar)];
-const POLA_KRITIS = unik(KATALOG.filter((a) => a.kritis).map((a) => a.alasan));
-const POLA_LAIN = unik(KATALOG.filter((a) => !a.kritis).map((a) => a.alasan));
+// Skala Label sebagai teks biasa: warna Label pastel hanya untuk hasil cek
+// dan legendanya (DESIGN.md, "The Pastel Hanya untuk Label Rule").
+const SKALA = URUTAN_LABEL.map((l) => `${TAMPILAN_LABEL[l].kata} ${RENTANG_LABEL[l]}`).join(", ");
 
 const FORMAT_PERSEN = new Intl.NumberFormat("id-ID", { maximumFractionDigits: 1 });
 const FORMAT_TANGGAL = new Intl.DateTimeFormat("id-ID", { dateStyle: "long", timeZone: "Asia/Jakarta" });
@@ -160,23 +157,19 @@ export function IsiCaraKerja({ hasil }: { hasil: HasilEvalTest | null }) {
             {PENILAIAN.map((p) => (
               <p key={p}>{p}</p>
             ))}
-            <p>{judulAI(SUMBANGAN_AI_MAKS)}</p>
-            <ul className="legenda" aria-label={JUDUL_SKALA}>
-              {URUTAN_LABEL.map((l) => (
-                <li key={l} className={`legenda-${l}`}>
-                  {TAMPILAN_LABEL[l].kata} <span className="legenda-rentang">{RENTANG_LABEL[l]}</span>
-                </li>
-              ))}
-            </ul>
+            <p>{penjelasanAI(SUMBANGAN_AI_MAKS)}</p>
+            <p>
+              {JUDUL_SKALA}: {SKALA}.
+            </p>
           </div>
           <div className="kisi-dua">
-            <section className="kartu kartu-darurat" aria-labelledby="judul-pola-kritis">
+            <section className="kartu" aria-labelledby="judul-pola-kritis">
               <h3 id="judul-pola-kritis">{JUDUL_POLA_KRITIS}</h3>
-              <DaftarTeks isi={POLA_KRITIS} />
+              <DaftarTeks isi={RINGKASAN_ATURAN.kritis} />
             </section>
-            <section className="kartu kartu-darurat" aria-labelledby="judul-pola-lain">
+            <section className="kartu" aria-labelledby="judul-pola-lain">
               <h3 id="judul-pola-lain">{JUDUL_POLA_LAIN}</h3>
-              <DaftarTeks isi={POLA_LAIN} />
+              <DaftarTeks isi={RINGKASAN_ATURAN.lain} />
             </section>
           </div>
         </Bagian>

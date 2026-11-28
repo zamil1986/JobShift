@@ -2,6 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { cek, memuatKataTerlarang } from "@/cek";
+import { RINGKASAN_ATURAN } from "@/cek/ringkasan-aturan";
 import { CONTOH_HASIL_TEST } from "@/eval/contoh-hasil.fixture";
 import { bacaHasilEval } from "@/eval/hasil-tersimpan";
 import { FormCek } from "./FormCek";
@@ -37,7 +38,7 @@ describe.each([
   });
 
   it("menjelaskan cara penilaian dalam bahasa awam", () => {
-    expect(teks).toContain("Meminta uang sebelum kamu resmi diterima kerja.");
+    for (const alasan of [...RINGKASAN_ATURAN.kritis, ...RINGKASAN_ATURAN.lain]) expect(teks).toContain(alasan);
     expect(teks).toMatch(/AI hanya boleh menambah/);
     expect(teks).toContain("60–100");
   });

@@ -19,7 +19,7 @@ export const PENILAIAN = [
   "Kalimat seperti “tidak dipungut biaya” tidak dihitung sebagai permintaan uang, karena kata “tidak” membatalkan polanya.",
 ] as const;
 
-export const judulAI = (sumbanganMaks: number) =>
+export const penjelasanAI = (sumbanganMaks: number) =>
   `AI hanya boleh menambah tanda bahaya, paling banyak ${sumbanganMaks} poin Skor, dan tidak pernah menghapus temuan pemeriksaan pola. Karena itu AI sendirian tidak bisa membuat Label Bahaya. Kalau AI sedang tidak tersedia, cek tetap berjalan dengan pemeriksaan pola saja.`;
 
 export const JUDUL_SKALA = "Skala Label";
@@ -67,6 +67,6 @@ export const PRIVASI = [
   "Teks dan gambar tidak disimpan. Teks yang kamu tempel dikirim ke server JobShift untuk satu kali cek, lalu dibuang, dan isinya tidak masuk log.",
   "Screenshot dibaca di perangkatmu sendiri. Gambarnya tidak pernah diunggah ke server.",
   "Nomor HP, nomor rekening, NIK, dan email disamarkan sebelum dikirim ke AI, misalnya nomor HP diganti [NOMOR]. Nama orang tidak ikut disamarkan.",
-  "AI yang dipakai disediakan Groq. Secara bawaan Groq tidak menyimpan isi permintaan, tetapi mungkin menyimpan log penyalahgunaan sampai 30 hari di Amerika Serikat kalau Zero Data Retention (ZDR) tidak tersedia untuk akun JobShift.",
+  "AI yang dipakai disediakan Groq. Secara bawaan Groq tidak menyimpan isi permintaan, tetapi mungkin menyimpan log penyalahgunaan sampai 30 hari di Amerika Serikat kalau Zero Data Retention (ZDR) tidak tersedia atau belum diaktifkan untuk akun JobShift.",
   "Tidak perlu akun, dan JobShift tidak memasang pelacak iklan.",
 ] as const;

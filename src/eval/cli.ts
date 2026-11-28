@@ -36,8 +36,6 @@ export type DependensiCli = {
   env?: NodeJS.ProcessEnv;
 };
 
-export { PATH_HASIL_TEST_DEFAULT };
-
 const PATH_DATASET: Record<JenisSet, string> = {
   dev: "data/dev.jsonl",
   test: "data/test.jsonl",
