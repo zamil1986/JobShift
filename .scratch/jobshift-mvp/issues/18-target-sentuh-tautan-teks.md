@@ -35,10 +35,25 @@ Yang lulus dan tidak perlu diubah:
 
 Arah perbaikan: pakai pola yang sudah ada di `.daftar-langkah a`, yaitu padding vertikal pada tautan inline. Jangan pakai `display: inline-block`, karena tautan disclaimer akan pindah utuh ke baris baru dan tata letak kalimatnya berubah. Untuk skip link, cukup `min-height: var(--target-min)`. Gaya visual dipegang tiket 15 (Zamil).
 
-- [ ] Kelima tautan teks di tabel (no 1–5) punya area sentuh ≥ 44 px per baris tautan, dari lebar 360 px sampai desktop, tanpa mengubah lipatan teks di sekitarnya
-- [ ] Skip link "Langsung ke kotak cek" setinggi ≥ 44 px di semua lebar
-- [ ] Diukur ulang dengan `getClientRects()` di Chrome dan Firefox di 360 px, dan hasilnya dicatat di bawah
+- [x] Kelima tautan teks di tabel (no 1–5) punya area sentuh ≥ 44 px per baris tautan, dari lebar 360 px sampai desktop, tanpa mengubah lipatan teks di sekitarnya
+- [x] Skip link "Langsung ke kotak cek" setinggi ≥ 44 px di semua lebar
+- [ ] Diukur ulang dengan `getClientRects()` di Chrome dan Firefox di 360 px, dan hasilnya dicatat di bawah (Chromium sudah; Firefox belum)
 
 ## Comments
 
 **Verifikasi reviewer (Zamil, 28 November 2026):** diukur ulang di URL publik dengan browser bawaan Claude desktop (Chromium, macOS), di 360 × 640 dan 1366 × 768. Keenam target di tabel terkonfirmasi kurang dari 44 px, dan tidak ada target lain yang kurang. Tingginya 19 px di 360 px dan 21,5 px di 1366 px, sedikit berbeda dari 21 dan 24 px di Windows karena metrik font. Lebarnya juga sedikit berbeda. Skip link 41,6 px di 360 px dan 46,8 px di 1366 px (akar 18 px). Tautan Langkah 47 px per baris.
+
+**Perbaikan (Zamil, 28 November 2026):** di `src/app/globals.css`, aturan padding `.daftar-langkah a` dijadikan aturan bersama untuk tautan sebaris `.disclaimer a`, `.tagline-hasil a`, dan `.fakta-sumber a`. Skip link `.lewati` diberi `min-height: var(--target-min)` dengan `display: flex` supaya teksnya tetap di tengah. Saat tautan sebaris difokus keyboard (`:focus-visible`), padding dilepas, sehingga cincin fokus membingkai teks tautan saja dan tidak memotong baris di atasnya. Aturan `outline-offset: 0` di `.daftar-langkah a:focus-visible` tidak diperlukan lagi. DESIGN.md (Do) diperbarui.
+
+Cara ukur: aturan CSS yang sama persis disuntikkan ke https://job-shift-navy.vercel.app di browser bawaan Claude desktop (Chromium, macOS), di keadaan `/` setelah Cek contoh "Kerja tugas online" (hasil Bahaya). Tata letak dibandingkan sebelum dan sesudah suntikan. `npm run build` juga dijalankan untuk memastikan aturan ini ada di CSS hasil build.
+
+| Lebar | Tautan teks no 1–5 (per baris) | Skip link | Target < 44 px | Elemen bergeser | Tinggi halaman | Tumpang-tindih dengan target lain |
+| --- | --- | --- | --- | --- | --- | --- |
+| 360 × 640 | 47 px (disclaimer 2 baris, masing-masing 47) | 44 px | 0 (sebelumnya 6) | 0 | 10.941 px, sama | tidak ada |
+| 768 × 1024 | 47 px | 44 px | 0 (sebelumnya 6) | 0 | 8.390 px, sama | tidak ada |
+| 1366 × 768 | 53 px (akar 18 px) | 49,5 px | 0 (sebelumnya 5) | 0 | 8.696 px, sama | tidak ada |
+
+- Uji ketuk di 360 px: `elementFromPoint` 2 px dari tepi atas dan bawah setiap baris tautan mengenai tautan itu sendiri, jadi padding benar-benar menangkap ketukan.
+- Fokus keyboard (Tab dari tombol Cek ke tautan disclaimer, 360 px): `:focus-visible` aktif, tiap baris kembali 19 px, cincin fokus hanya membingkai teks, dan posisi disclaimer serta tinggi halaman tidak berubah.
+- `npm test` (513 tes), `npm run lint`, `npm run typecheck`, dan `npm run build` lulus.
+- Belum diukur: Firefox (tidak terpasang di mesin ini) dan HP sungguhan. Setelah deploy, ukur ulang di Firefox 360 px dan catat di sini sebelum tiket ditutup.

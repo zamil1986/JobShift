@@ -307,7 +307,7 @@ Hasil muncul di panel alat yang sama, di bawah sekat Garis Terang, dan barisnya 
 - **Do** pakai bingkai gradien 1 px (`bingkai-gradien`, atau `bingkai-gradien-aksen` untuk permukaan utama) untuk memisahkan permukaan gelap dari latar.
 - **Do** beri setiap Label tiga penanda: warna pastel, bentuk ikon SVG, dan kata.
 - **Do** taruh semua gerak (kilau judul, transisi, muncul saat digulir, meter) di dalam `@media (prefers-reduced-motion: no-preference)`.
-- **Do** jaga target sentuh minimal 2.75rem (`target-min`), termasuk tautan sebaris di daftar Langkah lewat padding vertikal.
+- **Do** jaga target sentuh minimal 2.75rem (`target-min`), termasuk tautan sebaris (daftar Langkah, disclaimer, tautan di bawah legenda, dan sumber kartu fakta) lewat padding vertikal, bukan `inline-block`, supaya lipatan kalimat tidak berubah.
 - **Do** tampilkan domain resmi sebagai teks biasa di samping setiap tautan Langkah.
 - **Do** definisikan nilai baru sebagai token di `:root`, lalu pakai lewat `var(--…)` di aturan.
 
